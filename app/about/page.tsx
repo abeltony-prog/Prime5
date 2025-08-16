@@ -52,8 +52,7 @@ export default function AboutPage() {
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-6">About Prime5 League</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Where passion meets competition. Prime5 League is the premier futsal competition bringing together the best
-            teams and players in the region.
+            Where passion meets the pavement. Prime5 League is more than just a futsal competition — it's the revival of street football culture, reimagined and brought to life in Kigali.
           </p>
         </div>
 
@@ -63,25 +62,20 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold text-blue-900 mb-6">Our Story</h2>
             <div className="space-y-4 text-gray-700">
               <p>
-                Founded in 2020, Prime5 League emerged from a simple vision: to create the most competitive and
-                professionally organized futsal league in the region. What started as a small tournament between local
-                teams has grown into a premier sporting event that attracts the best talent from across the area.
+                Born in 2024 from a love of the game, Prime5 League began on the streets, where football has always been about creativity, flair, and community. What started as small, gritty 5v5 matchups has grown into the region's premier futsal competition — a stage where raw street talent meets professional organization.
               </p>
               <p>
-                Our league has become a launching pad for many players who have gone on to represent their countries and
-                play professionally. We take pride in maintaining the highest standards of competition while fostering a
-                community spirit that makes futsal accessible to everyone.
+                The league has quickly become a launchpad for dreamers — players who once played barefoot on local courts now chase opportunities to represent their countries and even play professionally. Yet, at its core, Prime5 remains faithful to its roots: football for the people, football for the streets.
               </p>
               <p>
-                Today, Prime5 League features 16 teams competing across two groups, with matches played in
-                state-of-the-art facilities and broadcast to thousands of fans online and in person.
+                Today, Prime5 League hosts 16 teams, divided across two groups, playing electrifying matches in facilities that bring street culture into the spotlight. Every game is more than competition — it's a showcase of skill, hustle, and passion that connects fans in the arena and thousands watching online.
               </p>
             </div>
           </div>
           <div className="relative">
             <Image
-              src="/placeholder.svg?height=400&width=500&text=League+History"
-              alt="Prime5 League History"
+              src="/streetfootballImage.jpg"
+              alt="Street football culture - young players on dusty field"
               width={500}
               height={400}
               className="rounded-lg shadow-xl"
@@ -97,9 +91,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="p-8">
               <p className="text-gray-700 text-lg leading-relaxed">
-                To provide a world-class futsal competition that develops talent, builds community, and promotes the
-                beautiful game of futsal. We are committed to creating opportunities for players of all levels to
-                compete, improve, and achieve their dreams.
+                To bring street football to life — providing a platform where talent is discovered, nurtured, and celebrated. Prime5 exists to build community, inspire the next generation, and prove that the streets produce stars.
               </p>
             </CardContent>
           </Card>
@@ -110,9 +102,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent className="p-8">
               <p className="text-gray-700 text-lg leading-relaxed">
-                To be recognized as the premier futsal league in the region, known for our professionalism, competitive
-                excellence, and positive impact on the community. We envision a future where Prime5 League serves as a
-                model for futsal development worldwide.
+                To be the heartbeat of futsal in the region, blending professionalism with street culture. We aim to inspire a future where Prime5 League is not only the top futsal competition locally, but also a symbol of how grassroots football can transform lives and communities worldwide.
               </p>
             </CardContent>
           </Card>
