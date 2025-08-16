@@ -44,6 +44,13 @@ import {
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
+// Import admin components
+import { Overview } from "@/components/admin/overview"
+import { Teams } from "@/components/admin/teams"
+import { Matches } from "@/components/admin/matches"
+import { Analytics } from "@/components/admin/analytics"
+import { Registrations } from "@/components/admin/registrations"
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -133,6 +140,88 @@ export default function AdminDashboard() {
       status: "info",
     },
     { type: "alert", description: "Payment overdue for Velocity FC", time: "1 day ago", status: "warning" },
+  ]
+
+  const matches = [
+    {
+      id: 1,
+      date: "2024-02-15",
+      time: "19:00",
+      team1: "Thunder FC",
+      team2: "Storm Riders",
+      team1Score: 3,
+      team2Score: 2,
+      group: "A",
+      venue: "Prime Arena 1",
+      status: "completed",
+    },
+    {
+      id: 2,
+      date: "2024-02-15",
+      time: "20:00",
+      team1: "Lightning United",
+      team2: "Velocity FC",
+      group: "B",
+      venue: "Prime Arena 2",
+      status: "scheduled",
+    },
+    {
+      id: 3,
+      date: "2024-02-16",
+      time: "18:30",
+      team1: "Rapid Fire",
+      team2: "Blaze FC",
+      group: "A",
+      venue: "Prime Arena 1",
+      status: "scheduled",
+    },
+    {
+      id: 4,
+      date: "2024-02-16",
+      time: "19:30",
+      team1: "Phoenix United",
+      team2: "Dynamo FC",
+      group: "B",
+      venue: "Prime Arena 2",
+      status: "scheduled",
+    },
+  ]
+
+  const registrations = [
+    {
+      id: 1,
+      teamName: "Fire Hawks",
+      managerName: "Sarah Johnson",
+      email: "sarah@firehawks.com",
+      phone: "+250 123 456 789",
+      submittedDate: "2024-02-10",
+      status: "pending" as const,
+      group: "A",
+      location: "Kigali",
+    },
+    {
+      id: 2,
+      teamName: "Golden Eagles",
+      managerName: "Michael Chen",
+      email: "michael@goldeneagles.com",
+      phone: "+250 987 654 321",
+      submittedDate: "2024-02-09",
+      status: "approved" as const,
+      group: "B",
+      location: "Kigali",
+    },
+    {
+      id: 3,
+      teamName: "Silver Lions",
+      managerName: "Emma Wilson",
+      email: "emma@silverlions.com",
+      phone: "+250 555 123 456",
+      submittedDate: "2024-02-08",
+      status: "rejected" as const,
+      group: "A",
+      location: "Kigali",
+      reviewNotes: "Incomplete documentation",
+    },
   ]
 
   const kpiData = [
@@ -244,203 +333,19 @@ export default function AdminDashboard() {
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-8">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {kpiData.map((kpi, index) => (
-                <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
-                        <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
-                      </div>
-                      <div
-                        className={`flex items-center gap-1 text-sm ${kpi.trend === "up" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        <TrendingUp className={`w-4 h-4 ${kpi.trend === "down" ? "rotate-180" : ""}`} />
-                        {kpi.change}
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <div className="text-2xl font-bold text-gray-900">{kpi.value}</div>
-                      <div className="text-sm text-gray-600">{kpi.title}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Match & Goals Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      matches: { label: "Matches", color: "#10b981" },
-                      goals: { label: "Goals", color: "#3b82f6" },
-                    }}
-                    className="h-[300px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={matchesData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line
-                          type="monotone"
-                          dataKey="matches"
-                          stroke="#10b981"
-                          strokeWidth={3}
-                          dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="goals"
-                          stroke="#3b82f6"
-                          strokeWidth={3}
-                          dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Team Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      points: { label: "Points", color: "#10b981" },
-                    }}
-                    className="h-[300px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={teamPerformanceData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="points" fill="#10b981" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Activity & Registration Status */}
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <Card className="border-0 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {recentActivity.map((activity, index) => (
-                        <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              activity.status === "success"
-                                ? "bg-green-500"
-                                : activity.status === "warning"
-                                  ? "bg-yellow-500"
-                                  : activity.status === "pending"
-                                    ? "bg-blue-500"
-                                    : "bg-gray-500"
-                            }`}
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                            <p className="text-xs text-gray-500">{activity.time}</p>
-                          </div>
-                          <Badge
-                            variant={
-                              activity.status === "success"
-                                ? "default"
-                                : activity.status === "warning"
-                                  ? "destructive"
-                                  : activity.status === "pending"
-                                    ? "secondary"
-                                    : "outline"
-                            }
-                            className={
-                              activity.status === "success"
-                                ? "bg-green-100 text-green-800 hover:bg-green-100"
-                                : activity.status === "warning"
-                                  ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                                  : activity.status === "pending"
-                                    ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                                    : ""
-                            }
-                          >
-                            {activity.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Registration Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      approved: { label: "Approved", color: "#10b981" },
-                      pending: { label: "Pending", color: "#f59e0b" },
-                      rejected: { label: "Rejected", color: "#ef4444" },
-                    }}
-                    className="h-[200px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={registrationStatusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {registrationStatusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                  <div className="mt-4 space-y-2">
-                    {registrationStatusData.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-gray-600">{item.name}</span>
-                        </div>
-                        <span className="font-semibold">{item.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <TabsContent value="overview">
+            <Overview
+              kpiData={kpiData}
+              matchesData={matchesData}
+              teamPerformanceData={teamPerformanceData}
+              registrationStatusData={registrationStatusData}
+              recentActivity={recentActivity}
+            />
           </TabsContent>
 
           {/* Teams Tab */}
-          <TabsContent value="teams" className="space-y-8">
-            <div className="flex items-center justify-between">
+          <TabsContent value="teams">
+            <Teams teams={teams} />
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Team Management</h2>
                 <p className="text-gray-600">Manage all registered teams and their information</p>
@@ -568,14 +473,26 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">League Analytics</h2>
-              <p className="text-gray-600">Comprehensive statistics and performance insights</p>
-            </div>
+          {/* Matches Tab */}
+          <TabsContent value="matches">
+            <Matches matches={matches} />
+          </TabsContent>
 
-            {/* Advanced Analytics Cards */}
+                    {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <Analytics
+              matchesData={matchesData}
+              teamPerformanceData={teamPerformanceData}
+              registrationStatusData={registrationStatusData}
+            />
+          </TabsContent>
+
+          {/* Registrations Tab */}
+          <TabsContent value="registrations">
+            <Registrations registrations={registrations} />
+          </TabsContent>
+
+              {/* Advanced Analytics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {

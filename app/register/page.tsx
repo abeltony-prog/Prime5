@@ -12,6 +12,7 @@ import { Navigation } from "@/components/navigation"
 import { Users, CheckCircle, Upload } from "lucide-react"
 import { useCreateManager } from "@/hooks/use-managers"
 import { useCreateTeam } from "@/hooks/use-teams"
+import { generatePassword, hashPassword } from "@/lib/utils/password"
 
 export default function RegisterPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -29,6 +30,8 @@ export default function RegisterPage() {
     location: "",
     logo: null as File | null
   })
+  const [generatedPassword, setGeneratedPassword] = useState("")
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   // GraphQL hooks
   const { createManager, loading: managerLoading, error: managerError } = useCreateManager()
@@ -59,7 +62,18 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Check if terms are agreed to
+    if (!agreedToTerms) {
+      alert("Please agree to the Terms and Conditions before submitting.")
+      return
+    }
+    
     try {
+      // Generate and hash password
+      const plainPassword = generatePassword()
+      const hashedPassword = hashPassword(plainPassword)
+      setGeneratedPassword(plainPassword)
+      
       // Step 1: Create manager
       const managerResult = await createManager({
         variables: {
@@ -69,7 +83,7 @@ export default function RegisterPage() {
             phone: managerData.phone,
             gender: managerData.gender || null,
             photo: managerData.photo ? managerData.photo.name : null,
-            password: "default_password", // You might want to generate this
+            password: hashedPassword,
             create_at: new Date().toISOString()
           }
         }
@@ -120,6 +134,34 @@ export default function RegisterPage() {
                 Thank you for registering your team with Prime5 League. We'll review your application and contact you
                 within 48 hours.
               </p>
+              
+              {/* Generated Password Display */}
+              {generatedPassword && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <h3 className="font-semibold text-yellow-800 mb-2">Your Login Credentials</h3>
+                  <p className="text-sm text-yellow-700 mb-3">
+                    Please save this password - it won't be shown again!
+                  </p>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="font-mono text-lg font-bold bg-white px-3 py-2 rounded border">
+                      {generatedPassword}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigator.clipboard.writeText(generatedPassword)}
+                      className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">
+                    Email: {managerData.email}
+                  </p>
+                </div>
+              )}
+              
               <Button asChild className="bg-blue-600 hover:bg-blue-700">
                 <a href="/">Return to Home</a>
               </Button>
@@ -320,7 +362,12 @@ export default function RegisterPage() {
             <Card className="border-0 shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-3">
-                  <Checkbox id="terms" required />
+                  <Checkbox 
+                    id="terms" 
+                    checked={agreedToTerms}
+                    onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                    required 
+                  />
                   <div className="text-sm">
                     <Label htmlFor="terms" className="cursor-pointer">
                       I agree to the{" "}
@@ -362,14 +409,14 @@ export default function RegisterPage() {
                   Next: Team Information →
                 </Button>
               ) : (
-                <Button 
+                                <Button 
                   type="submit" 
                   size="lg" 
-                  disabled={teamLoading || managerLoading}
-                  className="bg-blue-600 hover:bg-blue-700 px-12"
+                  disabled={teamLoading || managerLoading || !agreedToTerms}
+                  className="bg-blue-600 hover:bg-blue-700 px-12 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {teamLoading || managerLoading ? 'Creating...' : 'Submit Registration'}
-              </Button>
+                </Button>
               )}
             </div>
           </form>
