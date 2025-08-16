@@ -1,5 +1,47 @@
 import { gql } from '@apollo/client'
 
+// Mutation to create a new season
+export const ADD_SEASON = gql`
+  mutation addSeason($teams: jsonb = "", $name: String = "", $EndDate: String = "", $startDate: String = "") {
+    insert_seasons(objects: {teams: $teams, name: $name, EndDate: $EndDate, startDate: $startDate}) {
+      affected_rows
+      returning {
+        id
+        name
+        startDate
+        EndDate
+        teams
+      }
+    }
+  }
+`
+
+// Mutation to update season
+export const UPDATE_SEASON = gql`
+  mutation updateSeason($id: Int!, $teams: jsonb, $name: String, $EndDate: String, $startDate: String) {
+    update_seasons_by_pk(
+      pk_columns: { id: $id }
+      _set: { teams: $teams, name: $name, EndDate: $EndDate, startDate: $startDate }
+    ) {
+      id
+      name
+      startDate
+      EndDate
+      teams
+    }
+  }
+`
+
+// Mutation to delete season
+export const DELETE_SEASON = gql`
+  mutation deleteSeason($id: Int!) {
+    delete_seasons_by_pk(id: $id) {
+      id
+      name
+    }
+  }
+`
+
 // Mutation to create a new manager
 export const CREATE_MANAGER = gql`
   mutation CreateManager($manager: managers_insert_input!) {

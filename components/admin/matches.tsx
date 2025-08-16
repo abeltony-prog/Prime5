@@ -16,7 +16,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Calendar,
   Clock,
-  MapPin,
   Plus,
   Edit,
   Trash2,
@@ -28,7 +27,10 @@ import {
   Play,
   CheckCircle,
   XCircle,
+  Trophy,
+  MapPin,
 } from "lucide-react"
+import Link from "next/link"
 
 interface Match {
   id: number
@@ -94,6 +96,12 @@ export function Matches({ matches }: MatchesProps) {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
+          <Link href="/admin/season-scheduler">
+            <Button variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
+              <Trophy className="h-4 w-4 mr-2" />
+              Season Scheduler
+            </Button>
+          </Link>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 mr-2" />
             Schedule Match

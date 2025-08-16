@@ -1,25 +1,73 @@
 import { gql } from '@apollo/client'
 
+// Query to get all seasons
+export const GET_SEASONS = gql`
+  query GetSeasons {
+    seasons(order_by: { id: desc }) {
+      id
+      name
+      startDate
+      EndDate
+      teams
+    }
+  }
+`
+
+// Query to get season by ID
+export const GET_SEASON = gql`
+  query GetSeason($id: Int!) {
+    seasons_by_pk(id: $id) {
+      id
+      name
+      startDate
+      EndDate
+      teams
+    }
+  }
+`
+
 // Query to get all teams
 export const GET_TEAMS = gql`
   query GetTeams {
-    teams {
+    Teams {
       id
       name
-      short_name
-      group
-      manager
-      founded_year
-      logo_url
-      points
-      played
-      wins
-      draws
-      losses
-      goals_for
-      goals_against
-      goal_difference
-      position
+      shortname
+      team_manager
+      manager {
+        create_at
+        email
+        gender
+        id
+        name
+        password
+        phone
+        photo
+      }
+      matche1 {
+        created_at
+        date
+        id
+        location
+        team1
+      }
+      matche2 {
+        created_at
+        date
+        id
+        location
+        team2
+      }
+      players {
+        create_at
+        dob
+        email
+        gender
+        id
+        name
+        phone
+        team_id
+      }
     }
   }
 `
@@ -27,34 +75,43 @@ export const GET_TEAMS = gql`
 // Query to get team by ID
 export const GET_TEAM = gql`
   query GetTeam($id: Int!) {
-    teams_by_pk(id: $id) {
-      id
+    Teams_by_pk(id: $id) {
       name
-      short_name
-      group
-      manager
-      founded_year
-      logo_url
-      points
-      played
-      wins
-      draws
-      losses
-      goals_for
-      goals_against
-      goal_difference
-      position
-      players {
+      shortname
+      team_manager
+      manager {
+        create_at
+        email
+        gender
         id
         name
-        position
-        goals
-        assists
-        yellow_cards
-        red_cards
-        matches_played
-        rating
-        status
+        password
+        phone
+        photo
+      }
+      matche1 {
+        created_at
+        date
+        id
+        location
+        team1
+      }
+      matche2 {
+        created_at
+        date
+        id
+        location
+        team2
+      }
+      players {
+        create_at
+        dob
+        email
+        gender
+        id
+        name
+        phone
+        team_id
       }
     }
   }

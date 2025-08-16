@@ -6,7 +6,7 @@ export function useTeams() {
   const { data, loading, error, refetch } = useQuery(GET_TEAMS)
 
   return {
-    teams: data?.teams || [],
+    teams: data?.Teams || [],
     loading,
     error,
     refetch
@@ -20,7 +20,7 @@ export function useTeam(id: number) {
   })
 
   return {
-    team: data?.teams_by_pk,
+    team: data?.Teams_by_pk,
     loading,
     error,
     refetch
@@ -32,11 +32,11 @@ export function useCreateTeam() {
     update: (cache, { data }) => {
       // Update the cache after creating a team
       const existingTeams = cache.readQuery({ query: GET_TEAMS })
-      if (existingTeams && data?.insert_teams_one) {
+      if (existingTeams && data?.insert_Teams_one) {
         cache.writeQuery({
           query: GET_TEAMS,
           data: {
-            teams: [...(existingTeams as any).teams, data.insert_teams_one]
+            Teams: [...(existingTeams as any).Teams, data.insert_Teams_one]
           }
         })
       }

@@ -43,6 +43,7 @@ import {
   XCircle,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import Link from "next/link"
 
 // Import admin components
 import { Overview } from "@/components/admin/overview"
@@ -78,68 +79,135 @@ export default function AdminDashboard() {
     { name: "Rejected", value: 2, color: "#ef4444" },
   ]
 
-  const teams = [
+  const kpiData = [
     {
-      id: 1,
-      name: "Thunder FC",
-      manager: "John Smith",
-      players: 10,
-      group: "A",
-      points: 16,
-      status: "active",
-      lastActive: "2024-02-10",
-      email: "john@thunderfc.com",
+      title: "Total Revenue",
+      value: "$24,500",
+      change: "+12.5%",
+      trend: "up" as const,
+      icon: DollarSign,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
     },
     {
-      id: 2,
-      name: "Lightning United",
-      manager: "Mike Johnson",
-      players: 12,
-      group: "B",
-      points: 15,
-      status: "active",
-      lastActive: "2024-02-09",
-      email: "mike@lightning.com",
+      title: "Active Teams",
+      value: "16",
+      change: "+2",
+      trend: "up" as const,
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
     },
     {
-      id: 3,
-      name: "Storm Riders",
-      manager: "David Wilson",
-      players: 11,
-      group: "A",
-      points: 11,
-      status: "active",
-      lastActive: "2024-02-08",
-      email: "david@stormriders.com",
+      title: "Matches Played",
+      value: "48",
+      change: "+8",
+      trend: "up" as const,
+      icon: Trophy,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
     },
     {
-      id: 4,
-      name: "Velocity FC",
-      manager: "Chris Brown",
-      players: 10,
-      group: "B",
-      points: 14,
-      status: "inactive",
-      lastActive: "2024-02-05",
-      email: "chris@velocityfc.com",
+      title: "Avg Goals/Match",
+      value: "3.25",
+      change: "-0.1",
+      trend: "down" as const,
+      icon: Target,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
     },
   ]
 
   const recentActivity = [
-    { type: "match", description: "Thunder FC vs Storm Riders completed", time: "2 hours ago", status: "success" },
+    { type: "match", description: "Thunder FC vs Storm Riders completed", time: "2 hours ago", status: "success" as const },
     {
       type: "registration",
       description: "New team registration from Fire Hawks",
       time: "4 hours ago",
-      status: "pending",
+      status: "pending" as const,
     },
     {
       type: "update",
       description: "Player statistics updated for Lightning United",
       time: "6 hours ago",
-      status: "info",
+      status: "info" as const,
     },
-    { type: "alert", description: "Payment overdue for Velocity FC", time: "1 day ago", status: "warning" },
+    { type: "alert", description: "Payment overdue for Velocity FC", time: "1 day ago", status: "warning" as const },
+  ]
+
+  const teams = [
+    {
+      id: 1,
+      name: "Thunder FC",
+      shortname: "TFC",
+      team_manager: "John Smith",
+      manager: {
+        id: 1,
+        name: "John Smith",
+        email: "john@thunderfc.com",
+        phone: "+250 123 456 789",
+        gender: "male",
+        photo: undefined,
+        create_at: "2024-01-01T00:00:00Z"
+      },
+      matche1: [],
+      matche2: [],
+      players: []
+    },
+    {
+      id: 2,
+      name: "Lightning United",
+      shortname: "LUN",
+      team_manager: "Mike Johnson",
+      manager: {
+        id: 2,
+        name: "Mike Johnson",
+        email: "mike@lightning.com",
+        phone: "+250 987 654 321",
+        gender: "male",
+        photo: undefined,
+        create_at: "2024-01-01T00:00:00Z"
+      },
+      matche1: [],
+      matche2: [],
+      players: []
+    },
+    {
+      id: 3,
+      name: "Storm Riders",
+      shortname: "SRD",
+      team_manager: "David Wilson",
+      manager: {
+        id: 3,
+        name: "David Wilson",
+        email: "david@stormriders.com",
+        phone: "+250 555 123 456",
+        gender: "male",
+        photo: undefined,
+        create_at: "2024-01-01T00:00:00Z"
+      },
+      matche1: [],
+      matche2: [],
+      players: []
+    },
+    {
+      id: 4,
+      name: "Velocity FC",
+      shortname: "VFC",
+      team_manager: "Chris Brown",
+      manager: {
+        id: 4,
+        name: "Chris Brown",
+        email: "chris@velocityfc.com",
+        phone: "+250 111 222 333",
+        gender: "male",
+        photo: undefined,
+        create_at: "2024-01-01T00:00:00Z"
+      },
+      matche1: [],
+      matche2: [],
+      players: []
+    },
   ]
 
   const matches = [
@@ -224,45 +292,6 @@ export default function AdminDashboard() {
     },
   ]
 
-  const kpiData = [
-    {
-      title: "Total Revenue",
-      value: "$24,500",
-      change: "+12.5%",
-      trend: "up",
-      icon: DollarSign,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-    },
-    {
-      title: "Active Teams",
-      value: "16",
-      change: "+2",
-      trend: "up",
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-    {
-      title: "Matches Played",
-      value: "48",
-      change: "+8",
-      trend: "up",
-      icon: Trophy,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-    },
-    {
-      title: "Avg Goals/Match",
-      value: "3.25",
-      change: "-0.1",
-      trend: "down",
-      icon: Target,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Professional Header */}
@@ -299,7 +328,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6 bg-white border shadow-sm">
+          <TabsList className="grid w-full grid-cols-7 lg:w-fit lg:grid-cols-7 bg-white border shadow-sm">
             <TabsTrigger
               value="overview"
               className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700"
@@ -311,6 +340,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="matches" className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700">
               Matches
+            </TabsTrigger>
+            <TabsTrigger value="seasons" className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700">
+              Seasons
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
@@ -353,6 +385,34 @@ export default function AdminDashboard() {
             <Matches matches={matches} />
           </TabsContent>
 
+          {/* Seasons Tab */}
+          <TabsContent value="seasons">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Season Management</h2>
+                <p className="text-gray-600">Create and manage league seasons</p>
+              </div>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Season Scheduler</h3>
+                    <p className="text-gray-600 mb-4">
+                      Use the dedicated Season Scheduler to create seasons, invite teams, and plan your league.
+                    </p>
+                    <Link href="/admin/season-scheduler">
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Trophy className="h-4 w-4 mr-2" />
+                        Open Season Scheduler
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <Analytics
@@ -365,6 +425,138 @@ export default function AdminDashboard() {
           {/* Registrations Tab */}
           <TabsContent value="registrations">
             <Registrations registrations={registrations} />
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">System Settings</h2>
+                <p className="text-gray-600">Manage system configuration and database connections</p>
+              </div>
+              
+              {/* Database Status */}
+              <Card className="border-gray-200 bg-gray-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Database Connection Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm mb-4">
+                    <div>
+                      <span className="font-medium">Database Status: </span>
+                      <span className="text-green-600">Connected</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Teams Found: </span>
+                      <span>1</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Loading: </span>
+                      <span>No</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Fallback Teams: </span>
+                      <span>3</span>
+                    </div>
+                  </div>
+                  
+                  {/* Connection Details */}
+                  <div className="p-4 bg-white rounded-lg border">
+                    <h4 className="font-medium text-gray-900 mb-3">Connection Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="font-medium">Error: </span>
+                        <span className="text-green-600">None</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Network Status: </span>
+                        <span className="text-green-600">Connected</span>
+                      </div>
+                    </div>
+                    
+                    {/* Connection Test */}
+                    <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
+                      <span className="font-medium">Last Test: </span>
+                      <span className="text-gray-600">
+                        Click "Test Connection" to check your setup
+                      </span>
+                      <div className="mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                        >
+                          <Target className="h-4 w-4 mr-2" />
+                          Test Connection
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Environment Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Environment Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">GraphQL Configuration</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            GraphQL URL
+                          </label>
+                          <Input 
+                            value={process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL || 'http://localhost:8080/v1/graphql'}
+                            readOnly
+                            className="bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Admin Secret Status
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? "outline" : "destructive"}>
+                              {process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? 'Set' : 'Not Set'}
+                            </Badge>
+                            {!process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET && (
+                              <span className="text-xs text-red-600">Required for database access</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <h4 className="font-medium text-gray-900 mb-2">Setup Instructions</h4>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="text-yellow-600 text-lg">ℹ️</div>
+                          <span className="font-medium text-yellow-800">To connect to your database:</span>
+                        </div>
+                        <ol className="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
+                          <li>Create a <code className="bg-yellow-100 px-1 rounded">.env.local</code> file in your project root</li>
+                          <li>Add your Hasura GraphQL URL: <code className="bg-yellow-100 px-1 rounded">NEXT_PUBLIC_HASURA_GRAPHQL_URL=your_url_here</code></li>
+                          <li>Add your admin secret: <code className="bg-yellow-100 px-1 rounded">NEXT_PUBLIC_HASURA_ADMIN_SECRET=your_secret_here</code></li>
+                          <li>Restart your development server</li>
+                          <li>Click "Test Connection" to verify the setup</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
