@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -205,16 +206,14 @@ export function Analytics({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={attendanceData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis yAxisId="left" />
                   <YAxis yAxisId="right" orientation="right" />
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <ChartTooltip />
                   <Area
                     yAxisId="left"
                     type="monotone"
@@ -233,7 +232,7 @@ export function Analytics({
                   />
                 </AreaChart>
               </ResponsiveContainer>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
 
@@ -246,8 +245,8 @@ export function Analytics({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={financialData}
@@ -263,12 +262,10 @@ export function Analytics({
                       <Cell key={`cell-${index}`} fill={["#3b82f6", "#10b981", "#f59e0b", "#ef4444"][index]} />
                     ))}
                   </Pie>
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <ChartTooltip />
                 </PieChart>
               </ResponsiveContainer>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -284,20 +281,18 @@ export function Analytics({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={teamPerformanceData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <ChartTooltip />
                   <Bar dataKey="points" fill="#3b82f6" />
                   <Bar dataKey="matches" fill="#10b981" />
                 </BarChart>
               </ResponsiveContainer>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
 

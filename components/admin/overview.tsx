@@ -143,20 +143,18 @@ export function Overview({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={matchesData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <ChartTooltip />
                   <Line type="monotone" dataKey="matches" stroke="#3b82f6" strokeWidth={2} />
                   <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
 
@@ -169,19 +167,17 @@ export function Overview({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={teamPerformanceData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <ChartTooltip />
                   <Bar dataKey="points" fill="#3b82f6" />
                 </BarChart>
               </ResponsiveContainer>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -197,15 +193,15 @@ export function Overview({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={registrationStatusData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name} ${(percent ? (percent * 100).toFixed(0) : 0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -214,12 +210,10 @@ export function Overview({
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <ChartTooltip />
                 </PieChart>
               </ResponsiveContainer>
-            </ChartContainer>
+            </div>
           </CardContent>
         </Card>
 
