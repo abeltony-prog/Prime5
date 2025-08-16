@@ -1,16 +1,36 @@
 import { gql } from '@apollo/client'
 
+// Mutation to create a new manager
+export const CREATE_MANAGER = gql`
+  mutation CreateManager($manager: managers_insert_input!) {
+    insert_managers(objects: [$manager]) {
+      affected_rows
+      returning {
+        id
+        name
+        email
+        phone
+        gender
+        photo
+        create_at
+      }
+    }
+  }
+`
+
 // Mutation to create a new team
 export const CREATE_TEAM = gql`
-  mutation CreateTeam($team: teams_insert_input!) {
-    insert_teams_one(object: $team) {
-      id
-      name
-      short_name
-      group
-      manager
-      founded_year
-      logo_url
+  mutation CreateTeam($team: Teams_insert_input!) {
+    insert_Teams(objects: [$team]) {
+      affected_rows
+      returning {
+        id
+        name
+        shortname
+        location
+        team_manager
+        logo
+      }
     }
   }
 `
