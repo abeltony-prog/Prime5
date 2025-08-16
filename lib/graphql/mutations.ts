@@ -1,0 +1,156 @@
+import { gql } from '@apollo/client'
+
+// Mutation to create a new team
+export const CREATE_TEAM = gql`
+  mutation CreateTeam($team: teams_insert_input!) {
+    insert_teams_one(object: $team) {
+      id
+      name
+      short_name
+      group
+      manager
+      founded_year
+      logo_url
+    }
+  }
+`
+
+// Mutation to update team information
+export const UPDATE_TEAM = gql`
+  mutation UpdateTeam($id: Int!, $updates: teams_set_input!) {
+    update_teams_by_pk(
+      pk_columns: { id: $id }
+      _set: $updates
+    ) {
+      id
+      name
+      short_name
+      group
+      manager
+      founded_year
+      logo_url
+      points
+      played
+      wins
+      draws
+      losses
+      goals_for
+      goals_against
+      goal_difference
+      position
+    }
+  }
+`
+
+// Mutation to create a new match
+export const CREATE_MATCH = gql`
+  mutation CreateMatch($match: matches_insert_input!) {
+    insert_matches_one(object: $match) {
+      id
+      date
+      time
+      team1_id
+      team2_id
+      group
+      venue
+      status
+    }
+  }
+`
+
+// Mutation to update match result
+export const UPDATE_MATCH_RESULT = gql`
+  mutation UpdateMatchResult($id: Int!, $team1_score: Int!, $team2_score: Int!, $status: String!) {
+    update_matches_by_pk(
+      pk_columns: { id: $id }
+      _set: {
+        team1_score: $team1_score
+        team2_score: $team2_score
+        status: $status
+      }
+    ) {
+      id
+      team1_score
+      team2_score
+      status
+    }
+  }
+`
+
+// Mutation to add a player to a team
+export const ADD_PLAYER = gql`
+  mutation AddPlayer($player: players_insert_input!) {
+    insert_players_one(object: $player) {
+      id
+      name
+      position
+      team_id
+      goals
+      assists
+      yellow_cards
+      red_cards
+      matches_played
+      rating
+      status
+    }
+  }
+`
+
+// Mutation to update player statistics
+export const UPDATE_PLAYER_STATS = gql`
+  mutation UpdatePlayerStats($id: Int!, $updates: players_set_input!) {
+    update_players_by_pk(
+      pk_columns: { id: $id }
+      _set: $updates
+    ) {
+      id
+      goals
+      assists
+      yellow_cards
+      red_cards
+      matches_played
+      rating
+      status
+    }
+  }
+`
+
+// Mutation to update team standings after match
+export const UPDATE_TEAM_STANDINGS = gql`
+  mutation UpdateTeamStandings($team_id: Int!, $updates: teams_set_input!) {
+    update_teams_by_pk(
+      pk_columns: { id: $team_id }
+      _set: $updates
+    ) {
+      id
+      points
+      played
+      wins
+      draws
+      losses
+      goals_for
+      goals_against
+      goal_difference
+      position
+    }
+  }
+`
+
+// Mutation to delete a team (admin only)
+export const DELETE_TEAM = gql`
+  mutation DeleteTeam($id: Int!) {
+    delete_teams_by_pk(id: $id) {
+      id
+      name
+    }
+  }
+`
+
+// Mutation to delete a match (admin only)
+export const DELETE_MATCH = gql`
+  mutation DeleteMatch($id: Int!) {
+    delete_matches_by_pk(id: $id) {
+      id
+    }
+  }
+` 
