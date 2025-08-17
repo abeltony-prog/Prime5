@@ -21,11 +21,13 @@ import {
   Eye,
   MoreHorizontal
 } from "lucide-react"
-import { useSeason } from "@/hooks/use-seasons"
+import { useSeason, useUpdateSeason } from "@/hooks/use-seasons"
 import { useTeams } from "@/hooks/use-teams"
 import Link from "next/link"
 import React from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 
 interface Season {
   id: string
@@ -84,7 +86,7 @@ export default function SeasonDetailsPage() {
     )
   }
   
-  const { season, loading, error } = useSeason(seasonId)
+  const { season, loading, error, refetch } = useSeason(seasonId)
   
   // Debug logging for hook results
   console.log('useSeason hook results:', { season, loading, error })
@@ -93,6 +95,7 @@ export default function SeasonDetailsPage() {
   console.log('Error state:', error)
   
   const { teams } = useTeams()
+  const { updateSeason, loading: updateLoading } = useUpdateSeason()
 
   // Get the specific teams that are part of this season
   const seasonTeams = React.useMemo(() => {
@@ -110,9 +113,91 @@ export default function SeasonDetailsPage() {
   console.log('Season teams found:', seasonTeams)
   console.log('All teams:', teams)
 
+  // Get teams that are NOT already in this season
+  const availableTeamsToInvite = React.useMemo(() => {
+    if (!teams || !season?.teams) return teams || []
+    
+    const seasonTeamIds = Object.keys(season.teams)
+    return teams.filter((team: any) => {
+      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
+      return !seasonTeamIds.includes(teamIdentifier?.toString())
+    })
+  }, [teams, season?.teams])
+
+  const handleInviteTeams = async () => {
+    if (selectedTeamsToInvite.length === 0) {
+      alert('Please select at least one team to invite')
+      return
+    }
+
+    try {
+      // Create new teams object with existing teams plus new ones
+      const newTeamsObject = { ...season.teams }
+      
+      selectedTeamsToInvite.forEach(teamId => {
+        // Generate a unique token for each new team
+        const token = `e${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+        newTeamsObject[teamId] = token
+      })
+
+      console.log('Inviting teams:', selectedTeamsToInvite)
+      console.log('New teams object:', newTeamsObject)
+      
+      // Validate that all required fields have values
+      if (!season.name || !season.startDate || !season.EndDate) {
+        alert('Season data is incomplete. Cannot update teams.')
+        console.error('Missing season data:', { name: season.name, startDate: season.startDate, EndDate: season.EndDate })
+        return
+      }
+      
+      console.log('Updating season with data:', {
+        id: seasonId,
+        name: season.name,
+        startDate: season.startDate,
+        EndDate: season.EndDate,
+        teams: newTeamsObject
+      })
+
+      // Update the season in the database
+      const result = await updateSeason({
+        variables: {
+          id: seasonId,
+          name: season.name,
+          startDate: season.startDate,
+          EndDate: season.EndDate,
+          teams: newTeamsObject
+        }
+      })
+
+      console.log('Update result:', result)
+
+      if (result.data?.update_seasons_by_pk) {
+        // Show success message
+        alert(`Successfully invited ${selectedTeamsToInvite.length} team(s) to the season!`)
+        
+        // Reset and close modal
+        setSelectedTeamsToInvite([])
+        setIsInviteTeamsModalOpen(false)
+        
+        // Refetch the season data to show updated teams
+        await refetch()
+        
+        console.log('Season updated successfully:', result.data.update_seasons_by_pk)
+      } else {
+        throw new Error('Failed to update season')
+      }
+      
+    } catch (error) {
+      console.error('Error inviting teams:', error)
+      alert('Failed to invite teams. Please try again.')
+    }
+  }
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
+  const [isInviteTeamsModalOpen, setIsInviteTeamsModalOpen] = useState(false)
+  const [selectedTeamsToInvite, setSelectedTeamsToInvite] = useState<string[]>([])
 
   if (loading) {
     return (
@@ -465,7 +550,12 @@ export default function SeasonDetailsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-20 flex-col">
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col"
+                onClick={() => setIsInviteTeamsModalOpen(true)}
+                disabled={availableTeamsToInvite.length === 0}
+              >
                 <Plus className="h-6 w-6 mb-2" />
                 <span>Invite More Teams</span>
               </Button>
@@ -587,6 +677,93 @@ export default function SeasonDetailsPage() {
           <div className="flex justify-end pt-4">
             <Button variant="outline" onClick={() => setIsTeamModalOpen(false)}>
               Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Teams Modal */}
+      <Dialog open={isInviteTeamsModalOpen} onOpenChange={setIsInviteTeamsModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Invite Teams to Season
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-3">
+                Select teams to invite to "{season?.name}". Teams that are already in this season are not shown.
+              </p>
+              
+              {availableTeamsToInvite.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No teams available to invite</p>
+                  <p className="text-sm">All teams are already part of this season</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-60 overflow-y-auto border rounded-md p-3">
+                  {availableTeamsToInvite.map((team: any) => {
+                    const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
+                    
+                    return (
+                      <div key={teamId} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={`invite-team-${teamId}`}
+                          checked={selectedTeamsToInvite.includes(teamId)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedTeamsToInvite([...selectedTeamsToInvite, teamId])
+                            } else {
+                              setSelectedTeamsToInvite(selectedTeamsToInvite.filter(id => id !== teamId))
+                            }
+                          }}
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor={`invite-team-${teamId}`} className="text-sm font-medium">
+                            {team.name || team.team_name || `Team ${teamId}`}
+                          </Label>
+                          <div className="text-xs text-gray-500">
+                            {team.shortname || team.short_name || 'N/A'} • Manager: {team.manager?.name || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              
+              {selectedTeamsToInvite.length > 0 && (
+                <div className="bg-blue-50 p-3 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    <strong>{selectedTeamsToInvite.length}</strong> team(s) selected for invitation
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => {
+              setIsInviteTeamsModalOpen(false)
+              setSelectedTeamsToInvite([])
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleInviteTeams}
+              disabled={selectedTeamsToInvite.length === 0 || updateLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {updateLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              Invite {selectedTeamsToInvite.length > 0 ? `(${selectedTeamsToInvite.length})` : ''} Teams
             </Button>
           </div>
         </DialogContent>
