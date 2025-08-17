@@ -176,38 +176,38 @@ export default function StatisticsPage() {
     winner,
     stage,
   }: { team1: string; team2: string; winner: string; stage: string }) => (
-    <Card className={`border-2 ${winner !== "TBD" ? "border-green-500 bg-green-50" : "border-gray-300"} shadow-lg`}>
+    <Card className={`bg-white/10 backdrop-blur-xl border-2 ${winner !== "TBD" ? "border-green-500/50 bg-green-500/20" : "border-white/20"} shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105`}>
       <CardContent className="p-4">
         <div className="text-center space-y-2">
-          <Badge variant="outline" className="mb-2">
+          <Badge variant="outline" className="mb-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
             {stage}
           </Badge>
           <div className="space-y-1">
-            <p className={`font-semibold ${winner === team1 ? "text-green-600" : "text-blue-900"}`}>{team1}</p>
-            <p className="text-gray-500 text-sm">VS</p>
-            <p className={`font-semibold ${winner === team2 ? "text-green-600" : "text-blue-900"}`}>{team2}</p>
+            <p className={`font-semibold drop-shadow-md ${winner === team1 ? "text-green-300" : "text-white"}`}>{team1}</p>
+            <p className="text-white/80 text-sm">VS</p>
+            <p className={`font-semibold drop-shadow-md ${winner === team2 ? "text-green-300" : "text-white"}`}>{team2}</p>
           </div>
-          {winner !== "TBD" && <Badge className="bg-green-500 text-white mt-2">Winner: {winner}</Badge>}
+          {winner !== "TBD" && <Badge className="bg-green-500/90 backdrop-blur-md text-white mt-2">Winner: {winner}</Badge>}
         </div>
       </CardContent>
     </Card>
   )
 
   const TeamCard = ({ team, group }: { team: { name: string; position: number }; group: string }) => (
-    <Card className="border-0 shadow-lg">
+    <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
       <CardContent className="p-4 text-center">
-        <Badge variant="outline" className="mb-2">
+        <Badge variant="outline" className="mb-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
           #{team.position}
         </Badge>
-        <p className="font-semibold text-blue-900">{team.name}</p>
-        <p className="text-sm text-gray-600">Group {group}</p>
+        <p className="font-semibold text-white drop-shadow-md">{team.name}</p>
+        <p className="text-sm text-white/80">Group {group}</p>
       </CardContent>
     </Card>
   )
 
   const StandingsTable = ({ standings, groupName }: { standings: typeof groupAStandings; groupName: string }) => (
-    <Card className="border-0 shadow-xl">
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+    <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+      <CardHeader className="bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white">
         <CardTitle className="flex items-center gap-2">
           <Trophy className="h-5 w-5" />
           Group {groupName} Standings
@@ -216,8 +216,8 @@ export default function StatisticsPage() {
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr className="text-left text-sm font-medium text-gray-700">
+            <thead className="bg-white/20 backdrop-blur-sm">
+              <tr className="text-left text-sm font-medium text-white">
                 <th className="p-3">Pos</th>
                 <th className="p-3">Team</th>
                 <th className="p-3 text-center">P</th>
@@ -234,35 +234,35 @@ export default function StatisticsPage() {
               {standings.map((team, index) => (
                 <tr
                   key={team.team}
-                  className={`border-b hover:bg-gray-50 ${
-                    index < 2 ? "bg-green-50" : index >= standings.length - 2 ? "bg-red-50" : ""
+                  className={`border-b border-white/20 hover:bg-white/10 transition-all duration-300 ${
+                    index < 2 ? "bg-green-500/20 backdrop-blur-sm" : index >= standings.length - 2 ? "bg-red-500/20 backdrop-blur-sm" : ""
                   }`}
                 >
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold">{team.pos}</span>
-                      {index < 2 && <TrendingUp className="h-4 w-4 text-green-600" />}
-                      {index >= standings.length - 2 && <TrendingDown className="h-4 w-4 text-red-600" />}
+                      <span className="font-semibold text-white">{team.pos}</span>
+                      {index < 2 && <TrendingUp className="h-4 w-4 text-green-300" />}
+                      {index >= standings.length - 2 && <TrendingDown className="h-4 w-4 text-red-300" />}
                     </div>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-blue-900">{team.team}</span>
-                      {index === 0 && <Badge className="bg-yellow-500 text-black">Leader</Badge>}
+                      <span className="font-medium text-white drop-shadow-md">{team.team}</span>
+                      {index === 0 && <Badge className="bg-yellow-500/90 backdrop-blur-md text-black">Leader</Badge>}
                     </div>
                   </td>
-                  <td className="p-3 text-center">{team.played}</td>
-                  <td className="p-3 text-center text-green-600 font-medium">{team.wins}</td>
-                  <td className="p-3 text-center text-yellow-600 font-medium">{team.draws}</td>
-                  <td className="p-3 text-center text-red-600 font-medium">{team.losses}</td>
-                  <td className="p-3 text-center">{team.gf}</td>
-                  <td className="p-3 text-center">{team.ga}</td>
-                  <td className={`p-3 text-center font-medium ${team.gd >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  <td className="p-3 text-center text-white">{team.played}</td>
+                  <td className="p-3 text-center text-green-300 font-medium">{team.wins}</td>
+                  <td className="p-3 text-center text-yellow-300 font-medium">{team.draws}</td>
+                  <td className="p-3 text-center text-red-300 font-medium">{team.losses}</td>
+                  <td className="p-3 text-center text-white">{team.gf}</td>
+                  <td className="p-3 text-center text-white">{team.ga}</td>
+                  <td className={`p-3 text-center font-medium ${team.gd >= 0 ? "text-green-300" : "text-red-300"}`}>
                     {team.gd > 0 ? "+" : ""}
                     {team.gd}
                   </td>
                   <td className="p-3 text-center">
-                    <Badge variant="outline" className="font-bold text-blue-600 border-blue-600">
+                    <Badge variant="outline" className="font-bold text-white border-white/50 bg-white/20 backdrop-blur-sm">
                       {team.points}
                     </Badge>
                   </td>
@@ -281,38 +281,38 @@ export default function StatisticsPage() {
 
       <div className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">League Center</h1>
-          <p className="text-lg text-gray-600">Statistics, standings, and fixtures</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl">League Center</h1>
+          <p className="text-lg text-white/90 drop-shadow-xl">Statistics, standings, and fixtures</p>
         </div>
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white/80 backdrop-blur-md rounded-lg p-1 shadow-lg border border-white/30">
+          <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
             <Button
               variant={activeTab === 'statistics' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('statistics')}
-              className={activeTab === 'statistics' ? 'bg-blue-600 text-white' : ''}
+              className={activeTab === 'statistics' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
             >
               Statistics
             </Button>
             <Button
               variant={activeTab === 'standings' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('standings')}
-              className={activeTab === 'standings' ? 'bg-blue-600 text-white' : ''}
+              className={activeTab === 'standings' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
             >
               Standings
             </Button>
             <Button
               variant={activeTab === 'fixtures' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('fixtures')}
-              className={activeTab === 'fixtures' ? 'bg-blue-600 text-white' : ''}
+              className={activeTab === 'fixtures' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
             >
               Fixtures
             </Button>
             <Button
               variant={activeTab === 'bracket' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('bracket')}
-              className={activeTab === 'bracket' ? 'bg-blue-600 text-white' : ''}
+              className={activeTab === 'bracket' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
             >
               Bracket
             </Button>
@@ -326,11 +326,13 @@ export default function StatisticsPage() {
             {/* League Overview Stats */}
             <div className="grid md:grid-cols-4 gap-6">
               {leagueStats.map((stat, index) => (
-                <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg text-center hover:shadow-xl transition-shadow">
+                <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center hover:shadow-3xl transition-all duration-300 hover:scale-105">
                   <CardContent className="p-6">
-                    <stat.icon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                    <h3 className="text-3xl font-bold text-blue-900 mb-2">{stat.value}</h3>
-                    <p className="text-gray-600">{stat.label}</p>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <stat.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{stat.value}</h3>
+                    <p className="text-white/90 drop-shadow-md">{stat.label}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -338,8 +340,8 @@ export default function StatisticsPage() {
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Top Scorers */}
-              <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black">
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <CardHeader className="bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 backdrop-blur-md text-black">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5" />
                     Top Scorers
@@ -350,7 +352,7 @@ export default function StatisticsPage() {
                     {topScorers.map((player, index) => (
                       <div
                         key={index}
-                        className={`p-4 border-b last:border-b-0 hover:bg-gray-50/50 ${index === 0 ? "bg-yellow-50/80 backdrop-blur-sm" : ""}`}
+                        className={`p-4 border-b border-white/20 last:border-b-0 hover:bg-white/10 transition-all duration-300 ${index === 0 ? "bg-yellow-500/20 backdrop-blur-sm" : ""}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -362,19 +364,19 @@ export default function StatisticsPage() {
                                     ? "bg-gray-400 text-white"
                                     : index === 2
                                       ? "bg-orange-400 text-white"
-                                      : "bg-blue-100 text-blue-600"
+                                      : "bg-blue-100/80 backdrop-blur-sm text-blue-600"
                               }`}
                             >
                               {index + 1}
                             </div>
                             <div>
-                              <p className="font-semibold text-blue-900">{player.name}</p>
-                              <p className="text-sm text-gray-600">{player.team}</p>
+                              <p className="font-semibold text-white drop-shadow-md">{player.name}</p>
+                              <p className="text-sm text-white/80">{player.team}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-blue-600">{player.goals}</p>
-                            <p className="text-sm text-gray-500">{player.matches} matches</p>
+                            <p className="text-2xl font-bold text-white drop-shadow-lg">{player.goals}</p>
+                            <p className="text-sm text-white/70">{player.matches} matches</p>
                           </div>
                         </div>
                       </div>
@@ -385,41 +387,44 @@ export default function StatisticsPage() {
 
               {/* Player of the Week */}
               <div className="space-y-6">
-                <Card className="border-0 shadow-xl">
-                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white">
                     <CardTitle className="flex items-center gap-2">
                       <Award className="h-5 w-5" />
                       Player of the Week
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 text-center">
-                    <Badge className="mb-4 bg-yellow-500 text-black">{playerOfTheWeek.week}</Badge>
-                    <h3 className="text-2xl font-bold text-blue-900 mb-2">{playerOfTheWeek.name}</h3>
-                    <p className="text-lg text-gray-600 mb-4">{playerOfTheWeek.team}</p>
-                    <p className="text-blue-600 font-semibold">{playerOfTheWeek.stats}</p>
+                    <Badge className="mb-4 bg-yellow-500/90 backdrop-blur-md text-black">{playerOfTheWeek.week}</Badge>
+                    <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">{playerOfTheWeek.name}</h3>
+                    <p className="text-lg text-white/90 mb-4 drop-shadow-md">{playerOfTheWeek.team}</p>
+                    <p className="text-white font-semibold drop-shadow-md">{playerOfTheWeek.stats}</p>
                   </CardContent>
                 </Card>
 
                 {/* Team Performance Stats */}
-                <Card className="border-0 shadow-xl">
-                  <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white">
+                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-r from-green-600/90 to-green-700/90 backdrop-blur-md text-white">
                     <CardTitle className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5" />
-                      Team Performance
+                      Team Performance Stats
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="space-y-0">
                       {teamStats.map((stat, index) => (
-                        <div key={index} className="p-4 border-b last:border-b-0 hover:bg-gray-50">
+                        <div
+                          key={index}
+                          className="p-4 border-b border-white/20 last:border-b-0 hover:bg-white/10 transition-all duration-300"
+                        >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-semibold text-blue-900">{stat.team}</p>
-                              <p className="text-sm text-gray-600">{stat.stat}</p>
+                              <p className="font-semibold text-white drop-shadow-md">{stat.team}</p>
+                              <p className="text-sm text-white/80">{stat.stat}</p>
                             </div>
-                            <Badge variant="outline" className="font-bold text-green-600 border-green-600">
-                              {stat.value}
-                            </Badge>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-white drop-shadow-lg">{stat.value}</p>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -431,33 +436,33 @@ export default function StatisticsPage() {
 
             {/* Additional Statistics */}
             <div className="grid md:grid-cols-3 gap-6">
-              <Card className="border-0 shadow-lg">
-                <CardHeader className="bg-blue-600 text-white">
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+                <CardHeader className="bg-blue-600/90 backdrop-blur-md text-white">
                   <CardTitle className="text-center">Most Disciplined</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">Phoenix United</h3>
-                  <p className="text-gray-600">Only 2 yellow cards</p>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Phoenix United</h3>
+                  <p className="text-white/90 drop-shadow-md">Only 2 yellow cards</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg">
-                <CardHeader className="bg-yellow-500 text-black">
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+                <CardHeader className="bg-yellow-500/90 backdrop-blur-md text-black">
                   <CardTitle className="text-center">Best Goalkeeper</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">Roberto Martinez</h3>
-                  <p className="text-gray-600">Thunder FC • 4 clean sheets</p>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Roberto Martinez</h3>
+                  <p className="text-white/90 drop-shadow-md">Thunder FC • 4 clean sheets</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg">
-                <CardHeader className="bg-green-600 text-white">
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+                <CardHeader className="bg-green-600/90 backdrop-blur-md text-white">
                   <CardTitle className="text-center">Most Assists</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">Luis Garcia</h3>
-                  <p className="text-gray-600">Velocity FC • 8 assists</p>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Luis Garcia</h3>
+                  <p className="text-white/90 drop-shadow-md">Velocity FC • 8 assists</p>
                 </CardContent>
               </Card>
             </div>
@@ -467,175 +472,117 @@ export default function StatisticsPage() {
         {/* Standings Tab */}
         {activeTab === 'standings' && (
           <div className="space-y-8">
-            {/* Legend */}
+            {/* Group Selection */}
             <div className="flex justify-center">
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex flex-wrap gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-                      <span>Qualification</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-                      <span>Elimination</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
+                <Button
+                  variant={selectedGroup === "all" ? "default" : "ghost"}
+                  onClick={() => setSelectedGroup("all")}
+                  className={selectedGroup === "all" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
+                >
+                  All Groups
+                </Button>
+                <Button
+                  variant={selectedGroup === "A" ? "default" : "ghost"}
+                  onClick={() => setSelectedGroup("A")}
+                  className={selectedGroup === "A" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
+                >
+                  Group A
+                </Button>
+                <Button
+                  variant={selectedGroup === "B" ? "default" : "ghost"}
+                  onClick={() => setSelectedGroup("B")}
+                  className={selectedGroup === "B" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
+                >
+                  Group B
+                </Button>
+              </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
-              <StandingsTable standings={groupAStandings} groupName="A" />
-              <StandingsTable standings={groupBStandings} groupName="B" />
-            </div>
-
-            {/* Additional Stats */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="border-0 shadow-lg text-center">
-                <CardContent className="p-6">
-                  <Trophy className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">Top Scorer</h3>
-                  <p className="text-lg font-semibold">Marcus Silva</p>
-                  <p className="text-gray-600">12 goals</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg text-center">
-                <CardContent className="p-6">
-                  <TrendingUp className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">Best Defense</h3>
-                  <p className="text-lg font-semibold">Lightning United</p>
-                  <p className="text-gray-600">7 goals conceded</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg text-center">
-                <CardContent className="p-6">
-                  <Trophy className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">Best Attack</h3>
-                  <p className="text-lg font-semibold">Lightning United</p>
-                  <p className="text-gray-600">19 goals scored</p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Standings Tables */}
+            {selectedGroup === "all" && (
+              <div className="grid lg:grid-cols-2 gap-8">
+                <StandingsTable standings={groupAStandings} groupName="A" />
+                <StandingsTable standings={groupBStandings} groupName="B" />
+              </div>
+            )}
+            {selectedGroup === "A" && <StandingsTable standings={groupAStandings} groupName="A" />}
+            {selectedGroup === "B" && <StandingsTable standings={groupBStandings} groupName="B" />}
           </div>
         )}
 
         {/* Bracket Tab */}
         {activeTab === 'bracket' && (
-          <div className="space-y-12">
-            {/* Group Stage Qualifiers */}
-            <div className="grid lg:grid-cols-2 gap-8 mb-12">
-              <Card className="border-0 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Group A Qualifiers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    {groupATeams.map((team, index) => (
-                      <TeamCard key={index} team={team} group="A" />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Group B Qualifiers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    {groupBTeams.map((team, index) => (
-                      <TeamCard key={index} team={team} group="B" />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="space-y-8">
+            {/* Knockout Stage */}
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">Knockout Stage</h2>
+              <p className="text-lg text-white/90 drop-shadow-xl">Tournament progression and results</p>
             </div>
 
-            {/* Knockout Bracket */}
-            <div className="space-y-12">
-              {/* Quarterfinals */}
-              <div>
-                <h2 className="text-2xl font-bold text-blue-900 text-center mb-6">Quarterfinals</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {knockoutMatches.quarterfinals.map((match, index) => (
-                    <MatchCard key={index} team1={match.team1} team2={match.team2} winner={match.winner} stage="QF" />
-                  ))}
-                </div>
-              </div>
-
-              {/* Semifinals */}
-              <div>
-                <h2 className="text-2xl font-bold text-blue-900 text-center mb-6">Semifinals</h2>
-                <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                  {knockoutMatches.semifinals.map((match, index) => (
-                    <MatchCard key={index} team1={match.team1} team2={match.team2} winner={match.winner} stage="SF" />
-                  ))}
-                </div>
-              </div>
-
-              {/* Final */}
-              <div>
-                <h2 className="text-2xl font-bold text-blue-900 text-center mb-6">Final</h2>
-                <div className="max-w-sm mx-auto">
+            {/* Quarterfinals */}
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Quarterfinals</h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {knockoutMatches.quarterfinals.map((match, index) => (
                   <MatchCard
-                    team1={knockoutMatches.final.team1}
-                    team2={knockoutMatches.final.team2}
-                    winner={knockoutMatches.final.winner}
-                    stage="FINAL"
+                    key={index}
+                    team1={match.team1}
+                    team2={match.team2}
+                    winner={match.winner}
+                    stage="Quarterfinal"
                   />
-                </div>
-              </div>
-
-              {/* Champion */}
-              <div className="text-center">
-                <Card className="max-w-md mx-auto border-4 border-yellow-500 bg-gradient-to-br from-yellow-50 to-yellow-100 shadow-2xl">
-                  <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black">
-                    <CardTitle className="flex items-center justify-center gap-2">
-                      <Trophy className="h-6 w-6" />
-                      Prime5 League Champion
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-8">
-                    <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-                    <h3 className="text-3xl font-bold text-blue-900 mb-2">TBD</h3>
-                    <p className="text-lg text-gray-600">Tournament in Progress</p>
-                  </CardContent>
-                </Card>
+                ))}
               </div>
             </div>
 
-            {/* Tournament Progress */}
-            <div className="mt-12">
-              <Card className="border-0 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-                  <CardTitle className="text-center">Tournament Progress</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid md:grid-cols-3 gap-6 text-center">
-                    <div>
-                      <h3 className="text-lg font-semibold text-blue-900 mb-2">Group Stage</h3>
-                      <Badge className="bg-green-500 text-white">Completed</Badge>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-blue-900 mb-2">Quarterfinals</h3>
-                      <Badge className="bg-yellow-500 text-black">In Progress</Badge>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-blue-900 mb-2">Final</h3>
-                      <Badge variant="outline">Upcoming</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Semifinals */}
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Semifinals</h3>
+              <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                {knockoutMatches.semifinals.map((match, index) => (
+                  <MatchCard
+                    key={index}
+                    team1={match.team1}
+                    team2={match.team2}
+                    winner={match.winner}
+                    stage="Semifinal"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Final */}
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Final</h3>
+              <div className="max-w-md mx-auto">
+                <MatchCard
+                  team1={knockoutMatches.final.team1}
+                  team2={knockoutMatches.final.team2}
+                  winner={knockoutMatches.final.winner}
+                  stage="Final"
+                />
+              </div>
+            </div>
+
+            {/* Group Winners */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white text-center drop-shadow-lg">Group A Winners</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {groupATeams.slice(0, 4).map((team, index) => (
+                    <TeamCard key={index} team={team} group="A" />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white text-center drop-shadow-lg">Group B Winners</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {groupBTeams.slice(0, 4).map((team, index) => (
+                    <TeamCard key={index} team={team} group="B" />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -643,25 +590,20 @@ export default function StatisticsPage() {
         {/* Fixtures Tab */}
         {activeTab === 'fixtures' && (
           <div className="space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-blue-900 mb-4">Fixtures & Results</h2>
-              <p className="text-lg text-gray-600">Stay updated with all matches</p>
-            </div>
-
-            {/* Fixture Tab Navigation */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-white rounded-lg p-1 shadow-lg">
+            {/* Fixture Type Selection */}
+            <div className="flex justify-center">
+              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
                 <Button
                   variant={selectedFixtureTab === "upcoming" ? "default" : "ghost"}
                   onClick={() => setSelectedFixtureTab("upcoming")}
-                  className={selectedFixtureTab === "upcoming" ? "bg-blue-600 text-white" : ""}
+                  className={selectedFixtureTab === "upcoming" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
                 >
                   Upcoming Matches
                 </Button>
                 <Button
                   variant={selectedFixtureTab === "results" ? "default" : "ghost"}
                   onClick={() => setSelectedFixtureTab("results")}
-                  className={selectedFixtureTab === "results" ? "bg-blue-600 text-white" : ""}
+                  className={selectedFixtureTab === "results" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
                 >
                   Past Results
                 </Button>
@@ -669,26 +611,26 @@ export default function StatisticsPage() {
             </div>
 
             {/* Group Filter */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-white rounded-lg p-1 shadow-lg">
+            <div className="flex justify-center">
+              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
                 <Button
                   variant={selectedGroup === "all" ? "default" : "ghost"}
                   onClick={() => setSelectedGroup("all")}
-                  className={selectedGroup === "all" ? "bg-yellow-500 text-black" : ""}
+                  className={selectedGroup === "all" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
                 >
                   All Groups
                 </Button>
                 <Button
                   variant={selectedGroup === "A" ? "default" : "ghost"}
                   onClick={() => setSelectedGroup("A")}
-                  className={selectedGroup === "A" ? "bg-yellow-500 text-black" : ""}
+                  className={selectedGroup === "A" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
                 >
                   Group A
                 </Button>
                 <Button
                   variant={selectedGroup === "B" ? "default" : "ghost"}
                   onClick={() => setSelectedGroup("B")}
-                  className={selectedGroup === "B" ? "bg-yellow-500 text-black" : ""}
+                  className={selectedGroup === "B" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
                 >
                   Group B
                 </Button>
@@ -697,37 +639,31 @@ export default function StatisticsPage() {
 
             {/* Upcoming Matches */}
             {selectedFixtureTab === "upcoming" && (
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredUpcoming.map((match) => (
-                  <Card key={match.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                    <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-                      <div className="flex justify-between items-center">
-                        <Badge variant="secondary" className="bg-white text-blue-600">
-                          Group {match.group}
-                        </Badge>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(match.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </CardHeader>
+                  <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                     <CardContent className="p-6">
                       <div className="text-center mb-4">
-                        <div className="flex items-center justify-between">
-                          <div className="text-lg font-semibold text-blue-900">{match.team1}</div>
-                          <div className="text-gray-500 font-medium">VS</div>
-                          <div className="text-lg font-semibold text-blue-900">{match.team2}</div>
+                        <Badge variant="outline" className="bg-white/20 backdrop-blur-sm border-white/30 text-white">
+                          {new Date(match.date).toLocaleDateString()}
+                        </Badge>
+                        <p className="text-sm text-white/80 mt-2">{match.time}</p>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
+                        </div>
+                        <div className="text-center text-sm text-white/80 font-medium">VS</div>
+                        <div className="text-center">
+                          <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>
                         </div>
                       </div>
-                      <div className="flex justify-between items-center text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {match.time}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
+                      <div className="mt-4 pt-4 border-t border-white/20 text-center">
+                        <div className="flex items-center justify-center gap-1 text-sm text-white/80">
+                          <MapPin className="w-4 h-4" />
                           {match.venue}
                         </div>
+                        <Badge className="mt-2 bg-blue-600/90 backdrop-blur-md text-white">Group {match.group}</Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -737,28 +673,25 @@ export default function StatisticsPage() {
 
             {/* Past Results */}
             {selectedFixtureTab === "results" && (
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredResults.map((match) => (
-                  <Card key={match.id} className="border-0 shadow-lg">
-                    <CardHeader className="bg-gradient-to-r from-gray-600 to-gray-700 text-white">
-                      <div className="flex justify-between items-center">
-                        <Badge variant="secondary" className="bg-white text-gray-600">
-                          Group {match.group}
-                        </Badge>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(match.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </CardHeader>
+                  <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                     <CardContent className="p-6">
-                      <div className="text-center">
-                        <div className="flex items-center justify-between">
-                          <div className="text-lg font-semibold text-blue-900">{match.team1}</div>
-                          <div className="text-2xl font-bold text-blue-600">
-                            {match.score1} - {match.score2}
-                          </div>
-                          <div className="text-lg font-semibold text-blue-900">{match.team2}</div>
+                      <div className="text-center mb-4">
+                        <Badge variant="outline" className="bg-white/20 backdrop-blur-sm border-white/30 text-white">
+                          {new Date(match.date).toLocaleDateString()}
+                        </Badge>
+                        <Badge className="mt-2 bg-blue-600/90 backdrop-blur-md text-white">Group {match.group}</Badge>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
+                          <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score1}</p>
+                        </div>
+                        <div className="text-center text-sm text-white/80 font-medium">VS</div>
+                        <div className="text-center">
+                          <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>
+                          <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score2}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -773,3 +706,5 @@ export default function StatisticsPage() {
     </div>
   )
 }
+
+
