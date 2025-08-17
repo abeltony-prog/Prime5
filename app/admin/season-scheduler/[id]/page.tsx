@@ -433,6 +433,147 @@ export default function SeasonDetailsPage() {
     setIsRandomized(false)
   }
 
+  const generateWeekendDates = (startDate: string, endDate: string) => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const weekends: string[] = []
+    
+    let current = new Date(start)
+    
+    while (current <= end) {
+      // Check if it's a weekend (Saturday = 6, Sunday = 0)
+      if (current.getDay() === 6 || current.getDay() === 0) {
+        weekends.push(current.toISOString().split('T')[0])
+      }
+      current.setDate(current.getDate() + 1)
+    }
+    
+    return weekends
+  }
+
+  const scheduleMatches = async () => {
+    if (!season || seasonGroups.length === 0) {
+      alert('Please create groups first before scheduling matches')
+      return
+    }
+
+    setIsScheduling(true)
+    
+    try {
+      const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
+      const totalWeekends = weekendDates.length
+      
+      if (totalWeekends < 2) {
+        alert('Season must be at least 2 weeks long to schedule matches')
+        setIsScheduling(false)
+        return
+      }
+
+      const matches: any[] = []
+      
+      // Get teams from each group
+      const groupTeams = seasonGroups.map(group => {
+        const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
+        return {
+          groupId: group.id,
+          groupName: group.name,
+          teams: groupTeamStats.map((stat: any) => ({
+            team_id: stat.team_id,
+            teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`
+          }))
+        }
+      })
+
+      // Schedule matches for first 2 weekends
+      for (let weekend = 0; weekend < Math.min(2, Math.floor(totalWeekends / 2)); weekend++) {
+        const saturdayIndex = weekend * 2
+        const sundayIndex = weekend * 2 + 1
+        
+        if (saturdayIndex < weekendDates.length && sundayIndex < weekendDates.length) {
+          const saturday = weekendDates[saturdayIndex]
+          const sunday = weekendDates[sundayIndex]
+          
+          // Randomize which group plays on Saturday vs Sunday for fairness
+          const saturdayGroupIndex = Math.random() < 0.5 ? 0 : 1
+          const sundayGroupIndex = saturdayGroupIndex === 0 ? 1 : 0
+          
+          const weekendNumber = weekend + 1
+          
+          // Schedule Saturday matches
+          const saturdayGroup = groupTeams[saturdayGroupIndex]
+          if (saturdayGroup && saturdayGroup.teams.length >= 2) {
+            const shuffledTeams = [...saturdayGroup.teams].sort(() => Math.random() - 0.5)
+            const maxGamesPerDay = Math.min(4, Math.floor(saturdayGroup.teams.length / 2))
+            
+            for (let game = 0; game < maxGamesPerDay; game++) {
+              const team1Index = game * 2
+              const team2Index = game * 2 + 1
+              
+              if (team2Index < shuffledTeams.length) {
+                matches.push({
+                  id: `match-${Date.now()}-w${weekendNumber}-sat-${game}`,
+                  team1_id: shuffledTeams[team1Index].team_id,
+                  team2_id: shuffledTeams[team2Index].team_id,
+                  date: saturday,
+                  time: '', // Will be set manually
+                  group_id: saturdayGroup.groupId,
+                  venue: 'Prime Arena',
+                  status: 'scheduled',
+                  weekend: weekendNumber,
+                  day: 'Saturday',
+                  groupName: saturdayGroup.groupName
+                })
+              }
+            }
+          }
+          
+          // Schedule Sunday matches
+          const sundayGroup = groupTeams[sundayGroupIndex]
+          if (sundayGroup && sundayGroup.teams.length >= 2) {
+            const shuffledTeams = [...sundayGroup.teams].sort(() => Math.random() - 0.5)
+            const maxGamesPerDay = Math.min(4, Math.floor(sundayGroup.teams.length / 2))
+            
+            for (let game = 0; game < maxGamesPerDay; game++) {
+              const team1Index = game * 2
+              const team2Index = game * 2 + 1
+              
+              if (team2Index < shuffledTeams.length) {
+                matches.push({
+                  id: `match-${Date.now()}-w${weekendNumber}-sun-${game}`,
+                  team1_id: shuffledTeams[team1Index].team_id,
+                  team2_id: shuffledTeams[team2Index].team_id,
+                  date: sunday,
+                  time: '', // Will be set manually
+                  group_id: sundayGroup.groupId,
+                  venue: 'Prime Arena',
+                  status: 'scheduled',
+                  weekend: weekendNumber,
+                  day: 'Sunday',
+                  groupName: sundayGroup.groupName
+                })
+              }
+            }
+          }
+        }
+      }
+
+      setScheduledMatches(matches)
+      
+      toast({
+        title: "Matches Scheduled!",
+        description: `${matches.length} matches have been scheduled for the first 2 weekends. Groups are randomly assigned to Saturday vs Sunday for fairness.`,
+      })
+      
+      console.log('Scheduled matches:', matches)
+      
+    } catch (error) {
+      console.error('Error scheduling matches:', error)
+      alert('Failed to schedule matches. Please try again.')
+    } finally {
+      setIsScheduling(false)
+    }
+  }
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
@@ -440,6 +581,21 @@ export default function SeasonDetailsPage() {
   const [selectedTeamsToInvite, setSelectedTeamsToInvite] = useState<string[]>([])
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false)
   const [isViewGroupsModalOpen, setIsViewGroupsModalOpen] = useState(false)
+  const [isScheduleMatchesModalOpen, setIsScheduleMatchesModalOpen] = useState(false)
+  const [scheduledMatches, setScheduledMatches] = useState<Array<{
+    id: string
+    team1_id: string
+    team2_id: string
+    date: string
+    time: string
+    group_id: string
+    venue: string
+    status: string
+    weekend: number
+    day: string
+    groupName: string
+  }>>([])
+  const [isScheduling, setIsScheduling] = useState(false)
   const [groups, setGroups] = useState<Array<{
     id: string
     name: string
@@ -454,6 +610,7 @@ export default function SeasonDetailsPage() {
   }>>([])
   const [isRandomized, setIsRandomized] = useState(false)
   const [numberOfGroups, setNumberOfGroups] = useState(2)
+  const [defaultVenue, setDefaultVenue] = useState("Prime Arena")
 
   if (loading) {
     return (
@@ -815,9 +972,19 @@ export default function SeasonDetailsPage() {
                 <Plus className="h-6 w-6 mb-2" />
                 <span>Invite More Teams</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
+              <Button 
+                variant="outline" 
+                className="h-20 flex-col"
+                onClick={() => setIsScheduleMatchesModalOpen(true)}
+                disabled={seasonGroups.length === 0}
+              >
                 <Calendar className="h-6 w-6 mb-2" />
                 <span>Schedule Matches</span>
+                {seasonGroups.length === 0 && (
+                  <Badge variant="secondary" className="mt-1 text-xs">
+                    Create groups first
+                  </Badge>
+                )}
               </Button>
               {seasonGroups.length > 0 ? (
                 <Button 
@@ -827,9 +994,7 @@ export default function SeasonDetailsPage() {
                 >
                   <Users className="h-6 w-6 mb-2" />
                   <span>View Groups</span>
-                  <Badge variant="secondary" className="mt-1">
-                    {seasonGroups.length} groups
-                  </Badge>
+          
                 </Button>
               ) : (
                 <Button 
@@ -1423,6 +1588,185 @@ export default function SeasonDetailsPage() {
             <Button variant="outline" onClick={() => setIsViewGroupsModalOpen(false)}>
               Close
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Matches Modal */}
+      <Dialog open={isScheduleMatchesModalOpen} onOpenChange={setIsScheduleMatchesModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Schedule Season Matches
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Scheduling Controls */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <h3 className="font-semibold text-gray-900">Randomized Group Weekend Scheduling</h3>
+                <p className="text-sm text-gray-600">
+                  Weekend 1 & 2: Groups are randomly assigned to Saturday vs Sunday for fairness. Each group gets equal opportunities.
+                </p>
+              </div>
+              <Button 
+                onClick={scheduleMatches}
+                disabled={isScheduling || seasonGroups.length === 0}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isScheduling ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                  <Calendar className="h-4 w-4 mr-2" />
+                )}
+                {isScheduling ? 'Scheduling...' : 'Generate Matches'}
+              </Button>
+            </div>
+
+            {/* Scheduled Matches Display */}
+            {scheduledMatches.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">
+                    Scheduled Matches ({scheduledMatches.length})
+                  </h3>
+                  <Badge variant="outline">
+                    Weekend 1: {scheduledMatches.filter(m => m.weekend === 1).length} matches | 
+                    Weekend 2: {scheduledMatches.filter(m => m.weekend === 2).length} matches
+                  </Badge>
+                </div>
+
+                {/* Group matches by date */}
+                {(() => {
+                  const matchesByDate = scheduledMatches.reduce((acc: any, match) => {
+                    const date = match.date
+                    if (!acc[date]) acc[date] = []
+                    acc[date].push(match)
+                    return acc
+                  }, {})
+
+                  return Object.entries(matchesByDate).map(([date, dayMatches]: [string, any]) => (
+                    <Card key={date}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span>{new Date(date).toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}</span>
+                          <Badge variant="secondary">{dayMatches.length} matches</Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {dayMatches.map((match: any) => {
+                            const team1 = getTeamById(match.team1_id)
+                            const team2 = getTeamById(match.team2_id)
+                            
+                            return (
+                              <div key={match.id} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3">
+                                    <span className="font-medium">
+                                      {team1?.name || team1?.team_name || `Team ${match.team1_id}`}
+                                    </span>
+                                    <span className="text-gray-400">vs</span>
+                                    <span className="font-medium">
+                                      {team2?.name || team2?.team_name || `Team ${match.team2_id}`}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-gray-500 mt-1">
+                                    Group: {seasonGroups.find(g => g.id === match.group_id)?.name || 'N/A'} | 
+                                    Weekend {match.weekend} - {match.day}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="time"
+                                    placeholder="Time"
+                                    value={match.time}
+                                    onChange={(e) => {
+                                      setScheduledMatches(prev => 
+                                        prev.map(m => m.id === match.id ? { ...m, time: e.target.value } : m)
+                                      )
+                                    }}
+                                    className="w-32"
+                                  />
+                                  <Badge variant="outline">{match.venue}</Badge>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                })()}
+
+                {/* Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Match Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{scheduledMatches.length}</div>
+                        <div className="text-sm text-gray-500">Total Matches</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">
+                          {scheduledMatches.filter(m => m.weekend === 1).length}
+                        </div>
+                        <div className="text-sm text-gray-500">Weekend 1</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {scheduledMatches.filter(m => m.weekend === 2).length}
+                        </div>
+                        <div className="text-sm text-gray-500">Weekend 2</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {new Set(scheduledMatches.map(m => m.date)).size}
+                        </div>
+                        <div className="text-sm text-gray-500">Weekend Days</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* No matches scheduled */}
+            {scheduledMatches.length === 0 && !isScheduling && (
+              <div className="text-center text-gray-500 py-8">
+                <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No matches scheduled yet</p>
+                <p className="text-sm">Click "Generate Matches" to create the season schedule</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setIsScheduleMatchesModalOpen(false)}>
+              Close
+            </Button>
+            {scheduledMatches.length > 0 && (
+              <Button 
+                onClick={() => {
+                  // TODO: Save matches to database
+                  alert('Matches will be saved to database (implementation pending)')
+                }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                💾 Save to Database
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
