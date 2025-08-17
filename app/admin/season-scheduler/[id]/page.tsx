@@ -517,7 +517,7 @@ export default function SeasonDetailsPage() {
                   date: saturday,
                   time: '', // Will be set manually
                   group_id: saturdayGroup.groupId,
-                  venue: 'Prime Arena',
+                  venue: defaultVenue,
                   status: 'scheduled',
                   weekend: weekendNumber,
                   day: 'Saturday',
@@ -545,7 +545,7 @@ export default function SeasonDetailsPage() {
                   date: sunday,
                   time: '', // Will be set manually
                   group_id: sundayGroup.groupId,
-                  venue: 'Prime Arena',
+                  venue: defaultVenue,
                   status: 'scheduled',
                   weekend: weekendNumber,
                   day: 'Sunday',
@@ -572,6 +572,29 @@ export default function SeasonDetailsPage() {
     } finally {
       setIsScheduling(false)
     }
+  }
+
+  const updateAllVenues = () => {
+    if (defaultVenue.trim() === '') {
+      toast({
+        title: "Venue Required",
+        description: "Please enter a venue name before updating all matches.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const updatedMatches = scheduledMatches.map(match => ({
+      ...match,
+      venue: defaultVenue
+    }))
+    
+    setScheduledMatches(updatedMatches)
+    
+    toast({
+      title: "Venues Updated!",
+      description: `All ${updatedMatches.length} matches now have venue: ${defaultVenue}`,
+    })
   }
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -1603,6 +1626,36 @@ export default function SeasonDetailsPage() {
           </DialogHeader>
           
           <div className="space-y-6">
+            {/* Location Setting */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <Label htmlFor="default-venue" className="text-sm font-medium text-blue-900">
+                    Default Venue for All Games
+                  </Label>
+                  <Input
+                    id="default-venue"
+                    value={defaultVenue}
+                    onChange={(e) => setDefaultVenue(e.target.value)}
+                    placeholder="Enter venue name (e.g., Prime Arena, Stadium A)"
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-blue-700 mt-1">
+                    This venue will be applied to all scheduled matches. You can change individual match venues later.
+                  </p>
+                </div>
+                {scheduledMatches.length > 0 && (
+                  <Button 
+                    onClick={updateAllVenues}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    🏟️ Apply to All
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Scheduling Controls */}
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
@@ -1684,19 +1737,30 @@ export default function SeasonDetailsPage() {
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center space-x-2 mt-2">
                                   <Input
-                                    type="time"
-                                    placeholder="Time"
+                                    value={match.venue}
+                                    onChange={(e) => {
+                                      const updatedMatches = scheduledMatches.map(m => 
+                                        m.id === match.id ? { ...m, venue: e.target.value } : m
+                                      )
+                                      setScheduledMatches(updatedMatches)
+                                    }}
+                                    placeholder="Venue"
+                                    className="text-xs h-8"
+                                  />
+                                  <span className="text-xs text-gray-500">|</span>
+                                  <Input
                                     value={match.time}
                                     onChange={(e) => {
-                                      setScheduledMatches(prev => 
-                                        prev.map(m => m.id === match.id ? { ...m, time: e.target.value } : m)
+                                      const updatedMatches = scheduledMatches.map(m => 
+                                        m.id === match.id ? { ...m, time: e.target.value } : m
                                       )
+                                      setScheduledMatches(updatedMatches)
                                     }}
-                                    className="w-32"
+                                    placeholder="Time (e.g., 14:00)"
+                                    className="text-xs h-8 w-24"
                                   />
-                                  <Badge variant="outline">{match.venue}</Badge>
                                 </div>
                               </div>
                             )
@@ -1756,6 +1820,14 @@ export default function SeasonDetailsPage() {
             <Button variant="outline" onClick={() => setIsScheduleMatchesModalOpen(false)}>
               Close
             </Button>
+            {scheduledMatches.length > 0 && (
+              <Button 
+                onClick={updateAllVenues}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                🏟️ Update All Venues
+              </Button>
+            )}
             {scheduledMatches.length > 0 && (
               <Button 
                 onClick={() => {
