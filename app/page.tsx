@@ -59,49 +59,39 @@ export default function HomePage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-900/95 to-green-800/95"></div>
-        <div className="relative">
-          <Image
-            src="/mainbg.jpg"
-            alt="Prime5 League Futsal Background"
-            width={1920}
-            height={800}
-            className="w-full h-[800px] object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-green-900/90 to-transparent"></div>
-        </div>
+      <section className="relative min-h-[800px] flex items-center" style={{
+        backgroundImage: 'url(/mainbg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
+        <div className="relative z-10 container mx-auto px-6">
+          <div className="max-w-2xl">
+            <Badge className="bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold mb-6">
+              Season 2024 • Now Live
+            </Badge>
 
-        <div className="absolute inset-0 flex items-center">
-          <div className="container mx-auto px-6">
-            <div className="max-w-2xl">
-              <Badge className="bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold mb-6">
-                Season 2024 • Now Live
-              </Badge>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-2xl">Prime5 League</h1>
 
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">Prime5 League</h1>
+            <p className="text-xl md:text-2xl text-white mb-8 leading-relaxed drop-shadow-xl">
+              The premier futsal competition featuring the region's top teams competing for ultimate glory.
+            </p>
 
-              <p className="text-xl md:text-2xl text-green-100 mb-8 leading-relaxed">
-                The premier futsal competition featuring the region's top teams competing for ultimate glory.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8">
-                  <Link href="/register">Register Your Team</Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="border-white text-white hover:bg-white hover:text-green-900 bg-transparent"
-                >
-                  <Link href="/fixtures" className="flex items-center gap-2">
-                    <Play className="w-5 h-5" />
-                    Watch Highlights
-                  </Link>
-                </Button>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <Link href="/register">Register Your Team</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+              >
+                <Link href="/fixtures" className="flex items-center gap-2">
+                  <Play className="w-5 h-5" />
+                  Watch Highlights
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
