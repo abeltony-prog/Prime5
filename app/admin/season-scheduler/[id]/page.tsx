@@ -209,14 +209,21 @@ export default function SeasonDetailsPage() {
           description: `Group "${newGroup.name}" created successfully!`,
         })
         
-        console.log('Group created successfully:', newGroup)
+        // Refetch groups data to ensure consistency
+        await refetchGroups()
+        
+        // Close the modal
+        setIsCreateGroupModalOpen(false)
       } else {
         throw new Error('Failed to create group')
       }
       
     } catch (error) {
-      console.error('Error creating group:', error)
-      alert('Failed to create group. Please try again.')
+      toast({
+        title: "Error",
+        description: "Failed to create group. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -254,14 +261,21 @@ export default function SeasonDetailsPage() {
           description: "Team added to group successfully!",
         })
         
-        console.log('Team statistics created successfully for team:', teamId, 'in group:', groupId)
+        // Refetch team statistics to ensure consistency
+        await refetchStats()
+        
+        // Refetch groups to show updated state
+        await refetchGroups()
       } else {
         throw new Error('Failed to create team statistics')
       }
       
     } catch (error) {
-      console.error('Error adding team to group:', error)
-      alert('Failed to add team to group. Please try again.')
+      toast({
+        title: "Error",
+        description: "Failed to add team to group. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -391,14 +405,19 @@ export default function SeasonDetailsPage() {
         description: "Groups and team assignments have been saved to the database!",
       })
       
+      // Refetch data to ensure consistency
+      await refetchGroups()
+      await refetchStats()
+      
       // Close modal
       setIsCreateGroupModalOpen(false)
       
-      console.log('Randomization confirmed and saved:', savedGroups)
-      
     } catch (error) {
-      console.error('Error confirming randomization:', error)
-      alert('Failed to save groups. Please try again.')
+      toast({
+        title: "Error",
+        description: "Failed to save groups. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -427,7 +446,11 @@ export default function SeasonDetailsPage() {
 
   const scheduleMatches = async () => {
     if (!season || seasonGroups.length === 0) {
-      alert('Please create groups first before scheduling matches')
+      toast({
+        title: "Groups Required",
+        description: "Please create groups first before scheduling matches",
+        variant: "destructive"
+      })
       return
     }
 
@@ -438,7 +461,11 @@ export default function SeasonDetailsPage() {
       const totalWeekends = weekendDates.length
       
       if (totalWeekends < 2) {
-        alert('Season must be at least 2 weeks long to schedule matches')
+        toast({
+          title: "Season Too Short",
+          description: "Season must be at least 2 weeks long to schedule matches",
+          variant: "destructive"
+        })
         setIsScheduling(false)
         return
       }
@@ -538,13 +565,167 @@ export default function SeasonDetailsPage() {
         description: `${matches.length} matches have been scheduled for the first 2 weekends. Groups are randomly assigned to Saturday vs Sunday for fairness.`,
       })
       
-      console.log('Scheduled matches:', matches)
-      
     } catch (error) {
-      console.error('Error scheduling matches:', error)
-      alert('Failed to schedule matches. Please try again.')
+      toast({
+        title: "Scheduling Error",
+        description: "An error occurred while scheduling matches. Please try again.",
+        variant: "destructive"
+      })
     } finally {
       setIsScheduling(false)
+    }
+  }
+
+  const schedulePerformanceMatches = async () => {
+    if (!season || seasonGroups.length === 0) {
+      toast({
+        title: "Groups Required",
+        description: "Please create groups first before scheduling performance matches",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsSchedulingPerformance(true)
+    
+    try {
+      const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
+      const totalWeekends = weekendDates.length
+      
+      if (totalWeekends < 4) {
+        toast({
+          title: "Season Too Short",
+          description: "Season must be at least 4 weeks long to schedule performance matches",
+          variant: "destructive"
+        })
+        setIsSchedulingPerformance(false)
+        return
+      }
+
+      const performanceMatches: any[] = []
+      
+      // Get teams from each group with their statistics
+      const groupTeamsWithStats = seasonGroups.map(group => {
+        const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
+        return {
+          groupId: group.id,
+          groupName: group.name,
+          teams: groupTeamStats.map((stat: any) => ({
+            team_id: stat.team_id,
+            teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
+            points: parseInt(stat.points || '0'),
+            goalDiff: parseInt(stat.goal_diff || '0'),
+            goalsFor: parseInt(stat.goals_for || '0'),
+            played: parseInt(stat.played || '0')
+          }))
+        }
+      })
+
+      // Schedule performance matches for weekends 3-4 (if season is long enough)
+      const performanceWeekendStart = 2 // Start from weekend 3
+      const maxPerformanceWeekends = Math.min(2, Math.floor((totalWeekends - 4) / 2)) // Max 2 more weekends
+      
+      for (let weekend = 0; weekend < maxPerformanceWeekends; weekend++) {
+        const weekendNumber = performanceWeekendStart + weekend + 1
+        const saturdayIndex = (performanceWeekendStart + weekend) * 2
+        const sundayIndex = (performanceWeekendStart + weekend) * 2 + 1
+        
+        if (saturdayIndex < weekendDates.length && sundayIndex < weekendDates.length) {
+          const saturday = weekendDates[saturdayIndex]
+          const sunday = weekendDates[sundayIndex]
+          
+          // Randomize which group plays on Saturday vs Sunday for fairness
+          const saturdayGroupIndex = Math.random() < 0.5 ? 0 : 1
+          const sundayGroupIndex = saturdayGroupIndex === 0 ? 1 : 0
+          
+          // Schedule Saturday performance matches
+          const saturdayGroup = groupTeamsWithStats[saturdayGroupIndex]
+          if (saturdayGroup && saturdayGroup.teams.length >= 2) {
+            // Sort teams by performance (points, goal difference, goals for)
+            const sortedTeams = [...saturdayGroup.teams].sort((a, b) => {
+              if (a.points !== b.points) return b.points - a.points
+              if (a.goalDiff !== b.goalDiff) return b.goalDiff - a.goalDiff
+              return b.goalsFor - a.goalsFor
+            })
+            
+            const maxGamesPerDay = Math.min(4, Math.floor(sortedTeams.length / 2))
+            
+            for (let game = 0; game < maxGamesPerDay; game++) {
+              const team1Index = game * 2
+              const team2Index = game * 2 + 1
+              
+              if (team2Index < sortedTeams.length) {
+                performanceMatches.push({
+                  id: `perf-match-${Date.now()}-w${weekendNumber}-sat-${game}`,
+                  team1_id: sortedTeams[team1Index].team_id,
+                  team2_id: sortedTeams[team2Index].team_id,
+                  date: saturday,
+                  time: '', // Will be set manually
+                  group_id: saturdayGroup.groupId,
+                  venue: defaultVenue,
+                  status: 'scheduled',
+                  weekend: weekendNumber,
+                  day: 'Saturday',
+                  groupName: saturdayGroup.groupName,
+                  type: 'performance'
+                })
+              }
+            }
+          }
+          
+          // Schedule Sunday performance matches
+          const sundayGroup = groupTeamsWithStats[sundayGroupIndex]
+          if (sundayGroup && sundayGroup.teams.length >= 2) {
+            // Sort teams by performance (points, goal difference, goals for)
+            const sortedTeams = [...sundayGroup.teams].sort((a, b) => {
+              if (a.points !== b.points) return b.points - a.points
+              if (a.goalDiff !== b.goalDiff) return b.goalDiff - a.goalDiff
+              return b.goalsFor - a.goalsFor
+            })
+            
+            const maxGamesPerDay = Math.min(4, Math.floor(sortedTeams.length / 2))
+            
+            for (let game = 0; game < maxGamesPerDay; game++) {
+              const team1Index = game * 2
+              const team2Index = game * 2 + 1
+              
+              if (team2Index < sortedTeams.length) {
+                performanceMatches.push({
+                  id: `perf-match-${Date.now()}-w${weekendNumber}-sun-${game}`,
+                  team1_id: sortedTeams[team1Index].team_id,
+                  team2_id: sortedTeams[team2Index].team_id,
+                  date: sunday,
+                  time: '', // Will be set manually
+                  group_id: sundayGroup.groupId,
+                  venue: defaultVenue,
+                  status: 'scheduled',
+                  weekend: weekendNumber,
+                  day: 'Sunday',
+                  groupName: sundayGroup.groupName,
+                  type: 'performance'
+                })
+              }
+            }
+          }
+        }
+      }
+
+      // Add performance matches to existing scheduled matches
+      setScheduledMatches(prev => [...prev, ...performanceMatches])
+      
+      toast({
+        title: "Performance Matches Scheduled!",
+        description: `${performanceMatches.length} performance matches have been scheduled based on team statistics.`,
+      })
+      
+    } catch (error) {
+      toast({
+        title: "Performance Scheduling Error",
+        description: "An error occurred while scheduling performance matches. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSchedulingPerformance(false)
     }
   }
 
@@ -623,6 +804,9 @@ export default function SeasonDetailsPage() {
         
         // Clear local scheduled matches since they're now in database
         setScheduledMatches([])
+        
+        // Close the modal
+        setIsScheduleMatchesModalOpen(false)
       } else {
         toast({
           title: "Save Failed",
@@ -661,6 +845,7 @@ export default function SeasonDetailsPage() {
     weekend: number
     day: string
     groupName: string
+    type?: 'performance'
   }>>([])
   const [isScheduling, setIsScheduling] = useState(false)
   const [groups, setGroups] = useState<Array<{
@@ -678,6 +863,7 @@ export default function SeasonDetailsPage() {
   const [isRandomized, setIsRandomized] = useState(false)
   const [numberOfGroups, setNumberOfGroups] = useState(2)
   const [defaultVenue, setDefaultVenue] = useState("Prime Arena")
+  const [isSchedulingPerformance, setIsSchedulingPerformance] = useState(false)
 
   if (loading) {
     return (
@@ -1107,20 +1293,42 @@ export default function SeasonDetailsPage() {
                 <Plus className="h-6 w-6 mb-2" />
                 <span>Invite More Teams</span>
               </Button>
-              <Button 
-                variant="outline" 
-                className="h-20 flex-col"
-                onClick={() => setIsScheduleMatchesModalOpen(true)}
-                disabled={seasonGroups.length === 0}
-              >
-                <Calendar className="h-6 w-6 mb-2" />
-                <span>Schedule Matches</span>
-                {seasonGroups.length === 0 && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    Create groups first
-                  </Badge>
-                )}
-              </Button>
+              {/* Only show Schedule Matches button when no regular matches have been scheduled */}
+              {matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => setIsScheduleMatchesModalOpen(true)}
+                  disabled={seasonGroups.length === 0}
+                >
+                  <Calendar className="h-6 w-6 mb-2" />
+                  <span>Schedule Matches</span>
+                  {seasonGroups.length === 0 && (
+                    <Badge variant="secondary" className="mt-1 text-xs">
+                      Create groups first
+                    </Badge>
+                  )}
+                </Button>
+              )}
+              
+              {/* Show Schedule Performance Matches button when regular matches have been scheduled */}
+              {matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 && (
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => setIsScheduleMatchesModalOpen(true)}
+                  disabled={isSchedulingPerformance}
+                >
+                  <Target className="h-6 w-6 mb-2" />
+                  <span>Schedule Performance Matches</span>
+                  {isSchedulingPerformance && (
+                    <Badge variant="secondary" className="mt-1 text-xs">
+                      Scheduling...
+                    </Badge>
+                  )}
+                </Button>
+              )}
+              
               {seasonGroups.length > 0 ? (
                 <Button 
                   variant="outline" 
@@ -1732,63 +1940,95 @@ export default function SeasonDetailsPage() {
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Schedule Season Matches
+              {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 ? (
+                <Target className="h-5 w-5" />
+              ) : (
+                <Calendar className="h-5 w-5" />
+              )}
+              {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 
+                ? 'Schedule Performance Matches' 
+                : 'Schedule Season Matches'
+              }
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
-            {/* Location Setting */}
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <Label htmlFor="default-venue" className="text-sm font-medium text-blue-900">
-                    Default Venue for All Games
-                  </Label>
-                  <Input
-                    id="default-venue"
-                    value={defaultVenue}
-                    onChange={(e) => setDefaultVenue(e.target.value)}
-                    placeholder="Enter venue name (e.g., Prime Arena, Stadium A)"
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-blue-700 mt-1">
-                    This venue will be applied to all scheduled matches. You can change individual match venues later.
-                  </p>
+            {/* Show regular scheduling interface only when no matches are scheduled */}
+            {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
+              <>
+                {/* Location Setting */}
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <Label htmlFor="default-venue" className="text-sm font-medium text-blue-900">
+                        Default Venue for All Games
+                      </Label>
+                      <Input
+                        id="default-venue"
+                        value={defaultVenue}
+                        onChange={(e) => setDefaultVenue(e.target.value)}
+                        placeholder="Enter venue name (e.g., Prime Arena, Stadium A)"
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-blue-700 mt-1">
+                        This venue will be applied to all scheduled matches. You can change individual match venues later.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                {scheduledMatches.length > 0 && (
-                  <Button 
-                    onClick={updateAllVenues}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    🏟️ Apply to All
-                  </Button>
-                )}
-              </div>
-            </div>
 
-            {/* Scheduling Controls */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <h3 className="font-semibold text-gray-900">Randomized Group Weekend Scheduling</h3>
-                <p className="text-sm text-gray-600">
-                  Weekend 1 & 2: Groups are randomly assigned to Saturday vs Sunday for fairness. Each group gets equal opportunities.
-                </p>
+                {/* Scheduling Controls */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Randomized Group Weekend Scheduling</h3>
+                    <p className="text-sm text-gray-600">
+                      Weekend 1 & 2: Groups are randomly assigned to Saturday vs Sunday for fairness. Each group gets equal opportunities.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={scheduleMatches}
+                    disabled={isScheduling || seasonGroups.length === 0}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {isScheduling ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <Calendar className="h-4 w-4 mr-2" />
+                    )}
+                    {isScheduling ? 'Scheduling...' : 'Generate Matches'}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Show performance matches interface when regular matches are already scheduled */}
+            {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 && (
+              <div className="p-6 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="text-center space-y-4">
+                  <Target className="h-16 w-16 mx-auto text-purple-600" />
+                  <h3 className="text-xl font-semibold text-purple-900">Performance Matches Ready to Schedule</h3>
+                  <p className="text-purple-700 max-w-2xl mx-auto">
+                    Regular season matches have already been scheduled. You can now schedule performance matches 
+                    based on team statistics for weekends 3-4 to determine final standings.
+                  </p>
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={schedulePerformanceMatches}
+                      disabled={isSchedulingPerformance}
+                      size="lg"
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      {isSchedulingPerformance ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      ) : (
+                        <Target className="h-5 w-5 mr-2" />
+                      )}
+                      {isSchedulingPerformance ? 'Scheduling...' : 'Schedule Performance Matches'}
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <Button 
-                onClick={scheduleMatches}
-                disabled={isScheduling || seasonGroups.length === 0}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {isScheduling ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Calendar className="h-4 w-4 mr-2" />
-                )}
-                {isScheduling ? 'Scheduling...' : 'Generate Matches'}
-              </Button>
-            </div>
+            )}
 
             {/* Scheduled Matches Display */}
             {scheduledMatches.length > 0 && (
@@ -1846,6 +2086,9 @@ export default function SeasonDetailsPage() {
                                   <div className="text-sm text-gray-500 mt-1">
                                     Group: {seasonGroups.find(g => g.id === match.group_id)?.name || 'N/A'} | 
                                     Weekend {match.weekend} - {match.day}
+                                    {match.type === 'performance' && (
+                                      <Badge variant="secondary" className="ml-2">Performance</Badge>
+                                    )}
                                   </div>
                                 </div>
                                 
@@ -1889,7 +2132,7 @@ export default function SeasonDetailsPage() {
                     <CardTitle>Match Summary</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-blue-600">{scheduledMatches.length}</div>
                         <div className="text-sm text-gray-500">Total Matches</div>
@@ -1908,6 +2151,12 @@ export default function SeasonDetailsPage() {
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-orange-600">
+                          {scheduledMatches.filter(m => m.type === 'performance').length}
+                        </div>
+                        <div className="text-sm text-gray-500">Performance</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-indigo-600">
                           {new Set(scheduledMatches.map(m => m.date)).size}
                         </div>
                         <div className="text-sm text-gray-500">Weekend Days</div>
@@ -1918,8 +2167,8 @@ export default function SeasonDetailsPage() {
               </div>
             )}
 
-            {/* No matches scheduled */}
-            {scheduledMatches.length === 0 && !isScheduling && (
+            {/* No matches scheduled - only show when no regular matches exist */}
+            {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && !isScheduling && (
               <div className="text-center text-gray-500 py-8">
                 <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>No matches scheduled yet</p>
@@ -1943,9 +2192,15 @@ export default function SeasonDetailsPage() {
             {scheduledMatches.length > 0 && (
               <Button 
                 onClick={saveMatchesToDatabase}
+                disabled={addMatchLoading}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                💾 Save to Database
+                {addMatchLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                  <Calendar className="h-4 w-4 mr-2" />
+                )}
+                {addMatchLoading ? 'Saving...' : 'Schedule Match'}
               </Button>
             )}
           </div>
