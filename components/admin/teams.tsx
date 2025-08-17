@@ -338,17 +338,17 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Team Management</h2>
-          <p className="text-gray-600">Manage all registered teams and their information</p>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Team Management</h2>
+          <p className="text-white/80">Manage all registered teams and their information</p>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant={isUsingFallbackData ? "destructive" : "outline"} className="text-xs">
               {dataSource}
             </Badge>
             {!isUsingFallbackData && (
-              <span className="text-xs text-green-600">✓ Live Database</span>
+              <span className="text-xs text-green-300">✓ Live Database</span>
             )}
             {isUsingFallbackData && (
-              <span className="text-xs text-yellow-600">⚠️ Sample Data</span>
+              <span className="text-xs text-yellow-300">⚠️ Sample Data</span>
             )}
           </div>
         </div>
@@ -390,7 +390,7 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
       </div>
 
       {/* Filters */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -421,9 +421,9 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
       </Card>
 
       {/* Teams Table */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Users className="h-5 w-5" />
             Teams ({filteredTeams.length})
           </CardTitle>
@@ -433,33 +433,33 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Team</TableHead>
-                  <TableHead>Manager</TableHead>
-                  <TableHead>Group</TableHead>
-                  <TableHead>Players</TableHead>
-                  <TableHead>Matches</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-white/90">Team</TableHead>
+                  <TableHead className="text-white/90">Manager</TableHead>
+                  <TableHead className="text-white/90">Group</TableHead>
+                  <TableHead className="text-white/90">Players</TableHead>
+                  <TableHead className="text-white/90">Matches</TableHead>
+                  <TableHead className="text-white/90">Created</TableHead>
+                  <TableHead className="text-white/90">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTeams.map((team: Team) => (
-                  <TableRow key={team.name} className="hover:bg-gray-50">
+                  <TableRow key={team.name} className="hover:bg-white/10">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                           <span className="text-sm font-bold text-blue-600">{team.shortname || team.name.substring(0, 2)}</span>
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{team.name}</div>
-                          <div className="text-sm text-gray-500">Short: {team.shortname}</div>
+                          <div className="font-medium text-white">{team.name}</div>
+                          <div className="text-sm text-white/70">Short: {team.shortname}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium text-gray-900">{team.manager.name}</div>
-                        <div className="text-sm text-gray-500">{team.manager.email}</div>
+                        <div className="font-medium text-white">{team.manager.name}</div>
+                        <div className="text-sm text-white/70">{team.manager.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -477,7 +477,7 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                         {(team.matche1?.length || 0) + (team.matche2?.length || 0)} matches
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-gray-500">
+                    <TableCell className="text-sm text-white/70">
                       {formatDate(team.manager?.create_at || new Date().toISOString())}
                     </TableCell>
                     <TableCell>

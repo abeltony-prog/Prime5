@@ -88,8 +88,8 @@ export function Analytics({
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-          <p className="text-gray-600">Comprehensive insights into league performance and metrics</p>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Analytics Dashboard</h2>
+          <p className="text-white/80">Comprehensive insights into league performance and metrics</p>
         </div>
         <div className="flex gap-3">
           <Select value={timeRange} onValueChange={setTimeRange}>
@@ -122,15 +122,15 @@ export function Analytics({
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">$278,000</p>
+                <p className="text-sm font-medium text-white/80">Total Revenue</p>
+                <p className="text-2xl font-bold text-white">$278,000</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm font-medium text-green-600">+15.3%</span>
+                  <span className="text-sm font-medium text-green-300">+15.3%</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
@@ -140,15 +140,15 @@ export function Analytics({
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Average Attendance</p>
-                <p className="text-2xl font-bold text-gray-900">1,883</p>
+                <p className="text-sm font-medium text-white/80">Average Attendance</p>
+                <p className="text-2xl font-bold text-white">1,883</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm font-medium text-green-600">+8.7%</span>
+                  <span className="text-sm font-medium text-green-300">+8.7%</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -158,15 +158,15 @@ export function Analytics({
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Goals per Match</p>
-                <p className="text-2xl font-bold text-gray-900">3.25</p>
+                <p className="text-sm font-medium text-white/80">Goals per Match</p>
+                <p className="text-2xl font-bold text-white">3.25</p>
                 <div className="flex items-center mt-2">
                   <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                  <span className="text-sm font-medium text-red-600">-2.1%</span>
+                  <span className="text-sm font-medium text-red-300">-2.1%</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
@@ -176,15 +176,15 @@ export function Analytics({
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Match Completion</p>
-                <p className="text-2xl font-bold text-gray-900">94.2%</p>
+                <p className="text-sm font-medium text-white/80">Match Completion</p>
+                <p className="text-2xl font-bold text-white">94.2%</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm font-medium text-green-600">+1.8%</span>
+                  <span className="text-sm font-medium text-green-300">+1.8%</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
@@ -198,9 +198,9 @@ export function Analytics({
       {/* Charts Row 1 */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Revenue & Attendance Trend */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <TrendingUp className="h-5 w-5" />
               Revenue & Attendance Trend
             </CardTitle>
@@ -237,9 +237,9 @@ export function Analytics({
         </Card>
 
         {/* Financial Breakdown */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Trophy className="h-5 w-5" />
               Revenue Breakdown
             </CardTitle>
@@ -273,9 +273,9 @@ export function Analytics({
       {/* Charts Row 2 */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Team Performance Comparison */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Users className="h-5 w-5" />
               Team Performance Comparison
             </CardTitle>
@@ -297,9 +297,9 @@ export function Analytics({
         </Card>
 
         {/* Top Players Performance */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Target className="h-5 w-5" />
               Top Players Performance
             </CardTitle>
@@ -307,25 +307,25 @@ export function Analytics({
           <CardContent>
             <div className="space-y-4">
               {playerStats.map((player, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{player.name}</p>
-                      <p className="text-sm text-gray-500">{player.team}</p>
+                      <p className="font-medium text-white">{player.name}</p>
+                      <p className="text-sm text-white/70">{player.team}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-4">
                       <div className="text-center">
-                        <p className="text-sm text-gray-500">Goals</p>
-                        <p className="font-bold text-blue-600">{player.goals}</p>
+                        <p className="text-sm text-white/70">Goals</p>
+                        <p className="font-bold text-blue-300">{player.goals}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm text-gray-500">Rating</p>
-                        <p className="font-bold text-green-600">{player.rating}</p>
+                        <p className="text-sm text-white/70">Rating</p>
+                        <p className="font-bold text-green-300">{player.rating}</p>
                       </div>
                     </div>
                   </div>

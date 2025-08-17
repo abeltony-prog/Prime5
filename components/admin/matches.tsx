@@ -88,8 +88,8 @@ export function Matches({ matches }: MatchesProps) {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Match Management</h2>
-          <p className="text-gray-600">Schedule and manage all league matches</p>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Match Management</h2>
+          <p className="text-white/80">Schedule and manage all league matches</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline">
@@ -110,7 +110,7 @@ export function Matches({ matches }: MatchesProps) {
       </div>
 
       {/* Filters */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
@@ -153,9 +153,9 @@ export function Matches({ matches }: MatchesProps) {
       </Card>
 
       {/* Matches Table */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Calendar className="h-5 w-5" />
             Matches ({filteredMatches.length})
           </CardTitle>
@@ -165,22 +165,22 @@ export function Matches({ matches }: MatchesProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Teams</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Group</TableHead>
-                  <TableHead>Venue</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-white/90">Date & Time</TableHead>
+                  <TableHead className="text-white/90">Teams</TableHead>
+                  <TableHead className="text-white/90">Score</TableHead>
+                  <TableHead className="text-white/90">Group</TableHead>
+                  <TableHead className="text-white/90">Venue</TableHead>
+                  <TableHead className="text-white/90">Status</TableHead>
+                  <TableHead className="text-white/90">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredMatches.map((match) => (
-                  <TableRow key={match.id} className="hover:bg-gray-50">
+                  <TableRow key={match.id} className="hover:bg-white/10">
                     <TableCell>
                       <div>
-                        <div className="font-medium text-gray-900">{match.date}</div>
-                        <div className="text-sm text-gray-500 flex items-center gap-1">
+                        <div className="font-medium text-white">{match.date}</div>
+                        <div className="text-sm text-white/70 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {match.time}
                         </div>
@@ -188,18 +188,18 @@ export function Matches({ matches }: MatchesProps) {
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        <div>{match.team1}</div>
-                        <div className="text-gray-500">vs</div>
-                        <div>{match.team2}</div>
+                        <div className="text-white">{match.team1}</div>
+                        <div className="text-white/70">vs</div>
+                        <div className="text-white">{match.team2}</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       {match.team1Score !== undefined && match.team2Score !== undefined ? (
-                        <div className="text-center font-bold text-lg">
+                        <div className="text-center font-bold text-lg text-white">
                           {match.team1Score} - {match.team2Score}
                         </div>
                       ) : (
-                        <span className="text-gray-400">TBD</span>
+                        <span className="text-white/60">TBD</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -208,7 +208,7 @@ export function Matches({ matches }: MatchesProps) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-1 text-sm text-white/80">
                         <MapPin className="h-3 w-3" />
                         {match.venue}
                       </div>

@@ -66,32 +66,32 @@ export default function HomePage() {
         backgroundAttachment: 'fixed'
       }}>
         <div className="relative z-10 container mx-auto px-6">
-          <div className="max-w-2xl">
-            <Badge className="bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold mb-6">
-              Season 2024 • Now Live
-            </Badge>
+            <div className="max-w-2xl">
+              <Badge className="bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold mb-6">
+                Season 2024 • Now Live
+              </Badge>
 
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-2xl">Prime5 League</h1>
 
             <p className="text-xl md:text-2xl text-white mb-8 leading-relaxed drop-shadow-xl">
-              The premier futsal competition featuring the region's top teams competing for ultimate glory.
-            </p>
+                The premier futsal competition featuring the region's top teams competing for ultimate glory.
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
               <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                <Link href="/register">Register Your Team</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
+                  <Link href="/register">Register Your Team</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
                 className="border-white text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                <Link href="/fixtures" className="flex items-center gap-2">
-                  <Play className="w-5 h-5" />
-                  Watch Highlights
-                </Link>
-              </Button>
+                >
+                  <Link href="/fixtures" className="flex items-center gap-2">
+                    <Play className="w-5 h-5" />
+                    Watch Highlights
+                  </Link>
+                </Button>
             </div>
           </div>
         </div>
@@ -319,11 +319,11 @@ export default function HomePage() {
           <div className="bg-green-600/20 backdrop-blur-xl rounded-2xl p-12 border border-green-500/20 shadow-2xl">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Ready to Join Prime5 League?</h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-md">
-              Register your team today and compete against the best in the region.
-            </p>
+            Register your team today and compete against the best in the region.
+          </p>
             <Button asChild size="lg" className="bg-yellow-500/90 backdrop-blur-md hover:bg-yellow-600/90 text-black font-semibold px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-yellow-400/30">
-              <Link href="/register">Register Your Team</Link>
-            </Button>
+            <Link href="/register">Register Your Team</Link>
+          </Button>
           </div>
         </div>
       </section>

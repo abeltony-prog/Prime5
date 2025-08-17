@@ -106,19 +106,19 @@ export function Overview({
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiData.map((kpi, index) => (
-          <Card key={index} className="border-0 shadow-lg">
+          <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
+                  <p className="text-sm font-medium text-white/80">{kpi.title}</p>
+                  <p className="text-2xl font-bold text-white mt-1">{kpi.value}</p>
                   <div className="flex items-center mt-2">
                     {kpi.trend === "up" ? (
                       <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
                     ) : (
                       <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
                     )}
-                    <span className={`text-sm font-medium ${kpi.trend === "up" ? "text-green-600" : "text-red-600"}`}>
+                    <span className={`text-sm font-medium ${kpi.trend === "up" ? "text-green-300" : "text-red-300"}`}>
                       {kpi.change}
                     </span>
                   </div>
@@ -135,9 +135,9 @@ export function Overview({
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Matches & Goals Chart */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Trophy className="h-5 w-5" />
               Matches & Goals Trend
             </CardTitle>
@@ -159,9 +159,9 @@ export function Overview({
         </Card>
 
         {/* Team Performance Chart */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Users className="h-5 w-5" />
               Team Performance
             </CardTitle>
@@ -185,9 +185,9 @@ export function Overview({
       {/* Registration Status & Recent Activity */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Registration Status */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Target className="h-5 w-5" />
               Registration Status
             </CardTitle>
@@ -218,9 +218,9 @@ export function Overview({
         </Card>
 
         {/* Recent Activity */}
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Clock className="h-5 w-5" />
               Recent Activity
             </CardTitle>
@@ -228,11 +228,11 @@ export function Overview({
           <CardContent>
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50">
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/10">
                   <div className="mt-1">{getStatusIcon(activity.status)}</div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    <p className="text-sm font-medium text-white">{activity.description}</p>
+                    <p className="text-xs text-white/70 mt-1">{activity.time}</p>
                   </div>
                   <Badge variant="outline" className={getStatusColor(activity.status)}>
                     {activity.type}
@@ -240,7 +240,7 @@ export function Overview({
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-4">
+            <Button variant="outline" className="w-full mt-4 bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
               View All Activity
             </Button>
           </CardContent>

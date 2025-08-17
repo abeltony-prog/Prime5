@@ -104,8 +104,8 @@ export function Registrations({ registrations }: RegistrationsProps) {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Registration Management</h2>
-          <p className="text-gray-600">Review and manage team registration applications</p>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Registration Management</h2>
+          <p className="text-white/80">Review and manage team registration applications</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline">
@@ -121,12 +121,12 @@ export function Registrations({ registrations }: RegistrationsProps) {
 
       {/* Status Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Review</p>
-                <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
+                <p className="text-sm font-medium text-white/80">Pending Review</p>
+                <p className="text-2xl font-bold text-yellow-300">{pendingCount}</p>
               </div>
               <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
                 <Clock className="h-6 w-6 text-yellow-600" />
@@ -135,12 +135,12 @@ export function Registrations({ registrations }: RegistrationsProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-2xl font-bold text-green-600">{approvedCount}</p>
+                <p className="text-sm font-medium text-white/80">Approved</p>
+                <p className="text-2xl font-bold text-green-300">{approvedCount}</p>
               </div>
               <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-green-600" />
@@ -149,12 +149,12 @@ export function Registrations({ registrations }: RegistrationsProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Rejected</p>
-                <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
+                <p className="text-sm font-medium text-white/80">Rejected</p>
+                <p className="text-2xl font-bold text-red-300">{rejectedCount}</p>
               </div>
               <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
                 <XCircle className="h-6 w-6 text-red-600" />
@@ -165,7 +165,7 @@ export function Registrations({ registrations }: RegistrationsProps) {
       </div>
 
       {/* Filters */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
@@ -207,9 +207,9 @@ export function Registrations({ registrations }: RegistrationsProps) {
       </Card>
 
       {/* Registrations Table */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Users className="h-5 w-5" />
             Registration Applications ({filteredRegistrations.length})
           </CardTitle>
@@ -219,31 +219,31 @@ export function Registrations({ registrations }: RegistrationsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Team & Manager</TableHead>
-                  <TableHead>Contact Info</TableHead>
-                  <TableHead>Group</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Submitted</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-white/90">Team & Manager</TableHead>
+                  <TableHead className="text-white/90">Contact Info</TableHead>
+                  <TableHead className="text-white/90">Group</TableHead>
+                  <TableHead className="text-white/90">Location</TableHead>
+                  <TableHead className="text-white/90">Submitted</TableHead>
+                  <TableHead className="text-white/90">Status</TableHead>
+                  <TableHead className="text-white/90">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRegistrations.map((registration) => (
-                  <TableRow key={registration.id} className="hover:bg-gray-50">
+                  <TableRow key={registration.id} className="hover:bg-white/10">
                     <TableCell>
                       <div>
-                        <div className="font-medium text-gray-900">{registration.teamName}</div>
-                        <div className="text-sm text-gray-500">{registration.managerName}</div>
+                        <div className="font-medium text-white">{registration.teamName}</div>
+                        <div className="text-sm text-white/70">{registration.managerName}</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <div className="flex items-center gap-1 text-sm text-white/80">
                           <Mail className="h-3 w-3" />
                           {registration.email}
                         </div>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <div className="flex items-center gap-1 text-sm text-white/80">
                           <Phone className="h-3 w-3" />
                           {registration.phone}
                         </div>
@@ -254,9 +254,9 @@ export function Registrations({ registrations }: RegistrationsProps) {
                         Group {registration.group}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600">{registration.location}</TableCell>
+                    <TableCell className="text-sm text-white/80">{registration.location}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1 text-sm text-white/70">
                         <Calendar className="h-3 w-3" />
                         {registration.submittedDate}
                       </div>

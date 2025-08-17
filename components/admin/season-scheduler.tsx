@@ -332,11 +332,11 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Season Management</h2>
-          <p className="text-gray-600">Create and manage league seasons</p>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Season Management</h2>
+          <p className="text-white/80">Create and manage league seasons</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button variant="outline" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -388,7 +388,7 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                 </div>
                 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label>Description</Label>
                   <Textarea
                     id="description"
                     placeholder="Season description..."
@@ -461,7 +461,7 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
       </div>
 
       {/* Filters */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -493,9 +493,9 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
       </Card>
 
       {/* Seasons Table */}
-      <Card className="border-0 shadow-lg">
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Trophy className="h-5 w-5" />
             Seasons ({filteredSeasons.length})
           </CardTitle>
@@ -503,15 +503,15 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300"></div>
             </div>
           ) : error ? (
-            <div className="text-center text-red-600 p-8">
+            <div className="text-center text-red-300 p-8">
               <AlertCircle className="h-12 w-12 mx-auto mb-4" />
               <p>Error loading seasons: {error.message}</p>
             </div>
           ) : filteredSeasons.length === 0 ? (
-            <div className="text-center text-gray-500 p-8">
+            <div className="text-center text-white/60 p-8">
               <Trophy className="h-12 w-12 mx-auto mb-4" />
               <p>No seasons found</p>
               <p className="text-sm">Create your first season to get started</p>
@@ -521,12 +521,12 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Season</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Teams</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-white/90">Season</TableHead>
+                    <TableHead className="text-white/90">Duration</TableHead>
+                    <TableHead className="text-white/90">Teams</TableHead>
+                    <TableHead className="text-white/90">Status</TableHead>
+                    <TableHead className="text-white/90">Created</TableHead>
+                    <TableHead className="text-white/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -535,11 +535,11 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                     const teamNames = getTeamNames(season.teams)
                     
                     return (
-                      <TableRow key={season.id} className="hover:bg-gray-50">
+                      <TableRow key={season.id} className="hover:bg-white/10">
                         <TableCell>
                           <div>
-                            <div className="font-medium text-gray-900">{season.name}</div>
-                            <div className="text-sm text-gray-500">ID: {season.id}</div>
+                            <div className="font-medium text-white">{season.name}</div>
+                            <div className="text-sm text-white/70">ID: {season.id}</div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -560,7 +560,7 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                               {Object.keys(season.teams || {}).length} teams
                             </Badge>
                             {teamNames.length > 0 && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-white/70">
                                 {teamNames.slice(0, 2).join(', ')}
                                 {teamNames.length > 2 && ` +${teamNames.length - 2} more`}
                               </div>
@@ -572,7 +572,7 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                             {status.text}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-500">
+                        <TableCell className="text-sm text-white/70">
                           {formatDate(new Date().toISOString())}
                         </TableCell>
                         <TableCell>

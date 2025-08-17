@@ -496,15 +496,15 @@ export default function StatisticsPage() {
                 >
                   Group B
                 </Button>
-              </div>
+                  </div>
             </div>
 
             {/* Standings Tables */}
             {selectedGroup === "all" && (
-              <div className="grid lg:grid-cols-2 gap-8">
-                <StandingsTable standings={groupAStandings} groupName="A" />
-                <StandingsTable standings={groupBStandings} groupName="B" />
-              </div>
+            <div className="grid lg:grid-cols-2 gap-8">
+              <StandingsTable standings={groupAStandings} groupName="A" />
+              <StandingsTable standings={groupBStandings} groupName="B" />
+            </div>
             )}
             {selectedGroup === "A" && <StandingsTable standings={groupAStandings} groupName="A" />}
             {selectedGroup === "B" && <StandingsTable standings={groupBStandings} groupName="B" />}
@@ -520,11 +520,11 @@ export default function StatisticsPage() {
               <p className="text-lg text-white/90 drop-shadow-xl">Tournament progression and results</p>
             </div>
 
-            {/* Quarterfinals */}
+              {/* Quarterfinals */}
             <div className="space-y-6">
               <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Quarterfinals</h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {knockoutMatches.quarterfinals.map((match, index) => (
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {knockoutMatches.quarterfinals.map((match, index) => (
                   <MatchCard
                     key={index}
                     team1={match.team1}
@@ -532,15 +532,15 @@ export default function StatisticsPage() {
                     winner={match.winner}
                     stage="Quarterfinal"
                   />
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Semifinals */}
+              {/* Semifinals */}
             <div className="space-y-6">
               <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Semifinals</h3>
-              <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                {knockoutMatches.semifinals.map((match, index) => (
+                <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                  {knockoutMatches.semifinals.map((match, index) => (
                   <MatchCard
                     key={index}
                     team1={match.team1}
@@ -548,18 +548,18 @@ export default function StatisticsPage() {
                     winner={match.winner}
                     stage="Semifinal"
                   />
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Final */}
+              {/* Final */}
             <div className="space-y-6">
               <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Final</h3>
               <div className="max-w-md mx-auto">
-                <MatchCard
-                  team1={knockoutMatches.final.team1}
-                  team2={knockoutMatches.final.team2}
-                  winner={knockoutMatches.final.winner}
+                  <MatchCard
+                    team1={knockoutMatches.final.team1}
+                    team2={knockoutMatches.final.team2}
+                    winner={knockoutMatches.final.winner}
                   stage="Final"
                 />
               </div>
@@ -573,16 +573,16 @@ export default function StatisticsPage() {
                   {groupATeams.slice(0, 4).map((team, index) => (
                     <TeamCard key={index} team={team} group="A" />
                   ))}
-                </div>
-              </div>
+                    </div>
+                    </div>
               <div className="space-y-4">
                 <h3 className="text-xl font-bold text-white text-center drop-shadow-lg">Group B Winners</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {groupBTeams.slice(0, 4).map((team, index) => (
                     <TeamCard key={index} team={team} group="B" />
                   ))}
-                </div>
-              </div>
+                    </div>
+                  </div>
             </div>
           </div>
         )}
@@ -684,10 +684,10 @@ export default function StatisticsPage() {
                         <Badge className="mt-2 bg-blue-600/90 backdrop-blur-md text-white">Group {match.group}</Badge>
                       </div>
                       <div className="space-y-4">
-                        <div className="text-center">
+                      <div className="text-center">
                           <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
                           <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score1}</p>
-                        </div>
+                          </div>
                         <div className="text-center text-sm text-white/80 font-medium">VS</div>
                         <div className="text-center">
                           <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>

@@ -154,9 +154,9 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
         
         <div className="space-y-6">
           {/* Team Overview */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
                 <Trophy className="h-5 w-5" />
                 Team Overview
               </CardTitle>
@@ -184,17 +184,17 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="h-4 w-4 text-green-600" />
-                    <span className="font-medium">Manager</span>
+                    <User className="h-4 w-4 text-green-300" />
+                    <span className="font-medium text-white">Manager</span>
                   </div>
-                  <div className="text-lg font-bold text-green-600">{team.manager?.name || 'N/A'}</div>
-                  <div className="text-sm text-gray-600 flex items-center gap-1">
+                  <div className="text-lg font-bold text-green-300">{team.manager?.name || 'N/A'}</div>
+                  <div className="text-sm text-white/70 flex items-center gap-1">
                     <Mail className="h-3 w-3" />
                     {team.manager?.email || 'N/A'}
                   </div>
-                  <div className="text-sm text-gray-500 flex items-center gap-1">
+                  <div className="text-sm text-white/60 flex items-center gap-1">
                     <Phone className="h-3 w-3" />
                     {team.manager?.phone || 'N/A'}
                   </div>
@@ -204,14 +204,14 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                     </Badge>
                   </div>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium">Team Info</span>
+                    <Shield className="h-4 w-4 text-blue-300" />
+                    <span className="font-medium text-white">Team Info</span>
                   </div>
-                  <div className="text-lg font-bold text-blue-600">{team.name || 'N/A'}</div>
-                  <div className="text-sm text-gray-600">Short: {team.shortname || 'N/A'}</div>
-                  <div className="text-sm text-gray-500">Manager: {team.team_manager || 'N/A'}</div>
+                  <div className="text-lg font-bold text-blue-300">{team.name || 'N/A'}</div>
+                  <div className="text-sm text-white/70">Short: {team.shortname || 'N/A'}</div>
+                  <div className="text-sm text-white/60">Manager: {team.team_manager || 'N/A'}</div>
                   <div className="mt-2">
                     <Badge variant="outline" className="bg-blue-50 text-blue-700">
                       Active Team
@@ -223,9 +223,9 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
           </Card>
 
           {/* Players Section */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
                 <Users className="h-5 w-5" />
                 Players ({team.players?.length || 0})
               </CardTitle>
@@ -236,30 +236,30 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Player</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Gender</TableHead>
-                        <TableHead>Date of Birth</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="text-white/90">Player</TableHead>
+                        <TableHead className="text-white/90">Contact</TableHead>
+                        <TableHead className="text-white/90">Gender</TableHead>
+                        <TableHead className="text-white/90">Date of Birth</TableHead>
+                        <TableHead className="text-white/90">Joined</TableHead>
+                        <TableHead className="text-white/90">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {team.players.map((player: Player) => (
-                        <TableRow key={player.id} className="hover:bg-gray-50">
+                        <TableRow key={player.id} className="hover:bg-white/10">
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <span>{getGenderIcon(player.gender || 'unknown')}</span>
-                              <span className="font-medium">{player.name || 'N/A'}</span>
+                              <span className="font-medium text-white">{player.name || 'N/A'}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1">
-                              <div className="text-sm text-gray-900 flex items-center gap-1">
+                              <div className="text-sm text-white flex items-center gap-1">
                                 <Mail className="h-3 w-3" />
                                 {player.email || 'N/A'}
                               </div>
-                              <div className="text-xs text-gray-500 flex items-center gap-1">
+                              <div className="text-xs text-white/70 flex items-center gap-1">
                                 <Phone className="h-3 w-3" />
                                 {player.phone || 'N/A'}
                               </div>
@@ -270,10 +270,10 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                               {player.gender || 'N/A'}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-sm text-gray-600">
+                          <TableCell className="text-sm text-white/80">
                             {formatDate(player.dob || new Date().toISOString())}
                           </TableCell>
-                          <TableCell className="text-sm text-gray-500">
+                          <TableCell className="text-sm text-white/70">
                             {formatDate(player.create_at || new Date().toISOString())}
                           </TableCell>
                           <TableCell>
@@ -289,18 +289,18 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2">No players found for this team</p>
-                  <p className="text-sm text-gray-500">Players will appear here once they're added to the team</p>
+                  <Users className="h-12 w-12 text-white/50 mx-auto mb-4" />
+                  <p className="text-white mb-2">No players found for this team</p>
+                  <p className="text-sm text-white/70">Players will appear here once they're added to the team</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Matches Section */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
                 <Calendar className="h-5 w-5" />
                 Matches ({totalMatches})
               </CardTitle>
@@ -311,21 +311,21 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                   {allMatches.map((match: Match) => {
                     const matchStatus = getMatchStatus(match)
                     return (
-                      <div key={match.id} className="p-4 bg-gray-50 rounded-lg border">
+                      <div key={match.id} className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <div className="font-medium text-gray-900">Match #{match.id}</div>
+                              <div className="font-medium text-white">Match #{match.id}</div>
                               <Badge className={matchStatus.color}>
                                 {matchStatus.text}
                               </Badge>
                             </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-1">
+                            <div className="text-sm text-white/80 flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
                               {match.location || 'N/A'}
                             </div>
                             {match.team1 && match.team2 && (
-                              <div className="text-sm text-gray-700 mt-1">
+                              <div className="text-sm text-white/90 mt-1">
                                 <span className="font-medium">{match.team1}</span>
                                 <span className="mx-2">vs</span>
                                 <span className="font-medium">{match.team2}</span>
@@ -333,10 +333,10 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                             )}
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-white">
                               {formatDate(match.date || new Date().toISOString())}
                             </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                            <div className="text-xs text-white/70 flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               Created: {formatDate(match.created_at || new Date().toISOString())}
                             </div>
@@ -348,18 +348,18 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2">No matches found for this team</p>
-                  <p className="text-sm text-gray-500">Matches will appear here once they're scheduled</p>
+                  <Calendar className="h-12 w-12 text-white/50 mx-auto mb-4" />
+                  <p className="text-white mb-2">No matches found for this team</p>
+                  <p className="text-sm text-white/70">Matches will appear here once they're scheduled</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Team Statistics */}
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
                 <Target className="h-5 w-5" />
                 Team Statistics
               </CardTitle>

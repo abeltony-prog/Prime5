@@ -58,15 +58,15 @@ export default function SeasonSchedulerPage() {
       <div className="container mx-auto px-6 py-8">
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Trophy className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Seasons</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm text-white/80">Total Seasons</p>
+                  <p className="text-2xl font-bold text-white">
                     {loading ? "..." : totalSeasons}
                   </p>
                 </div>
@@ -74,15 +74,15 @@ export default function SeasonSchedulerPage() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Active Seasons</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm text-white/80">Active Seasons</p>
+                  <p className="text-2xl font-bold text-white">
                     {loading ? "..." : activeSeasons}
                   </p>
                 </div>
@@ -90,15 +90,15 @@ export default function SeasonSchedulerPage() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                   <Users className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Teams Participating</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm text-white/80">Teams Participating</p>
+                  <p className="text-2xl font-bold text-white">
                     {loading ? "..." : totalTeams}
                   </p>
                 </div>
@@ -106,15 +106,15 @@ export default function SeasonSchedulerPage() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                   <Target className="h-5 w-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Upcoming Seasons</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm text-white/80">Upcoming Seasons</p>
+                  <p className="text-2xl font-bold text-white">
                     {loading ? "..." : upcomingSeasons}
                   </p>
                 </div>
@@ -140,10 +140,10 @@ export default function SeasonSchedulerPage() {
 
         {/* Loading State */}
         {loading && (
-          <Card className="mb-6">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 mb-6">
             <CardContent className="p-6">
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+              <div className="flex items-center justify-center text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300 mr-3"></div>
                 <span>Loading seasons...</span>
               </div>
             </CardContent>
@@ -156,23 +156,24 @@ export default function SeasonSchedulerPage() {
         {/* Season Matches Section */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">All Season Matches</h2>
+            <h2 className="text-xl font-semibold text-white drop-shadow-lg">All Season Matches</h2>
             <Button 
               onClick={() => window.location.reload()}
               variant="outline"
               size="sm"
+              className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
           </div>
 
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="text-center py-8">
-                <Calendar className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">View individual season details to see scheduled matches</p>
-                <p className="text-sm text-gray-400 mt-1">
+                <Calendar className="h-8 w-8 text-white/50 mx-auto mb-2" />
+                <p className="text-white/80">View individual season details to see scheduled matches</p>
+                <p className="text-sm text-white/60 mt-1">
                   Click on any season above to view its matches, groups, and scheduling options
                 </p>
               </div>
