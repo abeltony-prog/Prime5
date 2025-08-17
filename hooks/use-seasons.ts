@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { GET_SEASONS, GET_SEASON, GET_SEASON_GROUPS, GET_SEASON_TEAM_STATISTICS } from '@/lib/graphql/queries'
-import { ADD_SEASON, UPDATE_SEASON, DELETE_SEASON, CREATE_GROUPS_AND_TEAM_STATISTICS, CREATE_GROUP, CREATE_TEAM_STATISTICS } from '@/lib/graphql/mutations'
+import { GET_SEASONS, GET_SEASON, GET_SEASON_GROUPS, GET_SEASON_TEAM_STATISTICS, GET_MATCH_SCHEDULES, GET_TEAMS_BY_IDS } from '@/lib/graphql/queries'
+import { ADD_SEASON, UPDATE_SEASON, DELETE_SEASON, CREATE_GROUPS_AND_TEAM_STATISTICS, CREATE_GROUP, CREATE_TEAM_STATISTICS, ADD_MATCH_SCHEDULER } from '@/lib/graphql/mutations'
 
 export function useSeasons() {
   const { data, loading, error, refetch } = useQuery(GET_SEASONS)
@@ -122,12 +122,25 @@ export function useCreateGroup() {
 
 export function useCreateTeamStatistics() {
   const [createTeamStatistics, { loading, error }] = useMutation(CREATE_TEAM_STATISTICS)
+  return { createTeamStatistics, loading, error }
+}
 
-  return {
-    createTeamStatistics,
-    loading,
-    error
-  }
+export function useAddMatchScheduler() {
+  const [addMatchScheduler, { loading, error }] = useMutation(ADD_MATCH_SCHEDULER)
+  return { addMatchScheduler, loading, error }
+}
+
+export function useMatchSchedules() {
+  const { data, loading, error, refetch } = useQuery(GET_MATCH_SCHEDULES)
+  return { matches: data?.matches || [], loading, error, refetch }
+}
+
+export function useTeamsByIds(teamIds: string[]) {
+  const { data, loading, error, refetch } = useQuery(GET_TEAMS_BY_IDS, {
+    variables: { ids: teamIds },
+    skip: teamIds.length === 0
+  })
+  return { teams: data?.Teams || [], loading, error, refetch }
 }
 
 export function useSeasonGroups(seasonId: string) {

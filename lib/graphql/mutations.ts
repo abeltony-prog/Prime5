@@ -110,6 +110,15 @@ export const CREATE_TEAM_STATISTICS = gql`
   }
 `
 
+export const ADD_MATCH_SCHEDULER = gql`
+  mutation addMatchSchedylar($team2: uuid!, $team1: uuid!, $location: String!, $dateAndtime: String!, $season_id: uuid!) {
+    insert_matches(objects: {team2: $team2, team1: $team1, location: $location, dateAndtime: $dateAndtime, season_id: $season_id}) {
+      affected_rows
+      returning { id team1 team2 location dateAndtime season_id }
+    }
+  }
+`
+
 // Mutation to create a new manager
 export const CREATE_MANAGER = gql`
   mutation CreateManager($manager: managers_insert_input!) {

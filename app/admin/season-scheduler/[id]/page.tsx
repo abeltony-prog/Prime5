@@ -20,9 +20,11 @@ import {
   Plus,
   Eye,
   MoreHorizontal,
-  X
+  X,
+  RefreshCw,
+  AlertCircle
 } from "lucide-react"
-import { useSeason, useUpdateSeason, useCreateGroup, useCreateTeamStatistics, useSeasonGroups, useSeasonTeamStatistics } from "@/hooks/use-seasons"
+import { useSeasons, useSeason, useUpdateSeason, useSeasonGroups, useSeasonTeamStatistics, useCreateGroup, useCreateTeamStatistics, useAddMatchScheduler, useMatchSchedules, useTeamsByIds } from '@/hooks/use-seasons'
 import { useTeams } from "@/hooks/use-teams"
 import Link from "next/link"
 import React from "react"
@@ -66,11 +68,6 @@ export default function SeasonDetailsPage() {
   const router = useRouter()
   const seasonId = params.id as string
   
-  // Debug logging
-  console.log('Route params:', params)
-  console.log('Season ID from params:', seasonId)
-  console.log('Season ID type:', typeof seasonId)
-  
   // Check if seasonId is valid
   if (!seasonId || typeof seasonId !== 'string') {
     return (
@@ -92,45 +89,39 @@ export default function SeasonDetailsPage() {
   
   const { season, loading, error, refetch } = useSeason(seasonId)
   
-  // Debug logging for hook results
-  console.log('useSeason hook results:', { season, loading, error })
-  console.log('Season data:', season)
-  console.log('Loading state:', loading)
-  console.log('Error state:', error)
+  // Get team IDs from the season
+  const seasonTeamIds = React.useMemo(() => {
+    if (!season?.teams) return []
+    return Object.keys(season.teams)
+  }, [season?.teams])
   
-  const { teams } = useTeams()
+  // Fetch only the teams that are part of this season
+  const { teams: seasonTeams, loading: teamsLoading, error: teamsError } = useTeamsByIds(seasonTeamIds)
+  
+  // Get all teams for inviting new ones
+  const { teams: allTeams } = useTeams()
+  
   const { updateSeason, loading: updateLoading } = useUpdateSeason()
   const { createGroup, loading: createGroupLoading } = useCreateGroup()
   const { createTeamStatistics, loading: createTeamStatsLoading } = useCreateTeamStatistics()
   const { groups: seasonGroups, loading: groupsLoading, error: groupsError, refetch: refetchGroups } = useSeasonGroups(seasonId)
   const { teamStatistics: seasonTeamStatistics, loading: statsLoading, error: statsError, refetch: refetchStats } = useSeasonTeamStatistics(seasonId)
+  const { addMatchScheduler, loading: addMatchLoading } = useAddMatchScheduler()
+  const { matches: matchSchedules, loading: matchSchedulesLoading, error: matchSchedulesError, refetch: refetchMatchSchedules } = useMatchSchedules()
 
-  // Get the specific teams that are part of this season
-  const seasonTeams = React.useMemo(() => {
-    if (!season?.teams || !teams) return []
-    
-    const seasonTeamIds = Object.keys(season.teams)
-    console.log('Season team IDs:', seasonTeamIds)
-    
-    return teams.filter((team: any) => {
-      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return seasonTeamIds.includes(teamIdentifier?.toString())
-    })
-  }, [season?.teams, teams])
-
-  console.log('Season teams found:', seasonTeams)
-  console.log('All teams:', teams)
+  // Calculate total teams for overview card
+  const totalTeams = seasonTeams.length
 
   // Get teams that are NOT already in this season
   const availableTeamsToInvite = React.useMemo(() => {
-    if (!teams || !season?.teams) return teams || []
+    if (!allTeams || !season?.teams) return allTeams || []
     
     const seasonTeamIds = Object.keys(season.teams)
-    return teams.filter((team: any) => {
+    return allTeams.filter((team: any) => {
       const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
       return !seasonTeamIds.includes(teamIdentifier?.toString())
     })
-  }, [teams, season?.teams])
+  }, [allTeams, season?.teams])
 
   const handleInviteTeams = async () => {
     if (selectedTeamsToInvite.length === 0) {
@@ -148,24 +139,12 @@ export default function SeasonDetailsPage() {
         newTeamsObject[teamId] = token
       })
 
-      console.log('Inviting teams:', selectedTeamsToInvite)
-      console.log('New teams object:', newTeamsObject)
-      
       // Validate that all required fields have values
       if (!season.name || !season.startDate || !season.EndDate) {
         alert('Season data is incomplete. Cannot update teams.')
-        console.error('Missing season data:', { name: season.name, startDate: season.startDate, EndDate: season.EndDate })
         return
       }
       
-      console.log('Updating season with data:', {
-        id: seasonId,
-        name: season.name,
-        startDate: season.startDate,
-        EndDate: season.EndDate,
-        teams: newTeamsObject
-      })
-
       // Update the season in the database
       const result = await updateSeason({
         variables: {
@@ -177,8 +156,6 @@ export default function SeasonDetailsPage() {
         }
       })
 
-      console.log('Update result:', result)
-
       if (result.data?.update_seasons_by_pk) {
         // Show success message
         alert(`Successfully invited ${selectedTeamsToInvite.length} team(s) to the season!`)
@@ -189,14 +166,11 @@ export default function SeasonDetailsPage() {
         
         // Refetch the season data to show updated teams
         await refetch()
-        
-        console.log('Season updated successfully:', result.data.update_seasons_by_pk)
       } else {
         throw new Error('Failed to update season')
       }
       
     } catch (error) {
-      console.error('Error inviting teams:', error)
       alert('Failed to invite teams. Please try again.')
     }
   }
@@ -306,10 +280,10 @@ export default function SeasonDetailsPage() {
     }
   }
 
-  const getTeamById = (teamId: string) => {
+  const getTeamById = (teamId: string | number) => {
     return seasonTeams.find((team: any) => {
       const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return teamIdentifier === teamId
+      return teamIdentifier && teamIdentifier.toString() === teamId.toString()
     })
   }
 
@@ -597,6 +571,76 @@ export default function SeasonDetailsPage() {
     })
   }
 
+  const saveMatchesToDatabase = async () => {
+    if (scheduledMatches.length === 0) {
+      toast({
+        title: "No Matches to Save",
+        description: "Please schedule matches first before saving to database.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      let savedCount = 0
+      let errorCount = 0
+
+      // Save each match to the database
+      for (const match of scheduledMatches) {
+        try {
+          // Combine date and time for dateAndtime field
+          const dateAndtime = match.time ? `${match.date}T${match.time}` : match.date
+          
+          const result = await addMatchScheduler({
+            variables: {
+              team1: match.team1_id,
+              team2: match.team2_id,
+              location: match.venue,
+              dateAndtime: dateAndtime,
+              season_id: seasonId
+            }
+          })
+
+          if (result.data?.insert_matches?.affected_rows > 0) {
+            savedCount++
+          } else {
+            errorCount++
+          }
+        } catch (error) {
+          console.error(`Error saving match ${match.id}:`, error)
+          errorCount++
+        }
+      }
+
+      if (savedCount > 0) {
+        toast({
+          title: "Matches Saved!",
+          description: `Successfully saved ${savedCount} matches to database${errorCount > 0 ? ` (${errorCount} failed)` : ''}`,
+        })
+        
+        // Refetch match schedules to show updated data
+        await refetchMatchSchedules()
+        
+        // Clear local scheduled matches since they're now in database
+        setScheduledMatches([])
+      } else {
+        toast({
+          title: "Save Failed",
+          description: `Failed to save any matches. Please check your data and try again.`,
+          variant: "destructive"
+        })
+      }
+      
+    } catch (error) {
+      console.error('Error saving matches:', error)
+      toast({
+        title: "Save Error",
+        description: "An error occurred while saving matches. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
@@ -701,15 +745,12 @@ export default function SeasonDetailsPage() {
     })
   }
 
-  const getTeamDetails = (teamId: string) => {
-    return teams?.find((team: any) => {
-      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return teamIdentifier && teamIdentifier.toString() === teamId.toString()
-    })
+  const getTeamDetails = (teamId: string | number) => {
+    return getTeamById(teamId)
   }
 
   const getTeamNames = (teamsObject: Record<string | number, string>) => {
-    if (!teamsObject || !teams) return []
+    if (!teamsObject || !seasonTeams) return []
     return Object.keys(teamsObject).map(teamId => {
       const team = getTeamDetails(teamId)
       return team?.name || team?.team_name || `Team ${teamId}`
@@ -718,7 +759,6 @@ export default function SeasonDetailsPage() {
 
   const status = getSeasonStatus(season)
   const teamNames = getTeamNames(season.teams)
-  const totalTeams = seasonTeams.length
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -882,7 +922,11 @@ export default function SeasonDetailsPage() {
               <div className="text-center text-gray-500 py-8">
                 <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>No teams have been invited to this season yet.</p>
-                <Button className="mt-4" variant="outline">
+                <Button 
+                  className="mt-4" 
+                  variant="outline"
+                  onClick={() => setIsInviteTeamsModalOpen(true)}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Invite Teams
                 </Button>
@@ -966,16 +1010,84 @@ export default function SeasonDetailsPage() {
               <Target className="h-5 w-5" />
               Season Matches
             </CardTitle>
+            <Button 
+              onClick={() => refetchMatchSchedules()}
+              variant="outline"
+              size="sm"
+              disabled={matchSchedulesLoading}
+              className="ml-auto"
+            >
+              {matchSchedulesLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </Button>
           </CardHeader>
           <CardContent>
-            <div className="text-center text-gray-500 py-8">
-              <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No matches have been scheduled for this season yet.</p>
-              <Button className="mt-4" variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Schedule Matches
-              </Button>
-            </div>
+            {matchSchedulesLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-500 mt-2">Loading season matches...</p>
+              </div>
+            ) : matchSchedulesError ? (
+              <div className="text-center py-8">
+                <AlertCircle className="h-8 w-8 text-red-500 mx-auto" />
+                <p className="text-red-500 mt-2">Error loading matches: {matchSchedulesError.message}</p>
+              </div>
+            ) : matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No matches have been scheduled for this season yet.</p>
+                <Button 
+                  className="mt-4" 
+                  variant="outline"
+                  onClick={() => setIsScheduleMatchesModalOpen(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Schedule Matches
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {matchSchedules
+                  .filter((match: any) => match.season_id === seasonId)
+                  .map((match: any) => (
+                    <div key={match.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4">
+                            <div className="text-center">
+                              <div className="font-semibold text-gray-900">
+                                {match.Team1?.name || `Team ${match.team1}`}
+                              </div>
+                              <div className="text-xs text-gray-500">vs</div>
+                              <div className="font-semibold text-gray-900">
+                                {match.Team2?.name || `Team ${match.team2}`}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm text-gray-600">
+                                {new Date(match.dateAndtime).toLocaleDateString()}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {new Date(match.dateAndtime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <Badge variant="outline">{match.location}</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          ID: {match.id}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -1751,6 +1863,7 @@ export default function SeasonDetailsPage() {
                                   />
                                   <span className="text-xs text-gray-500">|</span>
                                   <Input
+                                    type="time"
                                     value={match.time}
                                     onChange={(e) => {
                                       const updatedMatches = scheduledMatches.map(m => 
@@ -1758,8 +1871,7 @@ export default function SeasonDetailsPage() {
                                       )
                                       setScheduledMatches(updatedMatches)
                                     }}
-                                    placeholder="Time (e.g., 14:00)"
-                                    className="text-xs h-8 w-24"
+                                    className="text-xs h-8 w-32"
                                   />
                                 </div>
                               </div>
@@ -1830,10 +1942,7 @@ export default function SeasonDetailsPage() {
             )}
             {scheduledMatches.length > 0 && (
               <Button 
-                onClick={() => {
-                  // TODO: Save matches to database
-                  alert('Matches will be saved to database (implementation pending)')
-                }}
+                onClick={saveMatchesToDatabase}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 💾 Save to Database
@@ -1842,6 +1951,11 @@ export default function SeasonDetailsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      
+
+      {/* Season Matches Section */}
+
     </div>
   )
 } 

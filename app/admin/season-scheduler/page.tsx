@@ -4,18 +4,12 @@ import { useState, useEffect } from "react"
 import { SeasonScheduler } from "@/components/admin/season-scheduler"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Trophy, Calendar, Users, Target } from "lucide-react"
+import { ArrowLeft, Trophy, Calendar, Users, Target, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { useSeasons } from "@/hooks/use-seasons"
 
 export default function SeasonSchedulerPage() {
   const { seasons, loading, error } = useSeasons()
-  
-  // Debug logging
-  console.log('Seasons data:', seasons)
-  console.log('Seasons loading:', loading)
-  console.log('Seasons error:', error)
-  console.log('Seasons length:', seasons?.length)
   
   // Calculate statistics
   const totalSeasons = seasons?.length || 0
@@ -158,6 +152,33 @@ export default function SeasonSchedulerPage() {
 
         {/* Season Scheduler Component */}
         <SeasonScheduler />
+
+        {/* Season Matches Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">All Season Matches</h2>
+            <Button 
+              onClick={() => window.location.reload()}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center py-8">
+                <Calendar className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500">View individual season details to see scheduled matches</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Click on any season above to view its matches, groups, and scheduling options
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

@@ -57,6 +57,36 @@ export const GET_SEASON_TEAM_STATISTICS = gql`
   }
 `
 
+export const GET_MATCH_SCHEDULES = gql`
+  query getMatchSchedules {
+    matches {
+      created_at
+      dateAndtime
+      id
+      location
+      season_id
+      team1
+      team2
+      Team1 {
+        id
+        location
+        logo
+        name
+        shortname
+        team_manager
+      }
+      Team2 {
+        id
+        location
+        logo
+        name
+        shortname
+        team_manager
+      }
+    }
+  }
+`
+
 // Query to get all teams
 export const GET_TEAMS = gql`
   query GetTeams {
@@ -133,6 +163,38 @@ export const GET_TEAM = gql`
         id
         location
         team2
+      }
+      players {
+        create_at
+        dob
+        email
+        gender
+        id
+        name
+        phone
+        team_id
+      }
+    }
+  }
+`
+
+// Query to get teams by IDs
+export const GET_TEAMS_BY_IDS = gql`
+  query GetTeamsByIds($ids: [uuid!]!) {
+    Teams(where: {id: {_in: $ids}}) {
+      id
+      name
+      shortname
+      team_manager
+      manager {
+        create_at
+        email
+        gender
+        id
+        name
+        password
+        phone
+        photo
       }
       players {
         create_at
