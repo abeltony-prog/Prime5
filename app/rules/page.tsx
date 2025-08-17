@@ -86,10 +86,10 @@ export default function RulesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="container mx-auto px-6 py-16">
+      <div className="relative z-10 container mx-auto px-6 py-16">
         {/* Header */}
         <div className="text-center mb-16">
           <Badge className="bg-green-100 text-green-800 px-6 py-3 rounded-full font-semibold mb-6 text-lg">
@@ -177,9 +177,9 @@ export default function RulesPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {gamechangerPurpose.map((purpose, index) => (
-              <Card key={index} className="border-0 shadow-lg text-center hover:shadow-xl transition-shadow">
+              <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg text-center hover:shadow-xl transition-shadow">
                 <CardContent className="p-8">
-                  <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-2xl mb-6 mx-auto">
+                  <div className="flex items-center justify-center w-16 h-16 bg-green-100/80 backdrop-blur-sm rounded-2xl mb-6 mx-auto">
                     <purpose.icon className="w-8 h-8 text-green-600" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-4">{purpose.title}</h3>
@@ -201,8 +201,8 @@ export default function RulesPage() {
 
           <div className="grid md:grid-cols-2 gap-8">
             {standardRules.map((section, index) => (
-              <Card key={index} className="border-0 shadow-lg">
-                <CardHeader className="bg-gray-50">
+              <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
+                <CardHeader className="bg-gray-50/80 backdrop-blur-sm">
                   <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-green-600" />
                     {section.category}
@@ -225,7 +225,7 @@ export default function RulesPage() {
 
         {/* Important Notes */}
         <section className="mb-16">
-          <Card className="border-l-4 border-l-yellow-500 bg-yellow-50 border-0 shadow-lg">
+          <Card className="border-l-4 border-l-yellow-500 bg-yellow-50/80 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-8">
               <div className="flex items-start gap-4">
                 <AlertTriangle className="w-8 h-8 text-yellow-600 flex-shrink-0 mt-1" />
@@ -251,7 +251,7 @@ export default function RulesPage() {
             <p className="text-lg text-gray-600">Understanding when the Gamechanger activates during a match</p>
           </div>
 
-          <Card className="border-0 shadow-lg overflow-hidden">
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg overflow-hidden">
             <CardContent className="p-8">
               <div className="relative">
                 {/* Timeline */}

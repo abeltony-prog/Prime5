@@ -109,17 +109,17 @@ export default function StorePage() {
   const featuredItems = storeItems.filter(item => item.featured)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Official Prime5 League Store</h1>
           <p className="text-lg text-gray-600">Premium merchandise and equipment for true fans</p>
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-6 mb-8 border border-white/30">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -151,7 +151,7 @@ export default function StorePage() {
           <h2 className="text-3xl font-bold text-blue-900 mb-6">Featured Products</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {featuredItems.map((item) => (
-              <Card key={item.id} className="border-0 shadow-xl overflow-hidden">
+              <Card key={item.id} className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl overflow-hidden hover:shadow-2xl transition-shadow">
                 <div className="relative">
                   <Image
                     src={item.image}
@@ -210,7 +210,7 @@ export default function StorePage() {
           </div>
           
           {filteredItems.length === 0 ? (
-            <Card className="border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
               <CardContent className="p-12 text-center">
                 <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
@@ -220,7 +220,7 @@ export default function StorePage() {
           ) : (
             <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredItems.map((item) => (
-                <Card key={item.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={item.id} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
                   <div className="relative">
                     <Image
                       src={item.image}

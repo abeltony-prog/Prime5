@@ -44,10 +44,10 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-6">About Prime5 League</h1>
@@ -85,7 +85,7 @@ export default function AboutPage() {
 
         {/* Mission & Vision */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <Card className="border-0 shadow-xl">
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
               <CardTitle className="text-2xl">Our Mission</CardTitle>
             </CardHeader>
@@ -96,7 +96,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-xl">
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
             <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black">
               <CardTitle className="text-2xl">Our Vision</CardTitle>
             </CardHeader>
@@ -113,7 +113,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-blue-900 text-center mb-12">Our Values</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <Card key={index} className="border-0 shadow-lg text-center hover:shadow-xl transition-shadow">
+              <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg text-center hover:shadow-xl transition-shadow">
                 <CardContent className="p-8">
                   <value.icon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-blue-900 mb-4">{value.title}</h3>
@@ -126,7 +126,7 @@ export default function AboutPage() {
 
         {/* Contact Form */}
         <div className="grid lg:grid-cols-2 gap-12">
-          <Card className="border-0 shadow-xl">
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
               <CardTitle className="text-2xl">Get in Touch</CardTitle>
             </CardHeader>
@@ -174,7 +174,7 @@ export default function AboutPage() {
           </Card>
 
           <div className="space-y-8">
-            <Card className="border-0 shadow-xl">
+            <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
               <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black">
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
@@ -207,7 +207,7 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-xl">
+            <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
               <CardContent className="p-8 text-center">
                 <h3 className="text-xl font-bold text-blue-900 mb-4">Follow Us</h3>
                 <div className="flex justify-center space-x-4">

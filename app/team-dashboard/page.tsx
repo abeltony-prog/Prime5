@@ -167,9 +167,9 @@ export default function TeamDashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
       {/* Professional Team Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="relative z-10 bg-white/90 backdrop-blur-md shadow-lg border-b border-white/20">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -184,7 +184,7 @@ export default function TeamDashboard() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">{teamData.name}</h1>
                 <div className="flex items-center gap-4 mt-2">
-                  <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                  <Badge className="bg-green-100/80 backdrop-blur-sm text-green-800 hover:bg-green-100/80">
                     Group {teamData.group} • Position #{teamData.position}
                   </Badge>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -219,9 +219,9 @@ export default function TeamDashboard() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="relative z-10 container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5 bg-white border shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
             <TabsTrigger
               value="overview"
               className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700"
@@ -253,10 +253,10 @@ export default function TeamDashboard() {
             {/* Key Performance Indicators */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {teamStats.map((stat, index) => (
-                <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
-                      <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+                      <div className={`p-3 rounded-xl ${stat.bgColor}/80 backdrop-blur-sm`}>
                         <stat.icon className={`w-6 h-6 ${stat.color}`} />
                       </div>
                     </div>

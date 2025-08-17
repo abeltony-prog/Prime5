@@ -55,11 +55,11 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative bg-white">
+      <section className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-green-900/95 to-green-800/95"></div>
         <div className="relative">
           <Image
@@ -108,16 +108,16 @@ export default function HomePage() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-white border-b">
+      <section className="relative border-b">
         <div className="container mx-auto px-6 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {leagueStats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-3 mx-auto">
-                  <stat.icon className="w-6 h-6 text-green-600" />
+                <div className="flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mb-3 mx-auto border border-white/30 shadow-lg">
+                  <stat.icon className="w-8 h-8 text-white drop-shadow-lg" />
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+                <div className="text-4xl font-bold text-white mb-1 drop-shadow-lg">{stat.value}</div>
+                <div className="text-sm text-white/90 font-medium drop-shadow-md">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -125,41 +125,68 @@ export default function HomePage() {
       </section>
 
       {/* Next Match Countdown */}
-      <section className="py-16 bg-white">
+      <section className="py-16 relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <Badge className="bg-red-100 text-red-800 px-4 py-2 rounded-full font-semibold mb-4">Next Match Day</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Don't Miss the Action</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <Badge className="bg-red-100/90 backdrop-blur-sm text-red-800 px-4 py-2 rounded-full font-semibold mb-4 border border-red-200/50">Next Match Day</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Don't Miss the Action</h2>
+            <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-md">
               The next round of matches is approaching. Get your tickets now.
             </p>
           </div>
-          <CountdownTimer targetDate={nextMatchDate} />
+          <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 border border-white/30 shadow-xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
+                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">days</div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
+                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">hours</div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
+                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">minutes</div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
+                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">seconds</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Upcoming Matches */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 relative">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Upcoming Matches</h2>
-              <p className="text-lg text-gray-600">This week's fixtures</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Upcoming Matches</h2>
+              <p className="text-lg text-white/90 drop-shadow-md">This week's fixtures</p>
             </div>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
               <Link href="/fixtures">View All Fixtures</Link>
             </Button>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {upcomingMatches.map((match, index) => (
-              <Card key={index} className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs bg-white/20 backdrop-blur-sm border-white/30 text-white">
                       {match.date}
                     </Badge>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-white/90">
                       <Clock className="w-4 h-4" />
                       {match.time}
                     </div>
@@ -175,10 +202,10 @@ export default function HomePage() {
                         height={40}
                         className="rounded-full"
                       />
-                      <span className="font-semibold text-gray-900">{match.team1}</span>
+                      <span className="font-semibold text-white drop-shadow-md">{match.team1}</span>
                     </div>
 
-                    <div className="text-center text-sm text-gray-500 font-medium">VS</div>
+                    <div className="text-center text-sm text-white/80 font-medium">VS</div>
 
                     {/* Team 2 */}
                     <div className="flex items-center gap-3">
@@ -189,17 +216,17 @@ export default function HomePage() {
                         height={40}
                         className="rounded-full"
                       />
-                      <span className="font-semibold text-gray-900">{match.team2}</span>
+                      <span className="font-semibold text-white drop-shadow-md">{match.team2}</span>
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="mt-6 pt-4 border-t border-white/20">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-1 text-sm text-white/80">
                         <MapPin className="w-4 h-4" />
                         {match.venue}
                       </div>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                      <Button size="sm" className="bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 border border-green-500/30 shadow-lg">
                         Tickets
                       </Button>
                     </div>
@@ -212,14 +239,14 @@ export default function HomePage() {
       </section>
 
       {/* Latest News */}
-      <section className="py-16 bg-white">
+      <section className="py-16 relative">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Latest News</h2>
-              <p className="text-lg text-gray-600">Stay updated with league developments</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Latest News</h2>
+              <p className="text-lg text-white/90 drop-shadow-md">Stay updated with league developments</p>
             </div>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
               <Link href="/news">View All News</Link>
             </Button>
           </div>
@@ -247,7 +274,7 @@ export default function HomePage() {
             ].map((article, index) => (
               <Card
                 key={index}
-                className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 overflow-hidden"
               >
                 <Image
                   src={article.image || "/placeholder.svg"}
@@ -257,10 +284,10 @@ export default function HomePage() {
                   className="w-full h-48 object-cover"
                 />
                 <CardContent className="p-6">
-                  <div className="text-sm text-gray-500 mb-2">{article.date}</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{article.title}</h3>
-                  <p className="text-gray-600 mb-4">{article.excerpt}</p>
-                  <Button variant="ghost" className="p-0 h-auto text-green-600 hover:text-green-700">
+                  <div className="text-sm text-white/70 mb-2">{article.date}</div>
+                  <h3 className="text-xl font-semibold text-white mb-3 drop-shadow-md">{article.title}</h3>
+                  <p className="text-white/90 mb-4">{article.excerpt}</p>
+                  <Button variant="ghost" className="p-0 h-auto text-green-400 hover:text-green-300 hover:bg-white/10 rounded-lg px-3 py-2 transition-all duration-300">
                     Read More <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </CardContent>
@@ -271,17 +298,17 @@ export default function HomePage() {
       </section>
 
       {/* Sponsors */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Partners</h2>
-            <p className="text-lg text-gray-600">Proudly supported by leading brands</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Our Partners</h2>
+            <p className="text-lg text-white/90 drop-shadow-md">Proudly supported by leading brands</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
             {sponsors.map((sponsor, index) => (
               <div key={index} className="text-center">
-                <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white/10 backdrop-blur-xl rounded-lg p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border border-white/20">
                   <Image
                     src={sponsor.logo || "/placeholder.svg"}
                     alt={sponsor.name}
@@ -297,15 +324,17 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-green-600">
+      <section className="py-16 relative">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Join Prime5 League?</h2>
-          <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-            Register your team today and compete against the best in the region.
-          </p>
-          <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8">
-            <Link href="/register">Register Your Team</Link>
-          </Button>
+          <div className="bg-green-600/20 backdrop-blur-xl rounded-2xl p-12 border border-green-500/20 shadow-2xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Ready to Join Prime5 League?</h2>
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-md">
+              Register your team today and compete against the best in the region.
+            </p>
+            <Button asChild size="lg" className="bg-yellow-500/90 backdrop-blur-md hover:bg-yellow-600/90 text-black font-semibold px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-yellow-400/30">
+              <Link href="/register">Register Your Team</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>

@@ -26,9 +26,21 @@ html {
 }
         `}</style>
       </head>
-      <body>
+      <body 
+        className="relative"
+        style={{
+          backgroundImage: 'url(/mainbg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        {/* Background overlay for better readability */}
+        <div className="absolute inset-0 bg-black/20"></div>
         <ApolloWrapper>
-          {children}
+          <div className="relative z-10">
+            {children}
+          </div>
         </ApolloWrapper>
       </body>
     </html>

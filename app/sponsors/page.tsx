@@ -68,10 +68,10 @@ export default function SponsorsPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Our Sponsors & Partners</h1>
           <p className="text-lg text-gray-600">Supporting excellence in futsal</p>
@@ -82,7 +82,7 @@ export default function SponsorsPage() {
           <h2 className="text-3xl font-bold text-blue-900 text-center mb-8">Main Sponsors</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {mainSponsors.map((sponsor, index) => (
-              <Card key={index} className="border-0 shadow-xl">
+              <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
                 <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                   <CardTitle className="text-center">{sponsor.tier}</CardTitle>
                 </CardHeader>
@@ -105,7 +105,7 @@ export default function SponsorsPage() {
         {/* Partner Sponsors */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-blue-900 text-center mb-8">Partner Network</h2>
-          <Card className="border-0 shadow-xl">
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
             <CardContent className="p-8">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
                 {partnerSponsors.map((sponsor, index) => (
@@ -133,7 +133,7 @@ export default function SponsorsPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {sponsorshipTiers.map((tier, index) => (
-              <Card key={index} className="border-0 shadow-xl hover:shadow-2xl transition-shadow">
+              <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl hover:shadow-2xl transition-shadow">
                 <CardHeader className={`bg-gradient-to-r ${tier.color} text-white`}>
                   <CardTitle className="flex items-center justify-center gap-2">
                     <tier.icon className="h-6 w-6" />
@@ -161,7 +161,7 @@ export default function SponsorsPage() {
         </div>
 
         {/* Contact Section */}
-        <Card className="border-0 shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+        <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-xl">
           <CardContent className="p-12 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to Partner with Us?</h2>
             <p className="text-xl mb-8 text-blue-100">

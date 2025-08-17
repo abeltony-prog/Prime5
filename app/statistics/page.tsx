@@ -276,10 +276,10 @@ export default function StatisticsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">League Center</h1>
           <p className="text-lg text-gray-600">Statistics, standings, and fixtures</p>
@@ -287,7 +287,7 @@ export default function StatisticsPage() {
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg p-1 shadow-lg">
+          <div className="bg-white/80 backdrop-blur-md rounded-lg p-1 shadow-lg border border-white/30">
             <Button
               variant={activeTab === 'statistics' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('statistics')}
@@ -326,7 +326,7 @@ export default function StatisticsPage() {
             {/* League Overview Stats */}
             <div className="grid md:grid-cols-4 gap-6">
               {leagueStats.map((stat, index) => (
-                <Card key={index} className="border-0 shadow-lg text-center">
+                <Card key={index} className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg text-center hover:shadow-xl transition-shadow">
                   <CardContent className="p-6">
                     <stat.icon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
                     <h3 className="text-3xl font-bold text-blue-900 mb-2">{stat.value}</h3>
@@ -338,7 +338,7 @@ export default function StatisticsPage() {
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Top Scorers */}
-              <Card className="border-0 shadow-xl">
+              <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
                 <CardHeader className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5" />
@@ -350,7 +350,7 @@ export default function StatisticsPage() {
                     {topScorers.map((player, index) => (
                       <div
                         key={index}
-                        className={`p-4 border-b last:border-b-0 hover:bg-gray-50 ${index === 0 ? "bg-yellow-50" : ""}`}
+                        className={`p-4 border-b last:border-b-0 hover:bg-gray-50/50 ${index === 0 ? "bg-yellow-50/80 backdrop-blur-sm" : ""}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -374,7 +374,7 @@ export default function StatisticsPage() {
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-blue-600">{player.goals}</p>
-                            <p className="text-xs text-gray-500">{player.matches} matches</p>
+                            <p className="text-sm text-gray-500">{player.matches} matches</p>
                           </div>
                         </div>
                       </div>

@@ -123,10 +123,10 @@ export default function RegisterPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <div className="min-h-screen relative">
         <Navigation />
-        <div className="container mx-auto px-4 py-16">
-          <Card className="max-w-2xl mx-auto text-center border-0 shadow-xl">
+        <div className="relative z-10 container mx-auto px-4 py-16">
+          <Card className="max-w-2xl mx-auto text-center bg-white/80 backdrop-blur-md border-white/30 shadow-xl">
             <CardContent className="p-12">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
               <h1 className="text-3xl font-bold text-blue-900 mb-4">Registration Successful!</h1>
@@ -173,10 +173,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">Team Registration</h1>
@@ -205,7 +205,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Step 1: Manager Information */}
             {currentStep === 1 && (
-              <Card className="border-0 shadow-lg">
+              <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
                 <CardHeader className="bg-yellow-500 text-black">
                   <CardTitle>Manager Information</CardTitle>
                 </CardHeader>
@@ -281,7 +281,7 @@ export default function RegisterPage() {
 
             {/* Step 2: Team Information */}
             {currentStep === 2 && (
-            <Card className="border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
               <CardHeader className="bg-blue-600 text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
@@ -347,7 +347,7 @@ export default function RegisterPage() {
 
             {/* Error Display */}
             {(managerError || teamError) && (
-              <Card className="border-red-200 bg-red-50">
+              <Card className="border-red-200 bg-red-50/80 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="text-red-800">
                     <h3 className="font-semibold mb-2">Registration Error:</h3>
@@ -359,7 +359,7 @@ export default function RegisterPage() {
             )}
 
             {/* Terms and Conditions */}
-            <Card className="border-0 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-3">
                   <Checkbox 
