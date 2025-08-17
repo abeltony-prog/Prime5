@@ -1,9 +1,20 @@
 import { useQuery, useMutation } from '@apollo/client'
-import { GET_MATCHES, GET_UPCOMING_MATCHES, GET_PAST_RESULTS } from '@/lib/graphql/queries'
+import { GET_MATCHES, GET_UPCOMING_MATCHES, GET_PAST_RESULTS, GET_MATCH_SCHEDULES } from '@/lib/graphql/queries'
 import { CREATE_MATCH, UPDATE_MATCH_RESULT, DELETE_MATCH } from '@/lib/graphql/mutations'
 
 export function useMatches() {
   const { data, loading, error, refetch } = useQuery(GET_MATCHES)
+
+  return {
+    matches: data?.matches || [],
+    loading,
+    error,
+    refetch
+  }
+}
+
+export function useMatchSchedules() {
+  const { data, loading, error, refetch } = useQuery(GET_MATCH_SCHEDULES)
 
   return {
     matches: data?.matches || [],

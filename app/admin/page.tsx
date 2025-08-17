@@ -210,50 +210,7 @@ export default function AdminDashboard() {
     },
   ]
 
-  const matches = [
-    {
-      id: 1,
-      date: "2024-02-15",
-      time: "19:00",
-      team1: "Thunder FC",
-      team2: "Storm Riders",
-      team1Score: 3,
-      team2Score: 2,
-      group: "A",
-      venue: "Prime Arena 1",
-      status: "completed",
-    },
-    {
-      id: 2,
-      date: "2024-02-15",
-      time: "20:00",
-      team1: "Lightning United",
-      team2: "Velocity FC",
-      group: "B",
-      venue: "Prime Arena 2",
-      status: "scheduled",
-    },
-    {
-      id: 3,
-      date: "2024-02-16",
-      time: "18:30",
-      team1: "Rapid Fire",
-      team2: "Blaze FC",
-      group: "A",
-      venue: "Prime Arena 1",
-      status: "scheduled",
-    },
-    {
-      id: 4,
-      date: "2024-02-16",
-      time: "19:30",
-      team1: "Phoenix United",
-      team2: "Dynamo FC",
-      group: "B",
-      venue: "Prime Arena 2",
-      status: "scheduled",
-    },
-  ]
+
 
   const registrations = [
     {
@@ -382,7 +339,7 @@ export default function AdminDashboard() {
 
           {/* Matches Tab */}
           <TabsContent value="matches">
-            <Matches matches={matches} />
+            <Matches />
           </TabsContent>
 
           {/* Seasons Tab */}
