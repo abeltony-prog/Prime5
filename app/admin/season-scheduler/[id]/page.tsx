@@ -947,9 +947,19 @@ export default function SeasonDetailsPage() {
   const teamNames = getTeamNames(season.teams)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div 
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/mainbg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Background overlay for better readability */}
+      <div className="absolute inset-0 bg-black/20"></div>
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="relative z-10 bg-white/90 backdrop-blur-md shadow-lg border-b border-white/20">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -981,17 +991,17 @@ export default function SeasonDetailsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-100/80 rounded-lg flex items-center justify-center">
                   <Trophy className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Season Status</p>
+                  <p className="text-sm text-gray-700 font-medium">Season Status</p>
                   <Badge className={status.color}>
                     {status.text}
                   </Badge>
@@ -1000,14 +1010,14 @@ export default function SeasonDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-green-100/80 rounded-lg flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Duration</p>
+                  <p className="text-sm text-gray-700 font-medium">Duration</p>
                   <p className="text-lg font-semibold text-gray-900">
                     {formatDate(season.startDate)} - {formatDate(season.EndDate)}
                   </p>
@@ -1016,28 +1026,28 @@ export default function SeasonDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-purple-100/80 rounded-lg flex items-center justify-center">
                   <Users className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Teams Participating</p>
+                  <p className="text-sm text-gray-700 font-medium">Teams Participating</p>
                   <p className="text-2xl font-bold text-gray-900">{totalTeams}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-orange-100/80 rounded-lg flex items-center justify-center">
                   <Target className="h-5 w-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Days Remaining</p>
+                  <p className="text-sm text-gray-700 font-medium">Days Remaining</p>
                   <p className="text-lg font-semibold text-gray-900">
                     {Math.max(0, Math.ceil((new Date(season.EndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))}
                   </p>
@@ -1048,7 +1058,7 @@ export default function SeasonDetailsPage() {
         </div>
 
         {/* Season Information */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5" />
@@ -1096,7 +1106,7 @@ export default function SeasonDetailsPage() {
         </Card>
 
         {/* Teams Section */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -1190,7 +1200,7 @@ export default function SeasonDetailsPage() {
         </Card>
 
         {/* Matches Section */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
@@ -1236,49 +1246,97 @@ export default function SeasonDetailsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {matchSchedules
                   .filter((match: any) => match.season_id === seasonId)
-                  .map((match: any) => (
-                    <div key={match.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-4">
-                            <div className="text-center">
-                              <div className="font-semibold text-gray-900">
-                                {match.Team1?.name || `Team ${match.team1}`}
-                              </div>
-                              <div className="text-xs text-gray-500">vs</div>
-                              <div className="font-semibold text-gray-900">
-                                {match.Team2?.name || `Team ${match.team2}`}
-                              </div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-sm text-gray-600">
-                                {new Date(match.dateAndtime).toLocaleDateString()}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(match.dateAndtime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            </div>
-                            <div className="text-center">
-                              <Badge variant="outline">{match.location}</Badge>
+                  .map((match: any, index: number) => {
+                    // Generate different colors for each card
+                    const colors = [
+                      { bg: 'from-blue-500/20 to-purple-600/20', border: 'border-blue-400/30', accent: 'text-blue-600' },
+                      { bg: 'from-green-500/20 to-emerald-600/20', border: 'border-green-400/30', accent: 'text-green-600' },
+                      { bg: 'from-orange-500/20 to-red-500/20', border: 'border-orange-400/30', accent: 'text-orange-600' },
+                      { bg: 'from-purple-500/20 to-pink-600/20', border: 'border-purple-400/30', accent: 'text-purple-600' },
+                      { bg: 'from-teal-500/20 to-cyan-600/20', border: 'border-teal-400/30', accent: 'text-teal-600' },
+                      { bg: 'from-indigo-500/20 to-blue-600/20', border: 'border-indigo-400/30', accent: 'text-indigo-600' }
+                    ]
+                    const colorScheme = colors[index % colors.length]
+                    
+                    return (
+                      <div 
+                        key={match.id} 
+                        className={`relative group overflow-hidden rounded-2xl bg-gradient-to-br ${colorScheme.bg} backdrop-blur-xl border ${colorScheme.border} hover:scale-105 transition-all duration-300 hover:shadow-2xl`}
+                        style={{
+                          backgroundImage: 'url(/mainbg.jpg)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center'
+                        }}
+                      >
+                        {/* Glass overlay */}
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-2xl"></div>
+                        
+                        {/* Content */}
+                        <div className="relative z-10 p-6">
+                          {/* Header */}
+                          <div className="flex items-center justify-between mb-4">
+                            <Badge 
+                              className={`text-xs font-semibold px-3 py-1 bg-white/20 backdrop-blur-sm border-0 text-white`}
+                            >
+                              {match.location}
+                            </Badge>
+                            <div className="text-xs text-white/70 font-mono">
+                              #{match.id}
                             </div>
                           </div>
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          ID: {match.id}
+                          
+                          {/* Teams */}
+                          <div className="text-center space-y-4 mb-6">
+                            {/* Team 1 */}
+                            <div className="font-bold text-white text-xl drop-shadow-lg">
+                              {match.Team1?.name || `Team ${match.team1}`}
+                            </div>
+                            
+                            {/* VS */}
+                            <div className="text-white/80 font-semibold text-lg tracking-wider">VS</div>
+                            
+                            {/* Team 2 */}
+                            <div className="font-bold text-white text-xl drop-shadow-lg">
+                              {match.Team2?.name || `Team ${match.team2}`}
+                            </div>
+                          </div>
+                          
+                          {/* Date and Time */}
+                          <div className="pt-4 border-t border-white/20">
+                            <div className="text-center">
+                              <div className="text-sm font-bold text-white mb-1">
+                                {new Date(match.dateAndtime).toLocaleDateString('en-US', { 
+                                  weekday: 'long', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })}
+                              </div>
+                              <div className="text-xs text-white/80 font-medium">
+                                {new Date(match.dateAndtime).toLocaleTimeString([], { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Decorative elements */}
+                          <div className="absolute top-2 right-2 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+                          <div className="absolute bottom-2 left-2 w-12 h-12 bg-white/5 rounded-full blur-xl"></div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
