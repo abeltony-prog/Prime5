@@ -13,7 +13,7 @@ export function useSeasons() {
   }
 }
 
-export function useSeason(id: number) {
+export function useSeason(id: string) {
   const { data, loading, error, refetch } = useQuery(GET_SEASON, {
     variables: { id },
     skip: !id

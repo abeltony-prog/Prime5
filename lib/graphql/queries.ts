@@ -15,7 +15,7 @@ export const GET_SEASONS = gql`
 
 // Query to get season by ID
 export const GET_SEASON = gql`
-  query GetSeason($id: Int!) {
+  query GetSeason($id: uuid!) {
     seasons_by_pk(id: $id) {
       id
       name

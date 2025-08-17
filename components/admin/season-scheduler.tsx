@@ -17,6 +17,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import Link from "next/link"
 import {
   Calendar,
   Clock,
@@ -41,7 +42,7 @@ import { useTeams } from "@/hooks/use-teams"
 import { toast } from "@/hooks/use-toast"
 
 interface Season {
-  id: number
+  id: string
   name: string
   startDate: string
   EndDate: string
@@ -252,7 +253,7 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
     }
   }
 
-  const handleDeleteSeason = async (seasonId: number) => {
+  const handleDeleteSeason = async (seasonId: string) => {
     if (!confirm("Are you sure you want to delete this season?")) return
 
     try {
@@ -582,9 +583,11 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/season-scheduler/${season.id}`}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => openEditDialog(season)}>
                                 <Edit className="h-4 w-4 mr-2" />

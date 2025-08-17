@@ -18,7 +18,7 @@ export const ADD_SEASON = gql`
 
 // Mutation to update season
 export const UPDATE_SEASON = gql`
-  mutation updateSeason($id: Int!, $teams: jsonb, $name: String, $EndDate: String, $startDate: String) {
+  mutation updateSeason($id: uuid!, $teams: jsonb, $name: String, $EndDate: String, $startDate: String) {
     update_seasons_by_pk(
       pk_columns: { id: $id }
       _set: { teams: $teams, name: $name, EndDate: $EndDate, startDate: $startDate }
@@ -34,7 +34,7 @@ export const UPDATE_SEASON = gql`
 
 // Mutation to delete season
 export const DELETE_SEASON = gql`
-  mutation deleteSeason($id: Int!) {
+  mutation deleteSeason($id: uuid!) {
     delete_seasons_by_pk(id: $id) {
       id
       name
