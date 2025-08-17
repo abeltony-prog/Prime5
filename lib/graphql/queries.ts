@@ -26,6 +26,37 @@ export const GET_SEASON = gql`
   }
 `
 
+// Query to get groups for a season
+export const GET_SEASON_GROUPS = gql`
+  query GetSeasonGroups($season_id: uuid!) {
+    groups(where: {season_id: {_eq: $season_id}}) {
+      id
+      name
+      season_id
+    }
+  }
+`
+
+// Query to get team statistics for a season
+export const GET_SEASON_TEAM_STATISTICS = gql`
+  query GetSeasonTeamStatistics($season_id: uuid!) {
+    team_statistics(where: {season_id: {_eq: $season_id}}) {
+      id
+      team_id
+      group_id
+      season_id
+      played
+      wins
+      draws
+      losses
+      goals_for
+      goals_against
+      goal_diff
+      points
+    }
+  }
+`
+
 // Query to get all teams
 export const GET_TEAMS = gql`
   query GetTeams {

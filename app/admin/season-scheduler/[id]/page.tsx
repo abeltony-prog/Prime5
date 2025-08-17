@@ -19,15 +19,19 @@ import {
   Trash2,
   Plus,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  X
 } from "lucide-react"
-import { useSeason, useUpdateSeason } from "@/hooks/use-seasons"
+import { useSeason, useUpdateSeason, useCreateGroup, useCreateTeamStatistics, useSeasonGroups, useSeasonTeamStatistics } from "@/hooks/use-seasons"
 import { useTeams } from "@/hooks/use-teams"
 import Link from "next/link"
 import React from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
 
 interface Season {
   id: string
@@ -96,6 +100,10 @@ export default function SeasonDetailsPage() {
   
   const { teams } = useTeams()
   const { updateSeason, loading: updateLoading } = useUpdateSeason()
+  const { createGroup, loading: createGroupLoading } = useCreateGroup()
+  const { createTeamStatistics, loading: createTeamStatsLoading } = useCreateTeamStatistics()
+  const { groups: seasonGroups, loading: groupsLoading, error: groupsError, refetch: refetchGroups } = useSeasonGroups(seasonId)
+  const { teamStatistics: seasonTeamStatistics, loading: statsLoading, error: statsError, refetch: refetchStats } = useSeasonTeamStatistics(seasonId)
 
   // Get the specific teams that are part of this season
   const seasonTeams = React.useMemo(() => {
@@ -193,11 +201,259 @@ export default function SeasonDetailsPage() {
     }
   }
 
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      alert('Please enter a group name')
+      return
+    }
+
+    try {
+      // Create the group in the database using the simpler mutation
+      const result = await createGroup({
+        variables: {
+          name: newGroupName.trim(),
+          season_id: seasonId
+        }
+      })
+
+      if (result.data?.insert_groups?.affected_rows > 0) {
+        // Get the created group ID from the response
+        const groupId = result.data.insert_groups.returning[0].id
+        
+        // Add the group to local state
+        const newGroup = {
+          id: groupId,
+          name: newGroupName.trim(),
+          teams: []
+        }
+
+        setGroups([...groups, newGroup])
+        setNewGroupName("")
+        
+        toast({
+          title: "Success",
+          description: `Group "${newGroup.name}" created successfully!`,
+        })
+        
+        console.log('Group created successfully:', newGroup)
+      } else {
+        throw new Error('Failed to create group')
+      }
+      
+    } catch (error) {
+      console.error('Error creating group:', error)
+      alert('Failed to create group. Please try again.')
+    }
+  }
+
+  const handleAddTeamToGroup = async (teamId: string, groupId: string) => {
+    try {
+      // Create team statistics in the database using the new mutation
+      const result = await createTeamStatistics({
+        variables: {
+          team_id: teamId,
+          group_id: groupId,
+          season_id: seasonId
+        }
+      })
+
+      if (result.data?.insert_team_statistics?.affected_rows > 0) {
+        // Update local state
+        setGroups(groups.map(group => {
+          if (group.id === groupId) {
+            // Remove team from other groups first
+            const otherGroups = groups.filter(g => g.id !== groupId)
+            otherGroups.forEach(g => {
+              g.teams = g.teams.filter(t => t !== teamId)
+            })
+            
+            // Add team to this group if not already there
+            if (!group.teams.includes(teamId)) {
+              return { ...group, teams: [...group.teams, teamId] }
+            }
+          }
+          return group
+        }))
+
+        toast({
+          title: "Success",
+          description: "Team added to group successfully!",
+        })
+        
+        console.log('Team statistics created successfully for team:', teamId, 'in group:', groupId)
+      } else {
+        throw new Error('Failed to create team statistics')
+      }
+      
+    } catch (error) {
+      console.error('Error adding team to group:', error)
+      alert('Failed to add team to group. Please try again.')
+    }
+  }
+
+  const handleRemoveTeamFromGroup = (teamId: string, groupId: string) => {
+    setGroups(groups.map(group => {
+      if (group.id === groupId) {
+        return { ...group, teams: group.teams.filter(t => t !== teamId) }
+      }
+      return group
+    }))
+  }
+
+  const handleDeleteGroup = (groupId: string) => {
+    if (confirm('Are you sure you want to delete this group? All teams will be unassigned.')) {
+      setGroups(groups.filter(g => g.id !== groupId))
+    }
+  }
+
+  const getTeamById = (teamId: string) => {
+    return seasonTeams.find((team: any) => {
+      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
+      return teamIdentifier === teamId
+    })
+  }
+
+  const getUnassignedTeams = () => {
+    const assignedTeamIds = groups.flatMap(g => g.teams)
+    return seasonTeams.filter((team: any) => {
+      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
+      return !assignedTeamIds.includes(teamIdentifier)
+    })
+  }
+
+  const randomizeTeamsIntoGroups = () => {
+    if (numberOfGroups < 2) {
+      alert('Please create at least 2 groups')
+      return
+    }
+
+    if (seasonTeams.length === 0) {
+      alert('No teams available to randomize')
+      return
+    }
+
+    // Create group names if they don't exist
+    const groupNames = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F']
+    
+    // Create or use existing groups
+    const groupsToUse = groups.length >= numberOfGroups 
+      ? groups.slice(0, numberOfGroups)
+      : Array.from({ length: numberOfGroups }, (_, index) => ({
+          id: `temp-${index}`,
+          name: groupNames[index] || `Group ${String.fromCharCode(65 + index)}`,
+          teams: []
+        }))
+
+    // Shuffle teams randomly
+    const shuffledTeams = [...seasonTeams].sort(() => Math.random() - 0.5)
+    
+    // Distribute teams equally across groups
+    const teamsPerGroup = Math.ceil(shuffledTeams.length / numberOfGroups)
+    const randomized = groupsToUse.map((group, groupIndex) => {
+      const startIndex = groupIndex * teamsPerGroup
+      const endIndex = Math.min(startIndex + teamsPerGroup, shuffledTeams.length)
+      const groupTeams = shuffledTeams.slice(startIndex, endIndex).map((team: any) => {
+        const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
+        return teamIdentifier
+      })
+      
+      return {
+        ...group,
+        teams: groupTeams
+      }
+    })
+
+    setRandomizedGroups(randomized)
+    setIsRandomized(true)
+    
+    toast({
+      title: "Teams Randomized!",
+      description: `Teams have been randomly distributed into ${numberOfGroups} groups. Click 'Confirm' to save or make adjustments.`,
+    })
+  }
+
+  const confirmRandomization = async () => {
+    try {
+      // Save all groups and team statistics to database
+      const promises = randomizedGroups.map(async (group) => {
+        // Create group first
+        const groupResult = await createGroup({
+          variables: {
+            name: group.name,
+            season_id: seasonId
+          }
+        })
+
+        if (groupResult.data?.insert_groups?.affected_rows > 0) {
+          const groupId = groupResult.data.insert_groups.returning[0].id
+          
+          // Create team statistics for each team in the group
+          const teamPromises = group.teams.map(async (teamId) => {
+            return createTeamStatistics({
+              variables: {
+                team_id: teamId,
+                group_id: groupId,
+                season_id: seasonId
+              }
+            })
+          })
+
+          await Promise.all(teamPromises)
+          return { ...group, id: groupId }
+        }
+        
+        throw new Error(`Failed to create group: ${group.name}`)
+      })
+
+      const savedGroups = await Promise.all(promises)
+      
+      // Update local state
+      setGroups(savedGroups)
+      setRandomizedGroups([])
+      setIsRandomized(false)
+      
+      toast({
+        title: "Success!",
+        description: "Groups and team assignments have been saved to the database!",
+      })
+      
+      // Close modal
+      setIsCreateGroupModalOpen(false)
+      
+      console.log('Randomization confirmed and saved:', savedGroups)
+      
+    } catch (error) {
+      console.error('Error confirming randomization:', error)
+      alert('Failed to save groups. Please try again.')
+    }
+  }
+
+  const resetRandomization = () => {
+    setRandomizedGroups([])
+    setIsRandomized(false)
+  }
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [isInviteTeamsModalOpen, setIsInviteTeamsModalOpen] = useState(false)
   const [selectedTeamsToInvite, setSelectedTeamsToInvite] = useState<string[]>([])
+  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false)
+  const [isViewGroupsModalOpen, setIsViewGroupsModalOpen] = useState(false)
+  const [groups, setGroups] = useState<Array<{
+    id: string
+    name: string
+    teams: string[]
+  }>>([])
+  const [newGroupName, setNewGroupName] = useState("")
+  const [draggedTeam, setDraggedTeam] = useState<string | null>(null)
+  const [randomizedGroups, setRandomizedGroups] = useState<Array<{
+    id: string
+    name: string
+    teams: string[]
+  }>>([])
+  const [isRandomized, setIsRandomized] = useState(false)
+  const [numberOfGroups, setNumberOfGroups] = useState(2)
 
   if (loading) {
     return (
@@ -265,7 +521,7 @@ export default function SeasonDetailsPage() {
     })
   }
 
-  const getTeamDetails = (teamId: string | number) => {
+  const getTeamDetails = (teamId: string) => {
     return teams?.find((team: any) => {
       const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
       return teamIdentifier && teamIdentifier.toString() === teamId.toString()
@@ -563,10 +819,28 @@ export default function SeasonDetailsPage() {
                 <Calendar className="h-6 w-6 mb-2" />
                 <span>Schedule Matches</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col">
-                <Users className="h-6 w-6 mb-2" />
-                <span>Manage Teams</span>
-              </Button>
+              {seasonGroups.length > 0 ? (
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => setIsViewGroupsModalOpen(true)}
+                >
+                  <Users className="h-6 w-6 mb-2" />
+                  <span>View Groups</span>
+                  <Badge variant="secondary" className="mt-1">
+                    {seasonGroups.length} groups
+                  </Badge>
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col"
+                  onClick={() => setIsCreateGroupModalOpen(true)}
+                >
+                  <Users className="h-6 w-6 mb-2" />
+                  <span>Create Group</span>
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -764,6 +1038,390 @@ export default function SeasonDetailsPage() {
                 <Plus className="h-4 w-4 mr-2" />
               )}
               Invite {selectedTeamsToInvite.length > 0 ? `(${selectedTeamsToInvite.length})` : ''} Teams
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Group Modal */}
+      <Dialog open={isCreateGroupModalOpen} onOpenChange={setIsCreateGroupModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Create & Manage Groups
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Create New Group */}
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <Label htmlFor="groupName">New Group Name</Label>
+                <Input
+                  id="groupName"
+                  placeholder="e.g., Group A, Pool 1, Division 1"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                />
+              </div>
+              <Button onClick={handleCreateGroup} disabled={!newGroupName.trim() || createGroupLoading}>
+                {createGroupLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                Create Group
+              </Button>
+            </div>
+
+            {/* Randomization Section */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-gray-900 mb-4">Quick Randomization</h3>
+              <div className="flex gap-4 items-end">
+                <div>
+                  <Label htmlFor="numberOfGroups">Number of Groups</Label>
+                  <Select value={numberOfGroups.toString()} onValueChange={(value) => setNumberOfGroups(parseInt(value))}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[2, 3, 4, 5, 6].map(num => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num} Groups
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  onClick={randomizeTeamsIntoGroups}
+                  disabled={seasonTeams.length === 0}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  🎲 Randomize Teams
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                This will randomly distribute {seasonTeams.length} teams into {numberOfGroups} equal groups
+              </p>
+            </div>
+
+            {/* Randomized Groups Preview */}
+            {isRandomized && randomizedGroups.length > 0 && (
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900">Randomized Groups Preview</h3>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={resetRandomization}
+                      className="text-orange-600 hover:text-orange-700"
+                    >
+                      🔄 Reset
+                    </Button>
+                    <Button 
+                      onClick={confirmRandomization}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      ✅ Confirm & Save
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {randomizedGroups.map((group, index) => (
+                    <div key={group.id} className="border rounded-lg p-4 bg-blue-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-blue-900">{group.name}</h4>
+                        <Badge variant="secondary">{group.teams.length} teams</Badge>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {group.teams.map(teamId => {
+                          const team = getTeamById(teamId)
+                          return (
+                            <div key={teamId} className="bg-white p-2 rounded border text-sm">
+                              {team?.name || team?.team_name || `Team ${teamId}`}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    <strong>Ready to save!</strong> Review the groups above. Click "Confirm & Save" to save to database, 
+                    or "Reset" to randomize again.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Groups and Teams */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Existing Groups */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-900">Groups ({groups.length})</h3>
+                {groups.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                    <Users className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                    <p>No groups created yet</p>
+                    <p className="text-sm">Create a group to start organizing teams</p>
+                  </div>
+                ) : (
+                  groups.map(group => (
+                    <div key={group.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900">{group.name}</h4>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteGroup(group.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="text-sm text-gray-600">
+                          {group.teams.length} team(s)
+                        </div>
+                        {group.teams.map(teamId => {
+                          const team = getTeamById(teamId)
+                          return (
+                            <div key={teamId} className="flex items-center justify-between bg-white p-2 rounded border">
+                              <span className="text-sm">
+                                {team?.name || team?.team_name || `Team ${teamId}`}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveTeamFromGroup(teamId, group.id)}
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Available Teams */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-900">Available Teams ({getUnassignedTeams().length})</h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {getUnassignedTeams().map((team: any) => {
+                    const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
+                    
+                    return (
+                      <div
+                        key={teamId}
+                        className="flex items-center justify-between bg-white p-3 rounded border cursor-move hover:bg-gray-50"
+                        draggable
+                        onDragStart={() => setDraggedTeam(teamId)}
+                        onDragEnd={() => setDraggedTeam(null)}
+                      >
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {team.name || team.team_name || `Team ${teamId}`}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {team.shortname || team.short_name || 'N/A'}
+                          </div>
+                        </div>
+                        
+                        {/* Quick Add to Group */}
+                        {groups.length > 0 && (
+                          <Select onValueChange={(groupId) => handleAddTeamToGroup(teamId, groupId)}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue placeholder="Add to..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groups.map(group => (
+                                <SelectItem key={group.id} value={group.id}>
+                                  {group.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Drag and Drop Instructions */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">💡 How to Use Groups</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• <strong>Create groups</strong> to organize teams for match scheduling</li>
+                <li>• <strong>Drag and drop</strong> teams between groups or use the quick add dropdown</li>
+                <li>• <strong>Groups will be used</strong> when scheduling matches to ensure fair competition</li>
+                <li>• <strong>Teams can only be in one group</strong> at a time</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="flex justify-end pt-4">
+            <Button variant="outline" onClick={() => setIsCreateGroupModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Groups Modal */}
+      <Dialog open={isViewGroupsModalOpen} onOpenChange={setIsViewGroupsModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              View Season Groups & Statistics
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {groupsLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : seasonGroups.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No groups found for this season</p>
+              </div>
+            ) : (
+              <>
+                {/* Groups Overview */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {seasonGroups.map((group) => {
+                    const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
+                    const teamsInGroup = groupTeamStats.map((stat: any) => {
+                      const team = getTeamById(stat.team_id)
+                      return {
+                        ...stat,
+                        teamName: team?.name || team?.team_name || `Team ${stat.team_id}`,
+                        teamShortName: team?.shortname || team?.short_name || 'N/A'
+                      }
+                    })
+                    
+                    return (
+                      <Card key={group.id}>
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between">
+                            <span>{group.name}</span>
+                            <Badge variant="secondary">{teamsInGroup.length} teams</Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {teamsInGroup.length === 0 ? (
+                            <p className="text-gray-500 text-center py-4">No teams assigned to this group</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {teamsInGroup.map((teamStat) => (
+                                <div key={teamStat.id} className="border rounded-lg p-3 bg-gray-50">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                      <h4 className="font-medium text-gray-900">{teamStat.teamName}</h4>
+                                      <p className="text-sm text-gray-500">{teamStat.teamShortName}</p>
+                                    </div>
+                                    <Badge variant="outline">{teamStat.points} pts</Badge>
+                                  </div>
+                                  
+                                  {/* Team Statistics */}
+                                  <div className="grid grid-cols-4 gap-2 text-xs">
+                                    <div className="text-center">
+                                      <div className="font-medium text-gray-900">{teamStat.played}</div>
+                                      <div className="text-gray-500">Played</div>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="font-medium text-green-600">{teamStat.wins}</div>
+                                      <div className="text-gray-500">Wins</div>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="font-medium text-yellow-600">{teamStat.draws}</div>
+                                      <div className="text-gray-500">Draws</div>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="font-medium text-red-600">{teamStat.losses}</div>
+                                      <div className="text-gray-500">Losses</div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Goals */}
+                                  <div className="mt-2 pt-2 border-t grid grid-cols-3 gap-2 text-xs">
+                                    <div className="text-center">
+                                      <div className="font-medium text-green-600">{teamStat.goals_for}</div>
+                                      <div className="text-gray-500">GF</div>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="font-medium text-red-600">{teamStat.goals_against}</div>
+                                      <div className="text-gray-500">GA</div>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="font-medium text-blue-600">{teamStat.goal_diff}</div>
+                                      <div className="text-gray-500">GD</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
+
+                {/* Season Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Season Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{seasonGroups.length}</div>
+                        <div className="text-sm text-gray-500">Total Groups</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{seasonTeamStatistics.length}</div>
+                        <div className="text-sm text-gray-500">Teams with Stats</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {seasonTeamStatistics.reduce((total, stat) => total + parseInt(stat.points || '0'), 0)}
+                        </div>
+                        <div className="text-sm text-gray-500">Total Points</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {seasonTeamStatistics.reduce((total, stat) => total + parseInt(stat.goals_for || '0'), 0)}
+                        </div>
+                        <div className="text-sm text-gray-500">Total Goals</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+          
+          <div className="flex justify-end pt-4">
+            <Button variant="outline" onClick={() => setIsViewGroupsModalOpen(false)}>
+              Close
             </Button>
           </div>
         </DialogContent>

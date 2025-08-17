@@ -42,6 +42,74 @@ export const DELETE_SEASON = gql`
   }
 `
 
+// Mutation to create groups and team statistics
+export const CREATE_GROUPS_AND_TEAM_STATISTICS = gql`
+  mutation createGroupsAndTeamsStatistics($name: String = "", $season_id: uuid = "", $draws: String = "", $goal_diff: String = "", $goals_against: String = "", $goals_for: String = "", $group_id: uuid = "", $losses: String = "", $played: String = "", $points: String = "", $season_id1: uuid = "", $team_id: uuid = "", $wins: String = "") {
+    insert_groups(objects: {name: $name, season_id: $season_id}) {
+      affected_rows
+      returning {
+        id
+        name
+        season_id
+      }
+    }
+    insert_team_statistics(objects: {draws: $draws, goal_diff: $goal_diff, goals_against: $goals_against, goals_for: $goals_for, group_id: $group_id, losses: $losses, played: $played, points: $points, season_id: $season_id1, team_id: $team_id, wins: $wins}) {
+      affected_rows
+      returning {
+        id
+        team_id
+        group_id
+        season_id
+        played
+        wins
+        draws
+        losses
+        goals_for
+        goals_against
+        goal_diff
+        points
+      }
+    }
+  }
+`
+
+// Mutation to create just a group
+export const CREATE_GROUP = gql`
+  mutation createGroup($name: String!, $season_id: uuid!) {
+    insert_groups(objects: {name: $name, season_id: $season_id}) {
+      affected_rows
+      returning {
+        id
+        name
+        season_id
+      }
+    }
+  }
+`
+
+// Mutation to create team statistics
+export const CREATE_TEAM_STATISTICS = gql`
+  mutation createTeamStatistics($team_id: uuid!, $group_id: uuid!, $season_id: uuid!) {
+    insert_team_statistics(objects: {team_id: $team_id, group_id: $group_id, season_id: $season_id, played: "0", wins: "0", draws: "0", losses: "0", goals_for: "0", goals_against: "0", goal_diff: "0", points: "0"}) {
+      affected_rows
+      returning {
+        id
+        team_id
+        group_id
+        season_id
+        played
+        wins
+        draws
+        losses
+        goals_for
+        goals_against
+        goal_diff
+        points
+      }
+    }
+  }
+`
+
 // Mutation to create a new manager
 export const CREATE_MANAGER = gql`
   mutation CreateManager($manager: managers_insert_input!) {
