@@ -31,14 +31,14 @@ export default function SeasonSchedulerPage() {
   }, 0) || 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white/10 backdrop-blur-xl shadow-2xl border-b border-white/20">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/admin">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Admin
                 </Button>
@@ -47,8 +47,8 @@ export default function SeasonSchedulerPage() {
                 <Trophy className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Season Scheduler</h1>
-                <p className="text-sm text-gray-600">Plan and manage league seasons</p>
+                <h1 className="text-2xl font-bold text-white drop-shadow-lg">Season Scheduler</h1>
+                <p className="text-sm text-white/80">Plan and manage league seasons</p>
               </div>
             </div>
           </div>

@@ -50,7 +50,7 @@ interface Match {
     name: string
     shortname: string
     team_manager: string
-  }
+}
   Team2?: {
     id: string
     location: string
@@ -274,19 +274,19 @@ export function Matches() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
                     <TableHead className="text-white/90">Date & Time</TableHead>
                     <TableHead className="text-white/90">Teams</TableHead>
                     <TableHead className="text-white/90">Location</TableHead>
                     <TableHead className="text-white/90">Season</TableHead>
                     <TableHead className="text-white/90">Created</TableHead>
                     <TableHead className="text-white/90">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                   {filteredMatches.map((match) => {
                     const { date, time } = formatDateTime(match.dateAndtime)
                     const team1Name = match.Team1?.name || match.team1 || "Unknown Team"
@@ -294,71 +294,71 @@ export function Matches() {
                     
                     return (
                       <TableRow key={match.id} className="hover:bg-white/10">
-                        <TableCell>
-                          <div>
+                    <TableCell>
+                      <div>
                             <div className="font-medium text-white">{date}</div>
                             <div className="text-sm text-white/70 flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
+                          <Clock className="h-3 w-3" />
                               {time}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">
                             <div className="text-white">{team1Name}</div>
                             <div className="text-white/70">vs</div>
                             <div className="text-white">{team2Name}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
+                      </div>
+                    </TableCell>
+                    <TableCell>
                           <div className="flex items-center gap-1 text-sm text-white/80">
                             <MapPin className="h-3 w-3" />
                             {match.location || "TBD"}
-                          </div>
-                        </TableCell>
-                        <TableCell>
+                        </div>
+                    </TableCell>
+                    <TableCell>
                           <Badge variant="outline" className="font-medium">
                             {match.season_id ? `Season ${match.season_id.substring(0, 8)}...` : "No Season"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
                           <div className="text-sm text-white/70">
                             {formatCreatedAt(match.created_at)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Match
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Play className="h-4 w-4 mr-2" />
-                                Start Match
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Match
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Match
+                          </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Play className="h-4 w-4 mr-2" />
+                              Start Match
+                            </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Match
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
                     )
                   })}
-                </TableBody>
-              </Table>
-            </div>
+              </TableBody>
+            </Table>
+          </div>
           )}
         </CardContent>
       </Card>

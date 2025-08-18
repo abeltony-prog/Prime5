@@ -1784,7 +1784,7 @@ export default function SeasonDetailsPage() {
 
               {/* Available Teams */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Available Teams ({getUnassignedTeams().length})</h3>
+                <h3 className="font-semibold text-white">Available Teams ({getUnassignedTeams().length})</h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {getUnassignedTeams().map((team: any) => {
                     const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
@@ -1792,16 +1792,16 @@ export default function SeasonDetailsPage() {
                     return (
                       <div
                         key={teamId}
-                        className="flex items-center justify-between bg-white p-3 rounded border cursor-move hover:bg-gray-50"
+                        className="flex items-center justify-between bg-white/10 backdrop-blur-sm p-3 rounded border border-white/20 cursor-move hover:bg-white/20"
                         draggable
                         onDragStart={() => setDraggedTeam(teamId)}
                         onDragEnd={() => setDraggedTeam(null)}
                       >
                         <div>
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-white">
                             {team.name || team.team_name || `Team ${teamId}`}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-white/70">
                             {team.shortname || team.short_name || 'N/A'}
                           </div>
                         </div>
@@ -1809,7 +1809,7 @@ export default function SeasonDetailsPage() {
                         {/* Quick Add to Group */}
                         {groups.length > 0 && (
                           <Select onValueChange={(groupId) => handleAddTeamToGroup(teamId, groupId)}>
-                            <SelectTrigger className="w-32">
+                            <SelectTrigger className="w-32 bg-white/10 backdrop-blur-sm text-white border-white/20">
                               <SelectValue placeholder="Add to..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -1829,9 +1829,9 @@ export default function SeasonDetailsPage() {
             </div>
 
             {/* Drag and Drop Instructions */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">💡 How to Use Groups</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+              <h4 className="font-medium text-white mb-2">💡 How to Use Groups</h4>
+              <ul className="text-sm text-white/80 space-y-1">
                 <li>• <strong>Create groups</strong> to organize teams for match scheduling</li>
                 <li>• <strong>Drag and drop</strong> teams between groups or use the quick add dropdown</li>
                 <li>• <strong>Groups will be used</strong> when scheduling matches to ensure fair competition</li>
@@ -1841,7 +1841,7 @@ export default function SeasonDetailsPage() {
           </div>
           
           <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setIsCreateGroupModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsCreateGroupModalOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
               Close
             </Button>
           </div>
