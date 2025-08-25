@@ -11,10 +11,10 @@ export default function HomePage() {
   const nextMatchDate = new Date("2024-02-15T19:00:00")
 
   const sponsors = [
-    { name: "SportTech", logo: "/placeholder.svg?height=60&width=120&text=SportTech" },
-    { name: "FutsalGear", logo: "/placeholder.svg?height=60&width=120&text=FutsalGear" },
-    { name: "Prime Sports", logo: "/placeholder.svg?height=60&width=120&text=Prime+Sports" },
-    { name: "Athletic Pro", logo: "/placeholder.svg?height=60&width=120&text=Athletic+Pro" },
+    { name: "Plasera", logo: "/logo/plasera.png" },
+    { name: "Zaria Coart", logo: "https://cdn.prod.website-files.com/682a572382c4d682bcc2fcfa/682a572382c4d682bcc2fd45_Logo.svg" },
+    { name: "Planet Events", logo: "https://www.planetevents.rw/assets/images/logo/logo.png" },
+    { name: "Minitry of  Sports", logo: "https://www.planetevents.rw/assets/pertners/MiniSports_Logo_Portrait.png" },
   ]
 
   const upcomingMatches = [
@@ -229,7 +229,7 @@ export default function HomePage() {
       </section>
 
       {/* Latest News */}
-      <section className="py-16 relative">
+      {/* <section className="py-16 relative">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -285,7 +285,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Sponsors */}
       <section className="py-16 relative">
@@ -298,13 +298,13 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
             {sponsors.map((sponsor, index) => (
               <div key={index} className="text-center">
-                <div className="bg-white/10 backdrop-blur-xl rounded-lg p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border border-white/20">
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border border-white/30">
                   <Image
                     src={sponsor.logo || "/placeholder.svg"}
                     alt={sponsor.name}
                     width={120}
                     height={60}
-                    className="mx-auto opacity-70 hover:opacity-100 transition-opacity"
+                    className="mx-auto opacity-90 hover:opacity-100 transition-opacity drop-shadow-lg"
                   />
                 </div>
               </div>
