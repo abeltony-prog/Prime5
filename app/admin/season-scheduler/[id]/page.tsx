@@ -959,30 +959,30 @@ export default function SeasonDetailsPage() {
       {/* Background overlay for better readability */}
       <div className="absolute inset-0 bg-black/20"></div>
       {/* Header */}
-      <div className="relative z-10 bg-white/90 backdrop-blur-md shadow-lg border-b border-white/20">
+      <div className="relative z-10 bg-white/10 backdrop-blur-xl shadow-2xl border-b border-white/20 rounded-b-3xl">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/admin/season-scheduler">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Seasons
                 </Button>
               </Link>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400/80 to-green-600/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <Trophy className="w-6 h-6 text-white drop-shadow-lg" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{season.name}</h1>
-                <p className="text-sm text-gray-600">Season Details & Management</p>
+                <h1 className="text-2xl font-bold text-white drop-shadow-lg">{season.name}</h1>
+                <p className="text-sm text-white/80 drop-shadow-md">Season Details & Management</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(true)} className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Season
               </Button>
-              <Button variant="outline" className="text-red-600 hover:text-red-700">
+              <Button variant="outline" className="bg-red-500/20 backdrop-blur-sm border-red-400/30 text-red-300 hover:bg-red-500/30">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete Season
               </Button>
@@ -992,16 +992,16 @@ export default function SeasonDetailsPage() {
       </div>
 
       <div className="relative z-10 container mx-auto px-6 py-8">
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
+        {/* Season Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100/80 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-blue-600" />
+                <div className="w-10 h-10 bg-blue-100/20 rounded-lg flex items-center justify-center">
+                  <Trophy className="h-5 w-5 text-blue-300" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700 font-medium">Season Status</p>
+                  <p className="text-sm text-white/80 font-medium">Season Status</p>
                   <Badge className={status.color}>
                     {status.text}
                   </Badge>
@@ -1010,15 +1010,15 @@ export default function SeasonDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100/80 rounded-lg flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-green-600" />
+                <div className="w-10 h-10 bg-green-100/20 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-green-300" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700 font-medium">Duration</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-sm text-white/80 font-medium">Duration</p>
+                  <p className="text-lg font-semibold text-white">
                     {formatDate(season.startDate)} - {formatDate(season.EndDate)}
                   </p>
                 </div>
@@ -1026,29 +1026,29 @@ export default function SeasonDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100/80 rounded-lg flex items-center justify-center">
-                  <Users className="h-5 w-5 text-purple-600" />
+                <div className="w-10 h-10 bg-purple-100/20 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-purple-300" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700 font-medium">Teams Participating</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalTeams}</p>
+                  <p className="text-sm text-white/80 font-medium">Teams Participating</p>
+                  <p className="text-2xl font-bold text-white">{totalTeams}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100/80 rounded-lg flex items-center justify-center">
-                  <Target className="h-5 w-5 text-orange-600" />
+                <div className="w-10 h-10 bg-orange-100/20 rounded-lg flex items-center justify-center">
+                  <Target className="h-5 w-5 text-orange-300" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700 font-medium">Days Remaining</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-sm text-white/80 font-medium">Days Remaining</p>
+                  <p className="text-lg font-semibold text-white">
                     {Math.max(0, Math.ceil((new Date(season.EndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))}
                   </p>
                 </div>
@@ -1058,9 +1058,9 @@ export default function SeasonDetailsPage() {
         </div>
 
         {/* Season Information */}
-        <Card className="mb-8 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
+        <Card className="mb-8 bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Trophy className="h-5 w-5" />
               Season Information
             </CardTitle>
@@ -1068,18 +1068,18 @@ export default function SeasonDetailsPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Basic Details</h3>
+                <h3 className="font-semibold text-white mb-3">Basic Details</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Season ID:</span>
-                    <span className="font-medium">#{season.id}</span>
+                    <span className="text-white/70">Season ID:</span>
+                    <span className="font-medium text-white">#{season.id}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Name:</span>
-                    <span className="font-medium">{season.name}</span>
+                    <span className="text-white/70">Name:</span>
+                    <span className="font-medium text-white">{season.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
+                    <span className="text-white/70">Status:</span>
                     <Badge className={status.color}>
                       {status.text}
                     </Badge>
@@ -1087,17 +1087,17 @@ export default function SeasonDetailsPage() {
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Timeline</h3>
+                <h3 className="font-semibold text-white mb-3">Timeline</h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-green-600" />
-                    <span className="text-gray-600">Start Date:</span>
-                    <span className="font-medium">{formatDate(season.startDate)}</span>
+                    <Calendar className="h-4 w-4 text-green-300" />
+                    <span className="text-white/70">Start Date:</span>
+                    <span className="font-medium text-white">{formatDate(season.startDate)}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-red-600" />
-                    <span className="text-gray-600">End Date:</span>
-                    <span className="font-medium">{formatDate(season.EndDate)}</span>
+                    <Target className="h-4 w-4 text-red-300" />
+                    <span className="text-white/70">End Date:</span>
+                    <span className="font-medium text-white">{formatDate(season.EndDate)}</span>
                   </div>
                 </div>
               </div>
@@ -1106,17 +1106,17 @@ export default function SeasonDetailsPage() {
         </Card>
 
         {/* Teams Section */}
-        <Card className="mb-8 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
+        <Card className="mb-8 bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Users className="h-5 w-5" />
               Participating Teams ({seasonTeams.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {seasonTeams.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center text-white/60 py-8">
+                <Users className="h-12 w-12 mx-auto mb-4 text-white/30" />
                 <p>No teams have been invited to this season yet.</p>
                 <Button 
                   className="mt-4" 
@@ -1132,11 +1132,11 @@ export default function SeasonDetailsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Team</TableHead>
-                      <TableHead>Manager</TableHead>
-                      <TableHead>Players</TableHead>
-                      <TableHead>Invitation Token</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="text-white/90">Team</TableHead>
+                      <TableHead className="text-white/90">Manager</TableHead>
+                      <TableHead className="text-white/90">Players</TableHead>
+                      <TableHead className="text-white/90">Invitation Token</TableHead>
+                      <TableHead className="text-white/90">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1145,23 +1145,23 @@ export default function SeasonDetailsPage() {
                       const invitationToken = season?.teams?.[teamId] || 'N/A'
                       
                       return (
-                        <TableRow key={teamId}>
+                        <TableRow key={teamId} className="hover:bg-white/10">
                           <TableCell>
                             <div>
-                              <div className="font-medium text-gray-900">
+                              <div className="font-medium text-white">
                                 {team.name || team.team_name || `Team ${teamId}`}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-white/70">
                                 {team.shortname || team.short_name || 'N/A'}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              <div className="font-medium">
+                              <div className="font-medium text-white">
                                 {team.manager?.name || 'N/A'}
                               </div>
-                              <div className="text-gray-500">
+                              <div className="text-white/70">
                                 {team.manager?.email || 'N/A'}
                               </div>
                             </div>
@@ -1172,7 +1172,7 @@ export default function SeasonDetailsPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+                            <div className="text-xs font-mono bg-white/10 p-2 rounded text-white/80">
                               {invitationToken}
                             </div>
                           </TableCell>
@@ -1200,9 +1200,9 @@ export default function SeasonDetailsPage() {
         </Card>
 
         {/* Matches Section */}
-        <Card className="mb-8 bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
+        <Card className="mb-8 bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Target className="h-5 w-5" />
               Season Matches
             </CardTitle>
@@ -1211,10 +1211,10 @@ export default function SeasonDetailsPage() {
               variant="outline"
               size="sm"
               disabled={matchSchedulesLoading}
-              className="ml-auto"
+              className="ml-auto bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
             >
               {matchSchedulesLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-300 mr-2"></div>
               ) : (
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
@@ -1223,18 +1223,18 @@ export default function SeasonDetailsPage() {
           </CardHeader>
           <CardContent>
             {matchSchedulesLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-500 mt-2">Loading season matches...</p>
+              <div className="text-center py-8 text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300 mx-auto"></div>
+                <p className="text-white/80 mt-2">Loading season matches...</p>
               </div>
             ) : matchSchedulesError ? (
               <div className="text-center py-8">
-                <AlertCircle className="h-8 w-8 text-red-500 mx-auto" />
-                <p className="text-red-500 mt-2">Error loading matches: {matchSchedulesError.message}</p>
+                <AlertCircle className="h-8 w-8 text-red-300 mx-auto" />
+                <p className="text-red-300 mt-2">Error loading matches: {matchSchedulesError.message}</p>
               </div>
             ) : matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center text-white/60 py-8">
+                <Target className="h-12 w-12 mx-auto mb-4 text-white/30" />
                 <p>No matches have been scheduled for this season yet.</p>
                 <Button 
                   className="mt-4" 
@@ -1336,15 +1336,15 @@ export default function SeasonDetailsPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="bg-white/80 backdrop-blur-md border-white/30 shadow-lg">
+        <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle className="text-white drop-shadow-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
                 variant="outline" 
-                className="h-20 flex-col"
+                className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
                 onClick={() => setIsInviteTeamsModalOpen(true)}
                 disabled={availableTeamsToInvite.length === 0}
               >
@@ -1355,7 +1355,7 @@ export default function SeasonDetailsPage() {
               {matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col"
+                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
                   onClick={() => setIsScheduleMatchesModalOpen(true)}
                   disabled={seasonGroups.length === 0}
                 >
@@ -1373,7 +1373,7 @@ export default function SeasonDetailsPage() {
               {matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 && (
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col"
+                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
                   onClick={() => setIsScheduleMatchesModalOpen(true)}
                   disabled={isSchedulingPerformance}
                 >
@@ -1390,17 +1390,16 @@ export default function SeasonDetailsPage() {
               {seasonGroups.length > 0 ? (
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col"
+                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
                   onClick={() => setIsViewGroupsModalOpen(true)}
                 >
                   <Users className="h-6 w-6 mb-2" />
                   <span>View Groups</span>
-          
                 </Button>
               ) : (
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col"
+                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
                   onClick={() => setIsCreateGroupModalOpen(true)}
                 >
                   <Users className="h-6 w-6 mb-2" />
