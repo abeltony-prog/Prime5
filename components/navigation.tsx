@@ -24,15 +24,14 @@ export function Navigation() {
         <div className="flex justify-between items-center py-4">
           <Link href="/" className="flex items-center space-x-3">
             <Image
-              src="/placeholder.svg?height=40&width=40&text=P5"
+              src="/logo/Prime5.png"
               alt="Prime5 League"
-              width={40}
-              height={40}
-              className="rounded-lg"
+              width={60}
+              height={60}
+              className="drop-shadow-lg"
             />
             <div>
-              <div className="text-2xl font-bold text-white drop-shadow-lg">Prime5 League</div>
-              <div className="text-xs text-white/80 drop-shadow-md">Professional Futsal</div>
+        
             </div>
           </Link>
 

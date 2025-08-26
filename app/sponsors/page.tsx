@@ -8,24 +8,24 @@ import Link from "next/link"
 export default function SponsorsPage() {
   const mainSponsors = [
     {
-      name: "SportTech Solutions",
-      logo: "/placeholder.svg?height=100&width=200&text=SportTech",
+      name: "Plasera",
+      logo: "/logo/plasera.png",
       tier: "Title Sponsor",
       description: "Leading sports technology company providing innovative solutions for modern athletics.",
     },
     {
-      name: "FutsalGear Pro",
-      logo: "/placeholder.svg?height=100&width=200&text=FutsalGear",
+      name: "Planet Events",
+      logo: "/logo/planetevents.png",
       tier: "Official Equipment Partner",
       description: "Premium futsal equipment and apparel for professional and amateur players.",
     },
   ]
 
   const partnerSponsors = [
-    { name: "Prime Sports", logo: "/placeholder.svg?height=80&width=160&text=Prime+Sports" },
-    { name: "Athletic Pro", logo: "/placeholder.svg?height=80&width=160&text=Athletic+Pro" },
-    { name: "Energy Drink Co", logo: "/placeholder.svg?height=80&width=160&text=Energy+Drink" },
-    { name: "Local Fitness", logo: "/placeholder.svg?height=80&width=160&text=Local+Fitness" },
+    { name: "Zaria Coart", logo: "https://cdn.prod.website-files.com/682a572382c4d682bcc2fcfa/682a572382c4d682bcc2fd45_Logo.svg" },
+    { name: "Minitry of  Sports", logo: "https://www.planetevents.rw/assets/pertners/MiniSports_Logo_Portrait.png" },
+    { name: "Officeats", logo: "https://officeats.rw/images/OFFICEATS%20TYPO-13.png" },
+    { name: "North Creators", logo: "https://res.cloudinary.com/dpk7o7zlw/image/upload/f_auto,q_auto/ah059yjosdgn8wq5go5o" },
     { name: "Sports Media", logo: "/placeholder.svg?height=80&width=160&text=Sports+Media" },
     { name: "Health Plus", logo: "/placeholder.svg?height=80&width=160&text=Health+Plus" },
   ]
