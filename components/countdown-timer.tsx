@@ -35,16 +35,18 @@ export function CountdownTimer({ targetDate }: CountdownTimerProps) {
 
   return (
     <div className="flex justify-center">
-      <div className="grid grid-cols-4 gap-4 md:gap-6 max-w-2xl mx-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
         {Object.entries(timeLeft).map(([unit, value]) => (
-          <Card key={unit} className="bg-white border shadow-sm">
-            <CardContent className="p-4 md:p-6 text-center">
-              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <div key={unit} className="text-center">
+            <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+              <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">
                 {value.toString().padStart(2, "0")}
               </div>
-              <div className="text-sm text-gray-600 font-medium capitalize">{unit}</div>
-            </CardContent>
-          </Card>
+              <div className="text-sm text-white/90 font-medium uppercase tracking-wider capitalize">
+                {unit}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

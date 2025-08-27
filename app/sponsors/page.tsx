@@ -26,14 +26,14 @@ export default function SponsorsPage() {
     { name: "Minitry of  Sports", logo: "https://www.planetevents.rw/assets/pertners/MiniSports_Logo_Portrait.png" },
     { name: "Officeats", logo: "https://officeats.rw/images/OFFICEATS%20TYPO-13.png" },
     { name: "North Creators", logo: "https://res.cloudinary.com/dpk7o7zlw/image/upload/f_auto,q_auto/ah059yjosdgn8wq5go5o" },
-    { name: "Sports Media", logo: "/placeholder.svg?height=80&width=160&text=Sports+Media" },
-    { name: "Health Plus", logo: "/placeholder.svg?height=80&width=160&text=Health+Plus" },
+    { name: "Isimbi Designs", logo: "/logo/isimb.png" },
+    { name: "BM", logo: "/logo/BM.png" },
   ]
 
   const sponsorshipTiers = [
     {
       tier: "Title Sponsor",
-      price: "$10,000",
+      price: "RWF 500,000",
       benefits: [
         "League naming rights",
         "Logo on all jerseys",
@@ -47,7 +47,7 @@ export default function SponsorsPage() {
     },
     {
       tier: "Official Partner",
-      price: "$5,000",
+      price: "RWF 150,000",
       benefits: [
         "Logo on team jerseys",
         "Stadium advertising boards",
@@ -60,7 +60,7 @@ export default function SponsorsPage() {
     },
     {
       tier: "Supporting Partner",
-      price: "$2,500",
+      price: "RWF 100,000",
       benefits: ["Logo on website", "Social media mentions", "Match day programs", "Networking opportunities"],
       icon: Users,
       color: "from-green-600 to-green-700",
@@ -115,7 +115,11 @@ export default function SponsorsPage() {
                       alt={sponsor.name}
                       width={160}
                       height={80}
-                      className="mx-auto grayscale hover:grayscale-0 transition-all duration-300"
+                      className={`mx-auto transition-all duration-300 ${
+                        sponsor.name === "Isimbi Designs" || sponsor.name === "BM"
+                          ? "brightness-0 invert hover:brightness-100 hover:invert-0"
+                          : "grayscale hover:grayscale-0"
+                      }`}
                     />
                   </div>
                 ))}

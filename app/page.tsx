@@ -125,32 +125,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 border border-white/30 shadow-xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
-                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
-                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">days</div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
-                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
-                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">hours</div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
-                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
-                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">minutes</div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/50">
-                  <div className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">00</div>
-                  <div className="text-sm text-white/90 font-medium uppercase tracking-wider">seconds</div>
-                </div>
-              </div>
-            </div>
+            <CountdownTimer targetDate={new Date("2025-10-01T00:00:00")} />
           </div>
         </div>
       </section>

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { Users, Target, Shield, Clock, Zap, AlertTriangle, CheckCircle, Star, Timer, Gamepad2 } from "lucide-react"
+import { Users, Target, Shield, Clock, Zap, AlertTriangle, CheckCircle, Star, Timer, Gamepad2, Trophy } from "lucide-react"
 
 export default function RulesPage() {
   const gamechangerModes = [
@@ -220,6 +220,260 @@ export default function RulesPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+
+        {/* Detailed Match Rules */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-2xl">Detailed Match Rules</h2>
+            <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-xl">
+              Comprehensive rules and regulations for Prime5 League matches
+            </p>
+          </div>
+
+          <div className="space-y-8">
+            {/* Duration */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Clock className="w-5 h-5 text-blue-300" />
+                  3.1 Duration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Match Length:</strong> 2 halves of 20 minutes each</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Half-time:</strong> 5 minutes</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>No stoppage time</strong> except for serious injuries</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ball */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Target className="w-5 h-5 text-green-300" />
+                  3.2 Ball
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Official futsal size 4 ball provided by the league</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Kick-off */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Zap className="w-5 h-5 text-yellow-300" />
+                  3.3 Kick-off
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Coin toss determines which team starts</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Kick-off from center circle at start of halves and after goals</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Substitutions */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Users className="w-5 h-5 text-purple-300" />
+                  3.4 Substitutions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Rolling substitutions allowed at any time</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Substitution must occur at designated technical zone</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Fouls & Misconduct */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Shield className="w-5 h-5 text-red-300" />
+                  3.5 Fouls & Misconduct
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-red-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>5 fouls per half</strong> before awarding a 10-meter free kick to the opposing team</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-red-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Yellow and red cards</strong> apply:</span>
+                  </li>
+                  <li className="flex items-start gap-3 ml-6">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Yellow Card:</strong> 2-minute sin bin</span>
+                  </li>
+                  <li className="flex items-start gap-3 ml-6">
+                    <div className="w-2 h-2 bg-red-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Red Card:</strong> Player ejected, team plays with one less player for 4 minutes or until opponent scores</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Game Changers */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Gamepad2 className="w-5 h-5 text-green-300" />
+                  4. Game Changers (Baller League Influence)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Each team has <strong>1 "Power Play" card</strong> per match:</span>
+                  </li>
+                  <li className="flex items-start gap-3 ml-6">
+                    <div className="w-2 h-2 bg-green-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Power Play:</strong> Opponent plays with 4 players for 2 minutes</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Fan Vote MVP:</strong> Fans vote after each game; MVP earns points for their team in the season ranking</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Double Goal Period:</strong> A 2-minute window (chosen by coach) where all goals count double</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* League Format */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Trophy className="w-5 h-5 text-yellow-300" />
+                  5. League Format
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Regular Season:</strong> Round-robin, each team plays all others once</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Points System:</strong></span>
+                  </li>
+                  <li className="flex items-start gap-3 ml-6">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Win = 3 points</span>
+                  </li>
+                  <li className="flex items-start gap-3 ml-6">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Draw = 1 point</span>
+                  </li>
+                  <li className="flex items-start gap-3 ml-6">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Loss = 0 points</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-yellow-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Tie-breakers:</strong> Goal difference → Goals scored → Head-to-head</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Final Four Format */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Star className="w-5 h-5 text-purple-300" />
+                  6. Final Four Format
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Top 4 teams after the regular season qualify</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Semi-Finals:</strong> 1st vs 4th, 2nd vs 3rd</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Winners advance to the Grand Final</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Losers play for 3rd place</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Code of Conduct */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-white/20 backdrop-blur-sm border-b border-white/20">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                  <Shield className="w-5 h-5 text-blue-300" />
+                  7. Code of Conduct
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Respect referees, opponents, and officials at all times</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90">Abusive language, fighting, or unsporting behavior will lead to disciplinary action</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-white/90"><strong>Fair play is at the core of Prime5 League</strong></span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
