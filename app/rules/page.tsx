@@ -41,7 +41,7 @@ export default function RulesPage() {
     {
       category: "Match Duration",
       rules: [
-        "Two halves of 20 minutes each",
+        "Two halves of 15 minutes each",
         "Running clock (stops only for timeouts)",
         "2-minute break between halves",
         "Gamechanger activates in final 3 minutes of each half",
@@ -245,11 +245,11 @@ export default function RulesPage() {
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-white/90"><strong>Match Length:</strong> 2 halves of 20 minutes each</span>
+                    <span className="text-white/90"><strong>Match Length:</strong> 2 halves of 15 minutes each</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-white/90"><strong>Half-time:</strong> 5 minutes</span>
+                    <span className="text-white/90"><strong>Half-time:</strong> 2 minutes</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
