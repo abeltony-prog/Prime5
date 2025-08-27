@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: 'Prime5 League - Professional Futsal',
   description: 'The premier futsal competition featuring the region\'s top teams competing for ultimate glory.',
   generator: 'Next.js',
+  icons: {
+    icon: '/logo/Prime5IconGreen.png',
+    shortcut: '/logo/Prime5IconGreen.png',
+    apple: '/logo/Prime5IconGreen.png',
+  },
 }
 
 export default function RootLayout({
