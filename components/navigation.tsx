@@ -26,8 +26,8 @@ export function Navigation() {
             <Image
               src="/logo/PrimeALLWhite.png"
               alt="Prime5 League"
-              width={60}
-              height={60}
+              width={100}
+              height={100}
               className="drop-shadow-lg"
             />
             <div>

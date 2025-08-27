@@ -1,7 +1,9 @@
+import { env } from '@/lib/env'
+
 export const hasuraConfig = {
-  graphqlUrl: process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL || 'http://localhost:8080/v1/graphql',
-  adminSecret: process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET || '',
-  wsUrl: process.env.NEXT_PUBLIC_HASURA_WS_URL || 'ws://localhost:8080/v1/graphql',
+  graphqlUrl: env.HASURA_GRAPHQL_URL,
+  adminSecret: env.HASURA_ADMIN_SECRET,
+  wsUrl: env.HASURA_WS_URL,
 }
 
 export const defaultHeaders = {

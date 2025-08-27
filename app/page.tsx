@@ -87,7 +87,7 @@ export default function HomePage() {
                   size="lg"
                 className="border-white text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
-                  <Link href="/fixtures" className="flex items-center gap-2">
+                  <Link href="https://www.youtube.com/@Prime5League" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                     <Play className="w-5 h-5" />
                     Watch Highlights
                   </Link>
@@ -135,7 +135,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Upcoming Matches</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Happened Matches</h2>
               <p className="text-lg text-white/90 drop-shadow-md">This week's fixtures</p>
             </div>
             <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
