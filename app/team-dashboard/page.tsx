@@ -337,19 +337,34 @@ function TeamDashboardContent() {
   }
 
   const getRealTeamSettings = () => {
-    if (!currentTeam || !currentSeason) return null
+    // Provide fallback data if team data is not available
+    if (!currentTeam) {
+      return {
+        name: manager?.team?.name || "Team Name",
+        shortName: manager?.team?.shortName || "TFC",
+        location: manager?.team?.location || "Location",
+        founded: "2020",
+        description: "A competitive football team focused on excellence and sportsmanship.",
+        website: "",
+        socialMedia: {
+          facebook: "",
+          twitter: "",
+          instagram: "",
+        },
+      }
+    }
     
     return {
-      name: currentTeam.name || null,
-      shortName: currentTeam.shortname || null,
-      location: currentTeam.location || null,
-      founded: null, // Not available in current database
+      name: currentTeam.name || manager?.team?.name || "Team Name",
+      shortName: currentTeam.shortname || manager?.team?.shortName || "TFC",
+      location: currentTeam.location || manager?.team?.location || "Location",
+      founded: "2020", // Not available in current database
       description: "A competitive football team focused on excellence and sportsmanship.",
-      website: null, // Not available in current database
+      website: "", // Not available in current database
       socialMedia: {
-        facebook: null, // Not available in current database
-        twitter: null, // Not available in current database
-        instagram: null, // Not available in current database
+        facebook: "", // Not available in current database
+        twitter: "", // Not available in current database
+        instagram: "", // Not available in current database
       },
     }
   }
@@ -396,6 +411,9 @@ function TeamDashboardContent() {
   const realTeamSettings = getRealTeamSettings()
   const realPerformanceData = getRealPerformanceData()
 
+  // Debug: Log team settings data
+  console.log('Team Settings Data:', { currentTeam, realTeamSettings, manager: manager?.team })
+
   // Manager settings using real data
   const managerSettings = {
     name: manager?.name || null,
@@ -417,6 +435,9 @@ function TeamDashboardContent() {
   const handleLogout = () => {
     logout()
   }
+
+  // Debug: Log settings data before rendering
+  console.log('Settings Tab Data:', { realTeamSettings, managerSettings })
 
   return (
     <div className="min-h-screen relative">

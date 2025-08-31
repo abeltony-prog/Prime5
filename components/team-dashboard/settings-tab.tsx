@@ -28,24 +28,24 @@ import {
 } from "lucide-react"
 
 interface TeamSettings {
-  name: string
-  shortName: string
-  location: string
-  founded: string
-  description: string
-  website: string
+  name: string | null
+  shortName: string | null
+  location: string | null
+  founded: string | null
+  description: string | null
+  website: string | null
   socialMedia: {
-    facebook: string
-    twitter: string
-    instagram: string
+    facebook: string | null
+    twitter: string | null
+    instagram: string | null
   }
 }
 
 interface ManagerSettings {
-  name: string
-  email: string
-  phone: string
-  photo: string
+  name: string | null
+  email: string | null
+  phone: string | null
+  photo: string | null
   notifications: {
     email: boolean
     sms: boolean
@@ -134,12 +134,12 @@ export function SettingsTab({
                 {editingTeam ? (
                   <Input
                     id="team-name"
-                    value={teamForm.name}
+                    value={teamForm.name || ""}
                     onChange={(e) => setTeamForm({...teamForm, name: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.name}</p>
+                  <p className="text-white font-medium mt-1">{teamSettings.name || "Team Name Not Set"}</p>
                 )}
               </div>
               <div>
@@ -147,12 +147,12 @@ export function SettingsTab({
                 {editingTeam ? (
                   <Input
                     id="team-shortname"
-                    value={teamForm.shortName}
+                    value={teamForm.shortName || ""}
                     onChange={(e) => setTeamForm({...teamForm, shortName: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.shortName}</p>
+                  <p className="text-white font-medium mt-1">{teamSettings.shortName || "Short Name Not Set"}</p>
                 )}
               </div>
               <div>
@@ -160,12 +160,12 @@ export function SettingsTab({
                 {editingTeam ? (
                   <Input
                     id="team-location"
-                    value={teamForm.location}
+                    value={teamForm.location || ""}
                     onChange={(e) => setTeamForm({...teamForm, location: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.location}</p>
+                  <p className="text-white font-medium mt-1">{teamSettings.location || "Location Not Set"}</p>
                 )}
               </div>
               <div>
@@ -173,12 +173,12 @@ export function SettingsTab({
                 {editingTeam ? (
                   <Input
                     id="team-founded"
-                    value={teamForm.founded}
+                    value={teamForm.founded || ""}
                     onChange={(e) => setTeamForm({...teamForm, founded: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.founded}</p>
+                  <p className="text-white font-medium mt-1">{teamSettings.founded || "Founded Date Not Set"}</p>
                 )}
               </div>
             </div>
@@ -188,13 +188,13 @@ export function SettingsTab({
                 {editingTeam ? (
                   <Textarea
                     id="team-description"
-                    value={teamForm.description}
+                    value={teamForm.description || ""}
                     onChange={(e) => setTeamForm({...teamForm, description: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                     rows={3}
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.description}</p>
+                  <p className="text-white font-medium mt-1">{teamSettings.description || "No description available"}</p>
                 )}
               </div>
               <div>
@@ -202,12 +202,12 @@ export function SettingsTab({
                 {editingTeam ? (
                   <Input
                     id="team-website"
-                    value={teamForm.website}
+                    value={teamForm.website || ""}
                     onChange={(e) => setTeamForm({...teamForm, website: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.website}</p>
+                  <p className="text-white font-medium mt-1">{teamSettings.website || "Website not set"}</p>
                 )}
               </div>
             </div>
@@ -250,12 +250,12 @@ export function SettingsTab({
                 {editingManager ? (
                   <Input
                     id="manager-name"
-                    value={managerForm.name}
+                    value={managerForm.name || ""}
                     onChange={(e) => setManagerForm({...managerForm, name: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{managerSettings.name}</p>
+                  <p className="text-white font-medium mt-1">{managerSettings.name || "Full Name Not Set"}</p>
                 )}
               </div>
               <div>
@@ -264,12 +264,12 @@ export function SettingsTab({
                   <Input
                     id="manager-email"
                     type="email"
-                    value={managerForm.email}
+                    value={managerForm.email || ""}
                     onChange={(e) => setManagerForm({...managerForm, email: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{managerSettings.email}</p>
+                  <p className="text-white font-medium mt-1">{managerSettings.email || "Email Not Set"}</p>
                 )}
               </div>
               <div>
@@ -277,12 +277,12 @@ export function SettingsTab({
                 {editingManager ? (
                   <Input
                     id="manager-phone"
-                    value={managerForm.phone}
+                    value={managerForm.phone || ""}
                     onChange={(e) => setManagerForm({...managerForm, phone: e.target.value})}
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                 ) : (
-                  <p className="text-white font-medium mt-1">{managerSettings.phone}</p>
+                  <p className="text-white font-medium mt-1">{managerSettings.phone || "Phone Not Set"}</p>
                 )}
               </div>
             </div>
