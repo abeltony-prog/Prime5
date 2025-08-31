@@ -135,17 +135,11 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
 
     const handleRegeneratePassword = async (managerId: string) => {
     try {
-      console.log('Starting password regeneration for manager:', managerId)
-      
       // Generate new password
       const newPassword = generatePassword()
-      console.log('Generated new password:', newPassword)
       
       // Hash the password for storage
       const hashedPassword = hashPassword(newPassword)
-      console.log('Hashed password:', hashedPassword)
-      
-      console.log('Sending mutation with variables:', { id: managerId, password: hashedPassword })
       
       // Update password in database
       const result = await updatePassword({
@@ -160,14 +154,7 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
         ]
       })
       
-      console.log('Mutation result:', result)
-      console.log('Mutation data:', result.data)
-      console.log('Mutation errors:', result.errors)
-      
       if (result.data?.update_managers_by_pk) {
-        console.log('Password updated successfully in database')
-        console.log('Updated manager:', result.data.update_managers_by_pk)
-        
         // Update local managers state with new password
         setLocalManagers(prev => prev.map(manager => 
           manager.id === managerId 
@@ -193,18 +180,12 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
           description: `New password has been generated and saved for ${localManagers.find(m => m.id === managerId)?.name || 'manager'}`,
           duration: 5000,
         })
-        
-        console.log('Password regenerated and saved to database successfully')
       } else if (result.errors && result.errors.length > 0) {
-        console.error('GraphQL errors:', result.errors)
         throw new Error(`GraphQL errors: ${result.errors.map(e => e.message).join(', ')}`)
       } else {
-        console.error('No data returned from mutation:', result)
         throw new Error('Failed to update password in database - no data returned')
       }
     } catch (error) {
-      console.error('Error regenerating password:', error)
-      
       // Show error toast
       toast({
         title: "Password Regeneration Failed",
