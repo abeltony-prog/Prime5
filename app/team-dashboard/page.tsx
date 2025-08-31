@@ -48,6 +48,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useMutation, useQuery } from "@apollo/client"
 import { GET_ALL_PLAYERS_WHERE_TEAM_ID } from "@/lib/graphql/queries"
 import { ADD_TEAM_PLAYER_DETAILS } from "@/lib/graphql/mutations"
+import { OverviewTab, PlayersTab, MatchesTab, AnalyticsTab, SettingsTab } from "@/components/team-dashboard"
 
 function TeamDashboardContent() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -319,152 +320,12 @@ function TeamDashboardContent() {
 
           {/* Overview Tab */}
           <TabsContent value="overview">
-            <div className="space-y-8">
-              {/* Team Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white/80">League Position</p>
-                        <p className="text-2xl font-bold text-green-300">{teamData.position}</p>
-                      </div>
-                      <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                        <Trophy className="h-6 w-6 text-green-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white/80">Points</p>
-                        <p className="text-2xl font-bold text-blue-300">{teamData.points}</p>
-                      </div>
-                      <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                        <Target className="h-6 w-6 text-blue-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white/80">Win Rate</p>
-                        <p className="text-2xl font-bold text-yellow-300">{teamData.winRate}%</p>
-                      </div>
-                      <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="h-6 w-6 text-yellow-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white/80">Goals Scored</p>
-                        <p className="text-2xl font-bold text-purple-300">{teamData.goalsFor}</p>
-                      </div>
-                      <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                        <Zap className="h-6 w-6 text-purple-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Performance Chart */}
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-                    <Activity className="h-5 w-5" />
-                    Performance Over Matches
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis dataKey="match" stroke="rgba(255,255,255,0.7)" />
-                      <YAxis stroke="rgba(255,255,255,0.7)" />
-                      <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={2} />
-                      <Line type="monotone" dataKey="goalsAgainst" stroke="#ef4444" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Recent Results & Upcoming Matches */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-                      <CheckCircle className="h-5 w-5" />
-                      Recent Results
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {recentResults.map((result) => (
-                        <div key={result.id} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                          <div>
-                            <p className="font-medium text-white">{result.opponent}</p>
-                            <p className="text-sm text-white/70">{result.date}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-white">{result.result}</p>
-                            <p className="text-sm text-white/70">{result.points} pts</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-                      <Calendar className="h-5 w-5" />
-                      Upcoming Matches
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {upcomingMatches.map((match) => (
-                        <div key={match.id} className="p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="font-medium text-white">{match.opponent}</p>
-                            <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                              {match.type}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-white/70">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {match.date}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {match.time}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {match.venue}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            <OverviewTab 
+              teamData={teamData}
+              performanceData={performanceData}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+            />
           </TabsContent>
 
           {/* Players Tab */}

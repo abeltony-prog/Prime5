@@ -1,0 +1,5 @@
+export { OverviewTab } from './overview-tab'
+export { PlayersTab } from './players-tab'
+export { MatchesTab } from './matches-tab'
+export { AnalyticsTab } from './analytics-tab'
+export { SettingsTab } from './settings-tab' 
