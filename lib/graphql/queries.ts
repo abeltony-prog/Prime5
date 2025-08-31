@@ -66,7 +66,9 @@ export const GET_MATCH_SCHEDULES = gql`
       location
       season_id
       team1
+      team1Goals
       team2
+      team2Goals
       Team1 {
         id
         location
@@ -82,6 +84,17 @@ export const GET_MATCH_SCHEDULES = gql`
         name
         shortname
         team_manager
+      }
+      seasons {
+        id
+        name
+        startDate
+        EndDate
+      }
+      groups {
+        id
+        name
+        season_id
       }
     }
   }
@@ -421,6 +434,153 @@ export const GET_ALL_PLAYERS_WHERE_TEAM_ID = gql`
       name
       phone
       team_id
+    }
+  }
+`
+
+// Query to get player statistics
+export const GET_PLAYER_STATISTICS = gql`
+  query getPlayerStatistics {
+    player_statistics {
+      assists
+      goals
+      id
+      match_id
+      minutes_played
+      player_id
+      red_cards
+      season_id
+      updated_at
+      yellow_cards
+    }
+  }
+`
+
+// Query to get team with complete statistics and player data
+export const GET_TEAM_COMPLETE_DATA = gql`
+  query getTeamCompleteData($teamId: uuid!) {
+    Teams(where: {id: {_eq: $teamId}}) {
+      id
+      name
+      shortname
+      location
+      logo
+      approved
+      team_manager
+      team_statistics {
+        id
+        team_id
+        group_id
+        season_id
+        played
+        wins
+        draws
+        losses
+        goals_for
+        goals_against
+        goal_diff
+        points
+        updated_at
+        groups {
+          id
+          name
+          season_id
+          created_at
+        }
+      }
+      players {
+        id
+        name
+        email
+        phone
+        gender
+        dob
+        create_at
+        team_id
+        player_statistics {
+          id
+          player_id
+          match_id
+          season_id
+          goals
+          assists
+          minutes_played
+          yellow_cards
+          red_cards
+          updated_at
+        }
+      }
+    }
+  }
+`
+
+// Query to get current season with groups
+export const GET_CURRENT_SEASON_WITH_GROUPS = gql`
+  query getCurrentSeasonWithGroups {
+    seasons(order_by: {startDate: desc}, limit: 1) {
+      id
+      name
+      startDate
+      EndDate
+      teams
+      created_at
+      groups {
+        id
+        name
+        season_id
+        created_at
+      }
+    }
+  }
+`
+
+// Query to get matches for a specific team
+export const GET_TEAM_MATCHES = gql`
+  query getTeamMatches($teamId: uuid!) {
+    matches(where: {_or: [{team1: {_eq: $teamId}}, {team2: {_eq: $teamId}}]}) {
+      created_at
+      dateAndtime
+      id
+      location
+      season_id
+      team1
+      team1Goals
+      team2
+      team2Goals
+      Team1 {
+        id
+        location
+        logo
+        name
+        shortname
+        team_manager
+      }
+      Team2 {
+        id
+        location
+        logo
+        name
+        shortname
+        team_manager
+      }
+    }
+  }
+`
+
+// Query to get player statistics for a specific team
+export const GET_TEAM_PLAYER_STATISTICS = gql`
+  query getTeamPlayerStatistics($teamId: uuid!) {
+    player_statistics {
+      assists
+      goals
+      id
+      match_id
+      minutes_played
+      player_id
+      red_cards
+      season_id
+      updated_at
+      yellow_cards
     }
   }
 `
