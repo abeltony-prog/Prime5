@@ -35,4 +35,44 @@ export function hashPassword(password: string): string {
     }
     return `hash_${Math.abs(hash)}_${password.length}_${Date.now()}`
   }
+}
+
+// Function to hash password for storage (includes timestamp for uniqueness)
+export function hashPasswordForStorage(password: string): string {
+  let hash = 0
+  for (let i = 0; i < password.length; i++) {
+    const char = password.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return `hash_${Math.abs(hash)}_${password.length}_${Date.now()}`
+}
+
+// Function to hash password for comparison (consistent hash without timestamp)
+export function hashPasswordForComparison(password: string): string {
+  let hash = 0
+  for (let i = 0; i < password.length; i++) {
+    const char = password.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return `hash_${Math.abs(hash)}_${password.length}`
+}
+
+// Function to check if password matches stored hash (handles both old and new formats)
+export function checkPasswordMatch(password: string, storedHash: string): boolean {
+  // First try the new format (without timestamp)
+  const newFormatHash = hashPasswordForComparison(password)
+  if (newFormatHash === storedHash) {
+    return true
+  }
+  
+  // If that doesn't match, try the old format (with timestamp)
+  // Extract the base hash part from stored hash (remove timestamp)
+  const oldFormatBase = storedHash.replace(/_\d+$/, '') // Remove timestamp part
+  if (newFormatHash === oldFormatBase) {
+    return true
+  }
+  
+  return false
 } 

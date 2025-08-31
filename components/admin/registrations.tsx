@@ -36,7 +36,7 @@ import {
 import { useMutation } from "@apollo/client"
 import { UPDATE_MANAGER_PASSWORD } from "@/lib/graphql/mutations"
 import { GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
-import { generatePassword, hashPassword } from "@/lib/utils/password"
+import { generatePassword, hashPasswordForStorage } from "@/lib/utils/password"
 import { useToast } from "@/hooks/use-toast"
 
 interface Manager {
@@ -139,7 +139,7 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
       const newPassword = generatePassword()
       
       // Hash the password for storage
-      const hashedPassword = hashPassword(newPassword)
+      const hashedPassword = hashPasswordForStorage(newPassword)
       
       // Update password in database
       const result = await updatePassword({
@@ -402,7 +402,7 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
                               {getStatusIcon(team.approved)}
                               {team.approved ? 'Approved' : 'Pending'}
                             </div>
-                          </Badge>
+                      </Badge>
                         ))}
                       </div>
                     </TableCell>
@@ -463,7 +463,7 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
                     <TableCell>
                       <div className="text-sm text-white/70">
                         {new Date(manager.create_at).toLocaleDateString()}
-                      </div>
+                        </div>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -490,10 +490,10 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
                                 </>
                               ) : (
                                 <>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                <CheckCircle className="h-4 w-4 mr-2" />
                                   Approve Team
-                                </>
-                              )}
+                            </>
+                          )}
                             </DropdownMenuItem>
                           ))}
                           <DropdownMenuItem>

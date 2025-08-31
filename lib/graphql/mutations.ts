@@ -306,4 +306,6 @@ export const UPDATE_MANAGER_PASSWORD = gql`
       email
     }
   }
-` 
+`
+
+ 

@@ -384,4 +384,29 @@ export const GET_ALL_MANAGERS_DETAILS = gql`
   }
 `
 
+// Query to get manager by email for authentication
+export const GET_MANAGER_BY_EMAIL = gql`
+  query GetManagerByEmail($email: String!) {
+    managers(where: {email: {_eq: $email}}) {
+      id
+      name
+      email
+      password
+      phone
+      gender
+      photo
+      create_at
+      Teams {
+        approved
+        id
+        location
+        logo
+        name
+        shortname
+        team_manager
+      }
+    }
+  }
+`
+
  
