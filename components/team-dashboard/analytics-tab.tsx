@@ -53,6 +53,21 @@ interface AnalyticsTabProps {
 export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6']
 
+  // Add safety check for analyticsData
+  if (!analyticsData || !analyticsData.teamStats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-8 h-8 text-white/60" />
+          </div>
+          <p className="text-white/60 text-lg">No analytics data available</p>
+          <p className="text-white/40 text-sm">Please check back later</p>
+        </div>
+      </div>
+    )
+  }
+
   const getFormColor = (result: string) => {
     switch (result) {
       case 'W': return 'bg-green-500'
@@ -107,7 +122,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
                 <p className="text-2xl font-bold text-white">{analyticsData.teamStats.cleanSheets}</p>
               </div>
             </div>
-            <Progress value={(analyticsData.teamStats.cleanSheets / analyticsData.teamStats.totalMatches) * 100} className="mt-3" />
+            <Progress value={analyticsData.teamStats.totalMatches > 0 ? (analyticsData.teamStats.cleanSheets / analyticsData.teamStats.totalMatches) * 100 : 0} className="mt-3" />
           </CardContent>
         </Card>
 
@@ -138,7 +153,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={analyticsData.monthlyPerformance}>
+              <LineChart data={analyticsData.monthlyPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
                 <YAxis stroke="rgba(255,255,255,0.7)" />
@@ -170,7 +185,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analyticsData.monthlyPerformance}>
+              <BarChart data={analyticsData.monthlyPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
                 <YAxis stroke="rgba(255,255,255,0.7)" />
@@ -194,7 +209,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           </CardHeader>
           <CardContent>
             <div className="flex gap-2 justify-center">
-              {analyticsData.formData.map((match, index) => (
+              {(analyticsData.formData || []).map((match, index) => (
                 <div
                   key={index}
                   className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${getFormColor(match.result)}`}
@@ -205,7 +220,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
               ))}
             </div>
             <div className="mt-4 text-center text-white/60 text-sm">
-              <p>Last {analyticsData.formData.length} matches</p>
+              <p>Last {(analyticsData.formData || []).length} matches</p>
               <p className="mt-2">
                 <span className="text-green-400">W</span> = Win, 
                 <span className="text-yellow-400"> D</span> = Draw, 
@@ -224,7 +239,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {analyticsData.playerStats.slice(0, 5).map((player, index) => (
+              {(analyticsData.playerStats || []).slice(0, 5).map((player, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center">

@@ -75,10 +75,6 @@ export function SettingsTab({
 }: SettingsTabProps) {
   const [editingTeam, setEditingTeam] = useState(false)
   const [editingManager, setEditingManager] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
 
   const [teamForm, setTeamForm] = useState(teamSettings)
   const [managerForm, setManagerForm] = useState(managerSettings)
@@ -91,18 +87,6 @@ export function SettingsTab({
   const handleSaveManagerSettings = () => {
     onSaveManagerSettings(managerForm)
     setEditingManager(false)
-  }
-
-  const handlePasswordChange = () => {
-    if (newPassword !== confirmPassword) {
-      alert("New passwords don't match!")
-      return
-    }
-    // Handle password change logic here
-    alert("Password changed successfully!")
-    setCurrentPassword("")
-    setNewPassword("")
-    setConfirmPassword("")
   }
 
   return (
@@ -226,64 +210,25 @@ export function SettingsTab({
       {/* Manager Settings */}
       <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <User className="h-5 w-5" />
-              Manager Settings
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditingManager(!editingManager)}
-              className="border-white/20 text-white hover:bg-white/10"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              {editingManager ? "Cancel" : "Edit"}
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
+            <User className="h-5 w-5" />
+            Manager Settings
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="manager-name" className="text-white/80">Full Name</Label>
-                {editingManager ? (
-                  <Input
-                    id="manager-name"
-                    value={managerForm.name || ""}
-                    onChange={(e) => setManagerForm({...managerForm, name: e.target.value})}
-                    className="mt-1 bg-white/10 border-white/20 text-white"
-                  />
-                ) : (
-                  <p className="text-white font-medium mt-1">{managerSettings.name || "Full Name Not Set"}</p>
-                )}
+                <p className="text-white font-medium mt-1">{managerSettings.name || "Full Name Not Set"}</p>
               </div>
               <div>
                 <Label htmlFor="manager-email" className="text-white/80">Email</Label>
-                {editingManager ? (
-                  <Input
-                    id="manager-email"
-                    type="email"
-                    value={managerForm.email || ""}
-                    onChange={(e) => setManagerForm({...managerForm, email: e.target.value})}
-                    className="mt-1 bg-white/10 border-white/20 text-white"
-                  />
-                ) : (
-                  <p className="text-white font-medium mt-1">{managerSettings.email || "Email Not Set"}</p>
-                )}
+                <p className="text-white font-medium mt-1">{managerSettings.email || "Email Not Set"}</p>
               </div>
               <div>
                 <Label htmlFor="manager-phone" className="text-white/80">Phone</Label>
-                {editingManager ? (
-                  <Input
-                    id="manager-phone"
-                    value={managerForm.phone || ""}
-                    onChange={(e) => setManagerForm({...managerForm, phone: e.target.value})}
-                    className="mt-1 bg-white/10 border-white/20 text-white"
-                  />
-                ) : (
-                  <p className="text-white font-medium mt-1">{managerSettings.phone || "Phone Not Set"}</p>
-                )}
+                <p className="text-white font-medium mt-1">{managerSettings.phone || "Phone Not Set"}</p>
               </div>
             </div>
             <div className="space-y-4">
@@ -293,193 +238,11 @@ export function SettingsTab({
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center">
                     <User className="w-8 h-8 text-white" />
                   </div>
-                  {editingManager && (
-                    <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
           </div>
-          {editingManager && (
-            <div className="mt-6 flex gap-2">
-              <Button onClick={handleSaveManagerSettings} className="bg-green-600 hover:bg-green-700">
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Notification Settings */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Bell className="h-5 w-5" />
-            Notification Preferences
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">Email Notifications</p>
-                <p className="text-white/60 text-sm">Receive updates via email</p>
-              </div>
-              <Switch 
-                checked={managerSettings.notifications.email}
-                onCheckedChange={(checked) => setManagerForm({
-                  ...managerForm,
-                  notifications: { ...managerForm.notifications, email: checked }
-                })}
-              />
-            </div>
-            <Separator className="bg-white/20" />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">SMS Notifications</p>
-                <p className="text-white/60 text-sm">Receive updates via SMS</p>
-              </div>
-              <Switch 
-                checked={managerSettings.notifications.sms}
-                onCheckedChange={(checked) => setManagerForm({
-                  ...managerForm,
-                  notifications: { ...managerForm.notifications, sms: checked }
-                })}
-              />
-            </div>
-            <Separator className="bg-white/20" />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">Push Notifications</p>
-                <p className="text-white/60 text-sm">Receive updates in the app</p>
-              </div>
-              <Switch 
-                checked={managerSettings.notifications.push}
-                onCheckedChange={(checked) => setManagerForm({
-                  ...managerForm,
-                  notifications: { ...managerForm.notifications, push: checked }
-                })}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Privacy Settings */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Lock className="h-5 w-5" />
-            Privacy Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">Public Profile</p>
-                <p className="text-white/60 text-sm">Allow others to view your profile</p>
-              </div>
-              <Switch 
-                checked={managerSettings.privacy.profilePublic}
-                onCheckedChange={(checked) => setManagerForm({
-                  ...managerForm,
-                  privacy: { ...managerForm.privacy, profilePublic: checked }
-                })}
-              />
-            </div>
-            <Separator className="bg-white/20" />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">Show Contact Info</p>
-                <p className="text-white/60 text-sm">Display your contact information</p>
-              </div>
-              <Switch 
-                checked={managerSettings.privacy.showContactInfo}
-                onCheckedChange={(checked) => setManagerForm({
-                  ...managerForm,
-                  privacy: { ...managerForm.privacy, showContactInfo: checked }
-                })}
-              />
-            </div>
-            <Separator className="bg-white/20" />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">Show Statistics</p>
-                <p className="text-white/60 text-sm">Display your team statistics</p>
-              </div>
-              <Switch 
-                checked={managerSettings.privacy.showStats}
-                onCheckedChange={(checked) => setManagerForm({
-                  ...managerForm,
-                  privacy: { ...managerForm.privacy, showStats: checked }
-                })}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Password Change */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Lock className="h-5 w-5" />
-            Change Password
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="current-password" className="text-white/80">Current Password</Label>
-              <div className="relative mt-1">
-                <Input
-                  id="current-password"
-                  type={showPassword ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 text-white/60 hover:text-white"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="new-password" className="text-white/80">New Password</Label>
-              <Input
-                id="new-password"
-                type={showPassword ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 bg-white/10 border-white/20 text-white"
-              />
-            </div>
-            <div>
-              <Label htmlFor="confirm-password" className="text-white/80">Confirm New Password</Label>
-              <Input
-                id="confirm-password"
-                type={showPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 bg-white/10 border-white/20 text-white"
-              />
-            </div>
-            <Button onClick={handlePasswordChange} className="bg-blue-600 hover:bg-blue-700">
-              <Lock className="h-4 w-4 mr-2" />
-              Change Password
-            </Button>
-          </div>
         </CardContent>
       </Card>
 
@@ -507,4 +270,4 @@ export function SettingsTab({
       </Card>
     </div>
   )
-} 
+}
