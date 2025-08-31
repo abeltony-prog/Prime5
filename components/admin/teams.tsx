@@ -23,10 +23,19 @@ import {
   Search,
   Filter,
   Download,
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  User,
+  Calendar,
+  Upload,
 } from "lucide-react"
 import { useTeams } from "@/hooks/use-teams"
 import { useCreateTeam } from "@/hooks/use-teams"
 import { TeamDetails } from "./team-details"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 interface Player {
   id: number
@@ -203,6 +212,18 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   const [groupFilter, setGroupFilter] = useState("all")
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false)
+  const [newTeam, setNewTeam] = useState({
+    teamName: "",
+    shortname: "",
+    managerName: "",
+    email: "",
+    phone: "",
+    gender: "",
+    location: "",
+    photo: null as File | null,
+    logo: null as File | null
+  })
 
   // Use the hook to get teams from database
   const { teams: dbTeams, loading, error, refetch } = useTeams()
@@ -382,7 +403,10 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setIsAddTeamModalOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Team
           </Button>
@@ -518,6 +542,178 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
         onClose={() => setIsDetailsOpen(false)}
         loading={false}
       />
+
+      {/* Add Team Modal */}
+      {isAddTeamModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white drop-shadow-lg">Add New Team</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsAddTeamModalOpen(false)}
+                  className="text-white hover:bg-white/20"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault()
+                // Handle form submission here
+                console.log('New team data:', newTeam)
+                setIsAddTeamModalOpen(false)
+              }} className="space-y-6">
+                <div>
+                  <Label htmlFor="teamName" className="text-white drop-shadow-md">Team Name *</Label>
+                  <Input
+                    id="teamName"
+                    required
+                    value={newTeam.teamName}
+                    onChange={(e) => setNewTeam({...newTeam, teamName: e.target.value})}
+                    className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                    placeholder="Enter team name"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="managerName" className="text-white drop-shadow-md">Manager Name *</Label>
+                    <Input
+                      id="managerName"
+                      required
+                      value={newTeam.managerName}
+                      onChange={(e) => setNewTeam({...newTeam, managerName: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                      placeholder="Enter manager name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="text-white drop-shadow-md">Email *</Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      required
+                      value={newTeam.email}
+                      onChange={(e) => setNewTeam({...newTeam, email: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                      placeholder="manager@team.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone" className="text-white drop-shadow-md">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      required
+                      value={newTeam.phone}
+                      onChange={(e) => setNewTeam({...newTeam, phone: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                      placeholder="+250 788 123 456"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="gender" className="text-white drop-shadow-md">Gender</Label>
+                    <select 
+                      id="gender" 
+                      value={newTeam.gender}
+                      onChange={(e) => setNewTeam({...newTeam, gender: e.target.value})}
+                      className="mt-2 w-full px-3 py-2 border border-white/30 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500/50 bg-white/20 backdrop-blur-sm text-white"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="location" className="text-white drop-shadow-md">Team Location *</Label>
+                    <Input
+                      id="location"
+                      required
+                      value={newTeam.location}
+                      onChange={(e) => setNewTeam({...newTeam, location: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                      placeholder="Kigali, Rwanda"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="shortname" className="text-white drop-shadow-md">Short Name (3 letters) *</Label>
+                    <Input
+                      id="shortname"
+                      maxLength={3}
+                      required
+                      value={newTeam.shortname}
+                      onChange={(e) => setNewTeam({...newTeam, shortname: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                      placeholder="e.g., MUFC"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="photo" className="text-white drop-shadow-md">Manager Photo</Label>
+                    <div className="mt-2 border-2 border-dashed border-white/30 rounded-lg p-6 text-center hover:border-green-400/50 transition-colors bg-white/10 backdrop-blur-sm">
+                      <Upload className="h-8 w-8 text-white/70 mx-auto mb-2" />
+                      <p className="text-sm text-white/90">Click to upload or drag and drop</p>
+                      <p className="text-xs text-white/70 mt-1">PNG, JPG up to 2MB</p>
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => setNewTeam({...newTeam, photo: e.target.files?.[0] || null})}
+                        className="hidden" 
+                        id="photo" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="logo" className="text-white drop-shadow-md">Team Logo</Label>
+                    <div className="mt-2 border-2 border-dashed border-white/30 rounded-lg p-6 text-center hover:border-green-400/50 transition-colors bg-white/10 backdrop-blur-sm">
+                      <Upload className="h-8 w-8 text-white/70 mx-auto mb-2" />
+                      <p className="text-sm text-white/90">Click to upload or drag and drop</p>
+                      <p className="text-xs text-white/70 mt-1">PNG, JPG up to 2MB</p>
+                      <Input
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => setNewTeam({...newTeam, logo: e.target.files?.[0] || null})}
+                        className="hidden" 
+                        id="logo" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Team
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddTeamModalOpen(false)}
+                    className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

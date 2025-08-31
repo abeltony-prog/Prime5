@@ -292,4 +292,18 @@ export const DELETE_MATCH = gql`
       id
     }
   }
+`
+
+// Mutation to update manager password
+export const UPDATE_MANAGER_PASSWORD = gql`
+  mutation UpdateManagerPassword($id: uuid!, $password: String!) {
+    update_managers_by_pk(
+      pk_columns: { id: $id }
+      _set: { password: $password }
+    ) {
+      id
+      name
+      email
+    }
+  }
 ` 

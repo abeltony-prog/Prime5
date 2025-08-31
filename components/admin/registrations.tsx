@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Label } from "@/components/ui/label"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,86 +27,250 @@ import {
   Mail,
   Phone,
   Calendar,
+  Edit,
+  X,
+  Key,
+  Copy,
+  EyeOff,
 } from "lucide-react"
+import { useMutation } from "@apollo/client"
+import { UPDATE_MANAGER_PASSWORD } from "@/lib/graphql/mutations"
+import { GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
+import { generatePassword, hashPassword } from "@/lib/utils/password"
+import { useToast } from "@/hooks/use-toast"
 
-interface Registration {
-  id: number
-  teamName: string
-  managerName: string
+interface Manager {
+  id: string
+  name: string
   email: string
   phone: string
-  submittedDate: string
-  status: "pending" | "approved" | "rejected"
-  group: string
+  gender: string
+  photo?: string
+  create_at: string
+  password: string
+  Teams: Team[]
+}
+
+interface Team {
+  id: string
+  name: string
+  shortname: string
   location: string
-  reviewNotes?: string
+  logo?: string
+  team_manager: string
+  approved: boolean
 }
 
 interface RegistrationsProps {
-  registrations: Registration[]
+  managers: Manager[]
 }
 
-export function Registrations({ registrations }: RegistrationsProps) {
+export function Registrations({ managers = [] }: RegistrationsProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [groupFilter, setGroupFilter] = useState("all")
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedManager, setSelectedManager] = useState<Manager | null>(null)
+  const [editingManager, setEditingManager] = useState<Manager | null>(null)
+  const [generatedPasswords, setGeneratedPasswords] = useState<Record<string, string>>({})
+  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
+  const [localManagers, setLocalManagers] = useState<Manager[]>(managers)
 
-  const filteredRegistrations = registrations.filter((reg) => {
-    const matchesSearch = reg.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         reg.managerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         reg.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || reg.status === statusFilter
-    const matchesGroup = groupFilter === "all" || reg.group === groupFilter
+  // GraphQL mutation for updating passwords
+  const [updatePassword, { loading: passwordUpdating }] = useMutation(UPDATE_MANAGER_PASSWORD)
+  const { toast } = useToast()
+
+  // Update local managers when prop changes
+  useEffect(() => {
+    setLocalManagers(managers)
+  }, [managers])
+
+  // Handle case when managers is undefined or null
+  if (!localManagers || localManagers.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <Users className="h-16 w-16 text-white/50 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No Managers Found</h3>
+          <p className="text-white/70">There are no registered managers to display.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const filteredManagers = localManagers.filter((manager) => {
+    const matchesSearch = manager.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         manager.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         manager.Teams.some(team => team.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesStatus = statusFilter === "all" || 
+                         (statusFilter === "approved" && manager.Teams.some(team => team.approved)) ||
+                         (statusFilter === "pending" && manager.Teams.some(team => !team.approved))
     
-    return matchesSearch && matchesStatus && matchesGroup
+    return matchesSearch && matchesStatus
   })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800"
-      case "approved":
-        return "bg-green-100 text-green-800"
-      case "rejected":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+  const getStatusColor = (approved: boolean) => {
+    return approved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+  }
+
+  const getStatusIcon = (approved: boolean) => {
+    return approved ? <CheckCircle className="h-4 w-4" /> : <Clock className="h-4 w-4" />
+  }
+
+  const handleTeamApproval = (teamId: string, approved: boolean) => {
+    // Here you would update the team approval status in the database
+    console.log(`Changing team ${teamId} approval to ${approved}`)
+  }
+
+  const handleEditManager = (manager: Manager) => {
+    setEditingManager(manager)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSaveManager = () => {
+    // Here you would save the manager details to the database
+    console.log('Saving manager:', editingManager)
+    setIsEditModalOpen(false)
+    setEditingManager(null)
+  }
+
+    const handleRegeneratePassword = async (managerId: string) => {
+    try {
+      console.log('Starting password regeneration for manager:', managerId)
+      
+      // Generate new password
+      const newPassword = generatePassword()
+      console.log('Generated new password:', newPassword)
+      
+      // Hash the password for storage
+      const hashedPassword = hashPassword(newPassword)
+      console.log('Hashed password:', hashedPassword)
+      
+      console.log('Sending mutation with variables:', { id: managerId, password: hashedPassword })
+      
+      // Update password in database
+      const result = await updatePassword({
+        variables: {
+          id: managerId,
+          password: hashedPassword
+        },
+        refetchQueries: [
+          {
+            query: GET_ALL_MANAGERS_DETAILS
+          }
+        ]
+      })
+      
+      console.log('Mutation result:', result)
+      console.log('Mutation data:', result.data)
+      console.log('Mutation errors:', result.errors)
+      
+      if (result.data?.update_managers_by_pk) {
+        console.log('Password updated successfully in database')
+        console.log('Updated manager:', result.data.update_managers_by_pk)
+        
+        // Update local managers state with new password
+        setLocalManagers(prev => prev.map(manager => 
+          manager.id === managerId 
+            ? { ...manager, password: hashedPassword }
+            : manager
+        ))
+        
+        // Store the plain text password temporarily for display
+        setGeneratedPasswords(prev => ({
+          ...prev,
+          [managerId]: newPassword
+        }))
+        
+        // Show the password
+        setShowPasswords(prev => ({
+          ...prev,
+          [managerId]: true
+        }))
+        
+        // Show success toast
+        toast({
+          title: "Password Regenerated Successfully",
+          description: `New password has been generated and saved for ${localManagers.find(m => m.id === managerId)?.name || 'manager'}`,
+          duration: 5000,
+        })
+        
+        console.log('Password regenerated and saved to database successfully')
+      } else if (result.errors && result.errors.length > 0) {
+        console.error('GraphQL errors:', result.errors)
+        throw new Error(`GraphQL errors: ${result.errors.map(e => e.message).join(', ')}`)
+      } else {
+        console.error('No data returned from mutation:', result)
+        throw new Error('Failed to update password in database - no data returned')
+      }
+    } catch (error) {
+      console.error('Error regenerating password:', error)
+      
+      // Show error toast
+      toast({
+        title: "Password Regeneration Failed",
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+        duration: 5000,
+      })
     }
   }
 
-  const getGroupColor = (group: string) => {
-    return group === "A" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4" />
-      case "approved":
-        return <CheckCircle className="h-4 w-4" />
-      case "rejected":
-        return <XCircle className="h-4 w-4" />
-      default:
-        return <Clock className="h-4 w-4" />
+  const handleCopyPassword = async (password: string) => {
+    try {
+      await navigator.clipboard.writeText(password)
+      toast({
+        title: "Password Copied",
+        description: "Password has been copied to clipboard",
+        duration: 3000,
+      })
+    } catch (error) {
+      console.error('Error copying password:', error)
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy password to clipboard",
+        variant: "destructive",
+        duration: 3000,
+      })
     }
   }
 
-  const handleStatusChange = (registrationId: number, newStatus: string) => {
-    // Here you would update the registration status in the database
-    console.log(`Changing registration ${registrationId} to ${newStatus}`)
+  const togglePasswordVisibility = (managerId: string) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [managerId]: !prev[managerId]
+    }))
   }
 
-  const pendingCount = registrations.filter(r => r.status === "pending").length
-  const approvedCount = registrations.filter(r => r.status === "approved").length
-  const rejectedCount = registrations.filter(r => r.status === "rejected").length
+  // Function to decode/decrypt password from database
+  const decodePassword = (hashedPassword: string) => {
+    // For now, we'll show a placeholder since we can't decrypt hashed passwords
+    // In a real system, you might have a way to temporarily decrypt or show a masked version
+    return "••••••••"
+  }
+
+  // Function to get display password (either generated or from database)
+  const getDisplayPassword = (managerId: string, hashedPassword: string) => {
+    if (generatedPasswords[managerId]) {
+      return generatedPasswords[managerId]
+    }
+    // If we have a hashed password from database, show masked version
+    if (hashedPassword) {
+      return decodePassword(hashedPassword)
+    }
+    return "••••••••"
+  }
+
+  const pendingCount = localManagers.filter(m => m.Teams.some(t => !t.approved)).length
+  const approvedCount = localManagers.filter(m => m.Teams.some(t => t.approved)).length
+  const totalManagers = localManagers.length
 
   return (
     <div className="space-y-6">
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Registration Management</h2>
-          <p className="text-white/80">Review and manage team registration applications</p>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Managers & Teams Management</h2>
+          <p className="text-white/80">Review and manage managers and their team applications</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline">
@@ -125,7 +290,21 @@ export function Registrations({ registrations }: RegistrationsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/80">Pending Review</p>
+                <p className="text-sm font-medium text-white/80">Total Managers</p>
+                <p className="text-2xl font-bold text-blue-300">{totalManagers}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/80">Pending Approval</p>
                 <p className="text-2xl font-bold text-yellow-300">{pendingCount}</p>
               </div>
               <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
@@ -139,25 +318,11 @@ export function Registrations({ registrations }: RegistrationsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/80">Approved</p>
+                <p className="text-sm font-medium text-white/80">Approved Teams</p>
                 <p className="text-2xl font-bold text-green-300">{approvedCount}</p>
               </div>
               <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/80">Rejected</p>
-                <p className="text-2xl font-bold text-red-300">{rejectedCount}</p>
-              </div>
-              <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
-                <XCircle className="h-6 w-6 text-red-600" />
               </div>
             </div>
           </CardContent>
@@ -167,11 +332,11 @@ export function Registrations({ registrations }: RegistrationsProps) {
       {/* Filters */}
       <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search registrations..."
+                placeholder="Search managers and teams..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -183,19 +348,8 @@ export function Registrations({ registrations }: RegistrationsProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={groupFilter} onValueChange={setGroupFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by group" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Groups</SelectItem>
-                <SelectItem value="A">Group A</SelectItem>
-                <SelectItem value="B">Group B</SelectItem>
+                <SelectItem value="pending">Pending Approval</SelectItem>
+                <SelectItem value="approved">Approved Teams</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" className="flex items-center gap-2">
@@ -206,12 +360,12 @@ export function Registrations({ registrations }: RegistrationsProps) {
         </CardContent>
       </Card>
 
-      {/* Registrations Table */}
+      {/* Managers & Teams Table */}
       <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Users className="h-5 w-5" />
-            Registration Applications ({filteredRegistrations.length})
+            Managers & Teams ({filteredManagers.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -219,55 +373,116 @@ export function Registrations({ registrations }: RegistrationsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-white/90">Team & Manager</TableHead>
+                  <TableHead className="text-white/90">Manager Details</TableHead>
                   <TableHead className="text-white/90">Contact Info</TableHead>
-                  <TableHead className="text-white/90">Group</TableHead>
-                  <TableHead className="text-white/90">Location</TableHead>
-                  <TableHead className="text-white/90">Submitted</TableHead>
-                  <TableHead className="text-white/90">Status</TableHead>
+                  <TableHead className="text-white/90">Teams</TableHead>
+                  <TableHead className="text-white/90">Team Status</TableHead>
+                  <TableHead className="text-white/90">Password Status</TableHead>
+                  <TableHead className="text-white/90">Created</TableHead>
                   <TableHead className="text-white/90">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRegistrations.map((registration) => (
-                  <TableRow key={registration.id} className="hover:bg-white/10">
+                {filteredManagers.map((manager) => (
+                  <TableRow key={manager.id} className="hover:bg-white/10">
                     <TableCell>
                       <div>
-                        <div className="font-medium text-white">{registration.teamName}</div>
-                        <div className="text-sm text-white/70">{registration.managerName}</div>
+                        <div className="font-medium text-white">{manager.name}</div>
+                        <div className="text-sm text-white/70">Gender: {manager.gender || 'Not specified'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 text-sm text-white/80">
                           <Mail className="h-3 w-3" />
-                          {registration.email}
+                          {manager.email}
                         </div>
                         <div className="flex items-center gap-1 text-sm text-white/80">
                           <Phone className="h-3 w-3" />
-                          {registration.phone}
+                          {manager.phone}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getGroupColor(registration.group)}>
-                        Group {registration.group}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-white/80">{registration.location}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-white/70">
-                        <Calendar className="h-3 w-3" />
-                        {registration.submittedDate}
+                      <div className="space-y-2">
+                        {manager.Teams.map((team) => (
+                          <div key={team.id} className="text-sm">
+                            <div className="font-medium text-white">{team.name}</div>
+                            <div className="text-white/70">({team.shortname}) - {team.location}</div>
+                          </div>
+                        ))}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(registration.status)}>
-                        <div className="flex items-center gap-1">
-                          {getStatusIcon(registration.status)}
-                          {registration.status}
-                        </div>
-                      </Badge>
+                      <div className="space-y-2">
+                        {manager.Teams.map((team) => (
+                          <Badge key={team.id} className={getStatusColor(team.approved)}>
+                            <div className="flex items-center gap-1">
+                              {getStatusIcon(team.approved)}
+                              {team.approved ? 'Approved' : 'Pending'}
+                            </div>
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        {manager.password ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type={showPasswords[manager.id] ? "text" : "password"}
+                                value={getDisplayPassword(manager.id, manager.password)}
+                                readOnly
+                                className="text-xs bg-white/20 backdrop-blur-sm border-white/30 text-white font-mono"
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => togglePasswordVisibility(manager.id)}
+                                className="text-white hover:bg-white/20"
+                              >
+                                {showPasswords[manager.id] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  const passwordToCopy = generatedPasswords[manager.id] || getDisplayPassword(manager.id, manager.password)
+                                  if (passwordToCopy !== "••••••••") {
+                                    handleCopyPassword(passwordToCopy)
+                                  } else {
+                                    toast({
+                                      title: "Cannot Copy",
+                                      description: "Password is hashed and cannot be copied",
+                                      variant: "destructive",
+                                      duration: 3000,
+                                    })
+                                  }
+                                }}
+                                className="text-white hover:bg-white/20"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            {!generatedPasswords[manager.id] && (
+                              <div className="text-xs text-white/40 text-center">
+                                Password exists (hashed) - regenerate to view
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-xs text-white/50">
+                            <div>No password set</div>
+                            <div className="text-white/40 text-[10px]">Click regenerate to create one</div>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-white/70">
+                        {new Date(manager.create_at).toLocaleDateString()}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -277,22 +492,29 @@ export function Registrations({ registrations }: RegistrationsProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
+                          <DropdownMenuItem onClick={() => handleEditManager(manager)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Manager
                           </DropdownMenuItem>
-                          {registration.status === "pending" && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleStatusChange(registration.id, "approved")}>
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Approve
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(registration.id, "rejected")}>
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Reject
-                              </DropdownMenuItem>
-                            </>
-                          )}
+                          <DropdownMenuItem onClick={() => handleRegeneratePassword(manager.id)}>
+                            <Key className="h-4 w-4 mr-2" />
+                            {passwordUpdating ? 'Regenerating...' : 'Regenerate Password'}
+                          </DropdownMenuItem>
+                          {manager.Teams.map((team) => (
+                            <DropdownMenuItem key={team.id} onClick={() => handleTeamApproval(team.id, !team.approved)}>
+                              {team.approved ? (
+                                <>
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Revoke Approval
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Approve Team
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                          ))}
                           <DropdownMenuItem>
                             <Mail className="h-4 w-4 mr-2" />
                             Send Email
@@ -307,6 +529,101 @@ export function Registrations({ registrations }: RegistrationsProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Manager Modal */}
+      {isEditModalOpen && editingManager && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white drop-shadow-lg">Edit Manager Details</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="text-white hover:bg-white/20"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault()
+                handleSaveManager()
+              }} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editName" className="text-white drop-shadow-md">Manager Name *</Label>
+                    <Input
+                      id="editName"
+                      required
+                      value={editingManager.name}
+                      onChange={(e) => setEditingManager({...editingManager, name: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editEmail" className="text-white drop-shadow-md">Email *</Label>
+                    <Input
+                      type="email"
+                      id="editEmail"
+                      required
+                      value={editingManager.email}
+                      onChange={(e) => setEditingManager({...editingManager, email: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editPhone" className="text-white drop-shadow-md">Phone *</Label>
+                    <Input
+                      id="editPhone"
+                      type="tel"
+                      required
+                      value={editingManager.phone}
+                      onChange={(e) => setEditingManager({...editingManager, phone: e.target.value})}
+                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editGender" className="text-white drop-shadow-md">Gender</Label>
+                    <select 
+                      id="editGender" 
+                      value={editingManager.gender}
+                      onChange={(e) => setEditingManager({...editingManager, gender: e.target.value})}
+                      className="mt-2 w-full px-3 py-2 border border-white/30 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500/50 bg-white/20 backdrop-blur-sm text-white"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  >
+                    Save Changes
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

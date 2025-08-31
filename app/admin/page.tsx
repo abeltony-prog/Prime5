@@ -44,6 +44,8 @@ import {
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
+import { useQuery } from "@apollo/client"
+import { GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
 
 // Import admin components
 import { Overview } from "@/components/admin/overview"
@@ -54,6 +56,9 @@ import { Registrations } from "@/components/admin/registrations"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+
+  // Fetch managers data using GraphQL
+  const { data: managersData, loading: managersLoading, error: managersError } = useQuery(GET_ALL_MANAGERS_DETAILS)
 
   // Mock data for charts
   const matchesData = [
@@ -212,42 +217,7 @@ export default function AdminDashboard() {
 
 
 
-  const registrations = [
-    {
-      id: 1,
-      teamName: "Fire Hawks",
-      managerName: "Sarah Johnson",
-      email: "sarah@firehawks.com",
-      phone: "+250 123 456 789",
-      submittedDate: "2024-02-10",
-      status: "pending" as const,
-      group: "A",
-      location: "Kigali",
-    },
-    {
-      id: 2,
-      teamName: "Golden Eagles",
-      managerName: "Michael Chen",
-      email: "michael@goldeneagles.com",
-      phone: "+250 987 654 321",
-      submittedDate: "2024-02-09",
-      status: "approved" as const,
-      group: "B",
-      location: "Kigali",
-    },
-    {
-      id: 3,
-      teamName: "Silver Lions",
-      managerName: "Emma Wilson",
-      email: "emma@silverlions.com",
-      phone: "+250 555 123 456",
-      submittedDate: "2024-02-08",
-      status: "rejected" as const,
-      group: "A",
-      location: "Kigali",
-      reviewNotes: "Incomplete documentation",
-    },
-  ]
+
 
   return (
     <div className="min-h-screen relative">
@@ -381,7 +351,23 @@ export default function AdminDashboard() {
 
           {/* Registrations Tab */}
           <TabsContent value="registrations">
-            <Registrations registrations={registrations} />
+            {managersLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-white/70">Loading managers...</p>
+              </div>
+            ) : managersError ? (
+              <div className="text-center py-12">
+                <div className="text-red-400 mb-4">
+                  <XCircle className="h-16 w-16 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Error Loading Managers</h3>
+                <p className="text-white/70">Failed to load managers data. Please try again.</p>
+                <p className="text-red-400 text-sm mt-2">{managersError.message}</p>
+              </div>
+            ) : (
+              <Registrations managers={managersData?.managers || []} />
+            )}
           </TabsContent>
 
           {/* Settings Tab */}

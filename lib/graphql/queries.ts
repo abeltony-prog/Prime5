@@ -87,14 +87,34 @@ export const GET_MATCH_SCHEDULES = gql`
   }
 `
 
-// Query to get all teams
+// Query to get all teams with complete details
 export const GET_TEAMS = gql`
-  query GetTeams {
+  query getAllTeamsDetails {
     Teams {
       id
+      location
+      logo
       name
       shortname
       team_manager
+      matche1 {
+        created_at
+        dateAndtime
+        id
+        location
+        season_id
+        team1
+        team2
+      }
+      matche2 {
+        created_at
+        dateAndtime
+        id
+        location
+        season_id
+        team1
+        team2
+      }
       manager {
         create_at
         email
@@ -105,41 +125,38 @@ export const GET_TEAMS = gql`
         phone
         photo
       }
-      matche1 {
-        created_at
-        date
-        id
-        location
-        team1
-      }
-      matche2 {
-        created_at
-        date
-        id
-        location
-        team2
-      }
-      players {
-        create_at
-        dob
-        email
-        gender
-        id
-        name
-        phone
-        team_id
-      }
     }
   }
 `
 
-// Query to get team by ID
+// Query to get team by ID with complete details
 export const GET_TEAM = gql`
   query GetTeam($id: Int!) {
     Teams_by_pk(id: $id) {
+      id
+      location
+      logo
       name
       shortname
       team_manager
+      matche1 {
+        created_at
+        dateAndtime
+        id
+        location
+        season_id
+        team1
+        team2
+      }
+      matche2 {
+        created_at
+        dateAndtime
+        id
+        location
+        season_id
+        team1
+        team2
+      }
       manager {
         create_at
         email
@@ -150,42 +167,38 @@ export const GET_TEAM = gql`
         phone
         photo
       }
-      matche1 {
-        created_at
-        date
-        id
-        location
-        team1
-      }
-      matche2 {
-        created_at
-        date
-        id
-        location
-        team2
-      }
-      players {
-        create_at
-        dob
-        email
-        gender
-        id
-        name
-        phone
-        team_id
-      }
     }
   }
 `
 
-// Query to get teams by IDs
+// Query to get teams by IDs with complete details
 export const GET_TEAMS_BY_IDS = gql`
   query GetTeamsByIds($ids: [uuid!]!) {
     Teams(where: {id: {_in: $ids}}) {
       id
+      location
+      logo
       name
       shortname
       team_manager
+      matche1 {
+        created_at
+        dateAndtime
+        id
+        location
+        season_id
+        team1
+        team2
+      }
+      matche2 {
+        created_at
+        dateAndtime
+        id
+        location
+        season_id
+        team1
+        team2
+      }
       manager {
         create_at
         email
@@ -195,16 +208,6 @@ export const GET_TEAMS_BY_IDS = gql`
         password
         phone
         photo
-      }
-      players {
-        create_at
-        dob
-        email
-        gender
-        id
-        name
-        phone
-        team_id
       }
     }
   }
@@ -354,4 +357,31 @@ export const GET_LEAGUE_STATS = gql`
       clean_sheets
     }
   }
-` 
+`
+
+// Query to get all managers with their teams
+export const GET_ALL_MANAGERS_DETAILS = gql`
+  query getAllManagersDetails {
+    managers {
+      create_at
+      email
+      gender
+      id
+      name
+      password
+      phone
+      photo
+      Teams {
+        approved
+        id
+        location
+        logo
+        name
+        shortname
+        team_manager
+      }
+    }
+  }
+`
+
+ 
