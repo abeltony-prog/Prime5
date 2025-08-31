@@ -308,4 +308,13 @@ export const UPDATE_MANAGER_PASSWORD = gql`
   }
 `
 
+// Mutation to add a new player to a team
+export const ADD_TEAM_PLAYER_DETAILS = gql`
+  mutation addTeamPlayerDetails($team_id: uuid = "", $phone: String = "", $name: String = "", $gender: String = "", $email: String = "", $dob: String = "") {
+    insert_players(objects: {team_id: $team_id, phone: $phone, name: $name, gender: $gender, email: $email, dob: $dob}) {
+      affected_rows
+    }
+  }
+`
+
  

@@ -409,4 +409,20 @@ export const GET_MANAGER_BY_EMAIL = gql`
   }
 `
 
+// Query to get all players for a specific team
+export const GET_ALL_PLAYERS_WHERE_TEAM_ID = gql`
+  query getAllPlayersWhereTeamId($teamId: uuid = "") {
+    players(where: {team_id: {_eq: $teamId}}) {
+      create_at
+      dob
+      email
+      gender
+      id
+      name
+      phone
+      team_id
+    }
+  }
+`
+
  
