@@ -41,10 +41,10 @@ export default function RulesPage() {
     {
       category: "Match Duration",
       rules: [
-        "Two halves of 15 minutes each",
+        "Two halves of 15 minutes each (30 minutes total)",
         "Running clock (stops only for timeouts)",
         "2-minute break between halves",
-        "Gamechanger activates in final 3 minutes of each half",
+        "Gamechanger activates in final 3 minutes of each half (12-15 and 27-30 minutes)",
       ],
     },
     {
@@ -113,13 +113,13 @@ export default function RulesPage() {
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 drop-shadow-2xl">The Gamechanger System</h2>
               <p className="text-xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed drop-shadow-xl">
-                A revolutionary twist that activates in the <strong>last 3 minutes of each half</strong>, introducing
+                A revolutionary twist that activates in the <strong>last 3 minutes of each half</strong> (12-15 minutes and 27-30 minutes), introducing
                 dynamic rule changes that challenge players and electrify spectators. Inspired by innovative formats but
                 uniquely Prime5.
               </p>
               <div className="flex items-center justify-center gap-2 text-white/90">
                 <Clock className="w-5 h-5" />
-                <span className="font-semibold drop-shadow-md">Activates: Final 3 minutes of each half</span>
+                <span className="font-semibold drop-shadow-md">Activates: Minutes 12-15 and 27-30</span>
               </div>
             </CardContent>
           </Card>
@@ -245,7 +245,7 @@ export default function RulesPage() {
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-white/90"><strong>Match Length:</strong> 2 halves of 15 minutes each</span>
+                    <span className="text-white/90"><strong>Match Length:</strong> 2 halves of 15 minutes each (30 minutes total)</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 flex-shrink-0"></div>
@@ -511,20 +511,20 @@ export default function RulesPage() {
                 {/* Timeline */}
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex-1 h-2 bg-white/20 backdrop-blur-sm rounded-full relative">
-                    <div className="absolute left-0 top-0 h-full w-[85%] bg-green-500/90 backdrop-blur-sm rounded-full"></div>
-                    <div className="absolute right-0 top-0 h-full w-[15%] bg-red-500/90 backdrop-blur-sm rounded-full"></div>
+                    <div className="absolute left-0 top-0 h-full w-[80%] bg-green-500/90 backdrop-blur-sm rounded-full"></div>
+                    <div className="absolute right-0 top-0 h-full w-[20%] bg-red-500/90 backdrop-blur-sm rounded-full"></div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="w-4 h-4 bg-green-500/90 backdrop-blur-sm rounded-full mx-auto mb-2"></div>
-                    <div className="font-semibold text-white drop-shadow-lg">0-17 minutes</div>
+                    <div className="font-semibold text-white drop-shadow-lg">0-12 minutes</div>
                     <div className="text-sm text-white/80">Standard Rules</div>
                   </div>
                   <div>
                     <div className="w-4 h-4 bg-red-500/90 backdrop-blur-sm rounded-full mx-auto mb-2"></div>
-                    <div className="font-semibold text-white drop-shadow-lg">17-20 minutes</div>
+                    <div className="font-semibold text-white drop-shadow-lg">12-15 minutes</div>
                     <div className="text-sm text-white/80">Gamechanger Active</div>
                   </div>
                   <div>
@@ -537,7 +537,7 @@ export default function RulesPage() {
                 <div className="mt-8 text-center">
                   <Badge className="bg-red-500/20 backdrop-blur-md text-red-200 px-4 py-2 rounded-full font-semibold border border-red-500/30">
                     <Timer className="w-4 h-4 mr-2" />
-                    Same pattern repeats in second half (37-40 minutes)
+                    Same pattern repeats in second half (15-27 minutes standard, 27-30 minutes Gamechanger)
                   </Badge>
                 </div>
               </div>
