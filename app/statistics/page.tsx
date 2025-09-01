@@ -4,14 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Navigation } from "@/components/navigation"
-import { Target, Award, TrendingUp, Users, Trophy, TrendingDown, Calendar, Clock, MapPin, Loader2, XCircle } from "lucide-react"
+import { Target, Award, TrendingUp, Users, Trophy, TrendingDown, Calendar, Clock, MapPin, Loader2, XCircle, Shield } from "lucide-react"
 import { useState } from "react"
 import { useQuery } from '@apollo/client'
 import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_TEAM_STATISTICS, GET_TEAM_PLAYER_STATISTICS } from "@/lib/graphql/queries"
 
 
 export default function StatisticsPage() {
-  const [activeTab, setActiveTab] = useState<'statistics' | 'standings' | 'fixtures' | 'bracket'>('statistics')
+  const [activeTab, setActiveTab] = useState<'leaderboard' | 'statistics' | 'standings' | 'fixtures' | 'bracket'>('leaderboard')
   const [selectedFixtureTab, setSelectedFixtureTab] = useState("upcoming")
   const [selectedGroup, setSelectedGroup] = useState("all")
 
@@ -332,12 +332,103 @@ export default function StatisticsPage() {
     return { upcomingMatches, pastResults }
   }
 
+  const calculateLeaderboard = () => {
+    const teams = teamsData?.Teams || []
+    const teamStats = teamStatsData?.team_statistics || []
+
+    if (teamStats.length === 0) {
+      return teams.map((team: any, index: number) => ({
+        position: index + 1,
+        team: team.name,
+        played: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+        winRate: "0.0%",
+        avgGoalsPerMatch: "0.0",
+        form: "No matches"
+      }))
+    }
+
+    // Create leaderboard data by combining team info with statistics
+    const leaderboardData = teams.map((team: any) => {
+      const teamStat = teamStats.find((stat: any) => stat.team_id === team.id)
+      
+      if (teamStat) {
+        const played = parseInt(teamStat.played) || 0
+        const wins = parseInt(teamStat.wins) || 0
+        const draws = parseInt(teamStat.draws) || 0
+        const losses = parseInt(teamStat.losses) || 0
+        const goalsFor = parseInt(teamStat.goals_for) || 0
+        const goalsAgainst = parseInt(teamStat.goals_against) || 0
+        const goalDifference = parseInt(teamStat.goal_diff) || 0
+        const points = parseInt(teamStat.points) || 0
+        
+        const winRate = played > 0 ? ((wins / played) * 100).toFixed(1) : "0.0"
+        const avgGoalsPerMatch = played > 0 ? (goalsFor / played).toFixed(1) : "0.0"
+        
+        // Simple form calculation (last 5 matches would need more complex logic)
+        const form = played > 0 ? `${wins}W-${draws}D-${losses}L` : "No matches"
+        
+        return {
+          position: 0, // Will be set after sorting
+          team: team.name,
+          played,
+          wins,
+          draws,
+          losses,
+          goalsFor,
+          goalsAgainst,
+          goalDifference,
+          points,
+          winRate: `${winRate}%`,
+          avgGoalsPerMatch,
+          form
+        }
+      } else {
+        return {
+          position: 0,
+          team: team.name,
+          played: 0,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          goalDifference: 0,
+          points: 0,
+          winRate: "0.0%",
+          avgGoalsPerMatch: "0.0",
+          form: "No matches"
+        }
+      }
+    })
+
+    // Sort by points, then goal difference, then goals for
+    const sortedLeaderboard = leaderboardData.sort((a: any, b: any) => {
+      if (b.points !== a.points) return b.points - a.points
+      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference
+      return b.goalsFor - a.goalsFor
+    })
+
+    // Set positions
+    return sortedLeaderboard.map((team: any, index: number) => ({
+      ...team,
+      position: index + 1
+    }))
+  }
+
   // Calculate all data
   const leagueStats = calculateLeagueStats()
   const topScorers = calculateTopScorers()
   const teamStats = calculateTeamStats()
   const standings = calculateStandings()
   const fixtures = calculateFixtures()
+  const leaderboard = calculateLeaderboard()
 
   const playerOfTheWeek = {
     name: topScorers[0]?.name || "No Data",
@@ -509,6 +600,13 @@ export default function StatisticsPage() {
         <div className="flex justify-center mb-8">
           <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
             <Button
+              variant={activeTab === 'leaderboard' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('leaderboard')}
+              className={activeTab === 'leaderboard' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
+            >
+              Leaderboard
+            </Button>
+            <Button
               variant={activeTab === 'statistics' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('statistics')}
               className={activeTab === 'statistics' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
@@ -539,6 +637,140 @@ export default function StatisticsPage() {
 
           </div>
         </div>
+
+        {/* Leaderboard Tab */}
+        {activeTab === 'leaderboard' && (
+          <div className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">League Leaderboard</h2>
+              <p className="text-lg text-white/90 drop-shadow-xl">Complete team rankings and statistics</p>
+            </div>
+
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-purple-600/90 to-purple-700/90 backdrop-blur-md text-white">
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  Complete League Table
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-white/20 backdrop-blur-sm">
+                      <tr className="text-left text-sm font-medium text-white">
+                        <th className="p-4">Pos</th>
+                        <th className="p-4">Team</th>
+                        <th className="p-4 text-center">P</th>
+                        <th className="p-4 text-center">W</th>
+                        <th className="p-4 text-center">D</th>
+                        <th className="p-4 text-center">L</th>
+                        <th className="p-4 text-center">GF</th>
+                        <th className="p-4 text-center">GA</th>
+                        <th className="p-4 text-center">GD</th>
+                        <th className="p-4 text-center">Pts</th>
+                        <th className="p-4 text-center">Win%</th>
+                        <th className="p-4 text-center">Avg Goals</th>
+                        <th className="p-4 text-center">Form</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leaderboard.map((team: any, index: number) => (
+                        <tr
+                          key={team.team}
+                          className={`border-b border-white/20 hover:bg-white/10 transition-all duration-300 ${
+                            index === 0 ? "bg-yellow-500/20 backdrop-blur-sm" : 
+                            index < 3 ? "bg-green-500/20 backdrop-blur-sm" : 
+                            index >= leaderboard.length - 2 ? "bg-red-500/20 backdrop-blur-sm" : ""
+                          }`}
+                        >
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-white text-lg">{team.position}</span>
+                              {index === 0 && <Trophy className="h-5 w-5 text-yellow-400" />}
+                              {index === 1 && <Award className="h-5 w-5 text-gray-400" />}
+                              {index === 2 && <Award className="h-5 w-5 text-orange-400" />}
+                              {index < 3 && <TrendingUp className="h-4 w-4 text-green-300" />}
+                              {index >= leaderboard.length - 2 && <TrendingDown className="h-4 w-4 text-red-300" />}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-white drop-shadow-md text-lg">{team.team}</span>
+                              {index === 0 && <Badge className="bg-yellow-500/90 backdrop-blur-md text-black font-bold">Champion</Badge>}
+                              {index === 1 && <Badge className="bg-gray-400/90 backdrop-blur-md text-white">2nd</Badge>}
+                              {index === 2 && <Badge className="bg-orange-400/90 backdrop-blur-md text-white">3rd</Badge>}
+                            </div>
+                          </td>
+                          <td className="p-4 text-center text-white font-medium">{team.played}</td>
+                          <td className="p-4 text-center text-green-300 font-bold">{team.wins}</td>
+                          <td className="p-4 text-center text-yellow-300 font-medium">{team.draws}</td>
+                          <td className="p-4 text-center text-red-300 font-medium">{team.losses}</td>
+                          <td className="p-4 text-center text-white font-medium">{team.goalsFor}</td>
+                          <td className="p-4 text-center text-white font-medium">{team.goalsAgainst}</td>
+                          <td className={`p-4 text-center font-bold ${team.goalDifference >= 0 ? "text-green-300" : "text-red-300"}`}>
+                            {team.goalDifference > 0 ? "+" : ""}{team.goalDifference}
+                          </td>
+                          <td className="p-4 text-center">
+                            <Badge variant="outline" className="font-bold text-white border-white/50 bg-white/20 backdrop-blur-sm text-lg px-3 py-1">
+                              {team.points}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-center text-white font-medium">{team.winRate}</td>
+                          <td className="p-4 text-center text-white font-medium">{team.avgGoalsPerMatch}</td>
+                          <td className="p-4 text-center">
+                            <Badge variant="outline" className="text-xs bg-white/10 backdrop-blur-sm border-white/30 text-white">
+                              {team.form}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Summary Stats */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="h-8 w-8 text-yellow-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">League Leader</h3>
+                  <p className="text-white/90 drop-shadow-md">{leaderboard[0]?.team || "No Data"}</p>
+                  <p className="text-sm text-white/70 mt-1">{leaderboard[0]?.points || 0} points</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="h-8 w-8 text-green-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Top Scorer</h3>
+                  <p className="text-white/90 drop-shadow-md">{leaderboard[0]?.team || "No Data"}</p>
+                  <p className="text-sm text-white/70 mt-1">{leaderboard[0]?.goalsFor || 0} goals</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Best Defense</h3>
+                  <p className="text-white/90 drop-shadow-md">
+                    {leaderboard.reduce((min: any, team: any) => team.goalsAgainst < min.goalsAgainst ? team : min, leaderboard[0] || {goalsAgainst: 0, team: "No Data"}).team}
+                  </p>
+                  <p className="text-sm text-white/70 mt-1">
+                    {leaderboard.reduce((min: any, team: any) => team.goalsAgainst < min.goalsAgainst ? team : min, leaderboard[0] || {goalsAgainst: 0}).goalsAgainst} goals conceded
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
 
         {/* Statistics Tab */}
         {activeTab === 'statistics' && (
@@ -926,5 +1158,3 @@ export default function StatisticsPage() {
     </div>
   )
 }
-
-
