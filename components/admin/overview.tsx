@@ -575,7 +575,7 @@ export function Overview() {
           <CardContent>
             <div className="w-full h-[300px]">
               {matchesTrendData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%">
                                   <LineChart data={matchesTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis dataKey="week" stroke="rgba(255,255,255,0.7)" />
@@ -584,7 +584,7 @@ export function Overview() {
                   <Line type="monotone" dataKey="matches" stroke="#3b82f6" strokeWidth={2} />
                   <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={2} />
                 </LineChart>
-                </ResponsiveContainer>
+              </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">

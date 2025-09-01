@@ -4,141 +4,361 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Navigation } from "@/components/navigation"
-import { Target, Award, TrendingUp, Users, Trophy, TrendingDown, Calendar, Clock, MapPin } from "lucide-react"
+import { Target, Award, TrendingUp, Users, Trophy, TrendingDown, Calendar, Clock, MapPin, Loader2, XCircle } from "lucide-react"
 import { useState } from "react"
+import { useQuery } from '@apollo/client'
+import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_TEAM_STATISTICS, GET_TEAM_PLAYER_STATISTICS } from "@/lib/graphql/queries"
 
 
 export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState<'statistics' | 'standings' | 'fixtures' | 'bracket'>('statistics')
-
-  const topScorers = [
-    { name: "Marcus Silva", team: "Lightning United", goals: 12, matches: 6 },
-    { name: "Diego Rodriguez", team: "Thunder FC", goals: 10, matches: 6 },
-    { name: "Alex Johnson", team: "Velocity FC", goals: 9, matches: 6 },
-    { name: "Carlos Santos", team: "Rapid Fire", goals: 8, matches: 6 },
-    { name: "Ahmed Hassan", team: "Dynamo FC", goals: 7, matches: 6 },
-  ]
-
-  const playerOfTheWeek = {
-    name: "Marcus Silva",
-    team: "Lightning United",
-    stats: "Hat-trick + 2 assists",
-    week: "Week 6",
-  }
-
-  const teamStats = [
-    { team: "Lightning United", stat: "Most Goals", value: "19" },
-    { team: "Thunder FC", stat: "Best Defense", value: "8 GA" },
-    { team: "Velocity FC", stat: "Most Assists", value: "15" },
-    { team: "Rapid Fire", stat: "Most Shots", value: "87" },
-  ]
-
-  const leagueStats = [
-    { label: "Total Goals", value: "156", icon: Target },
-    { label: "Total Matches", value: "48", icon: Users },
-    { label: "Average Goals/Match", value: "3.25", icon: TrendingUp },
-    { label: "Clean Sheets", value: "12", icon: Award },
-  ]
-
-  const groupAStandings = [
-    { pos: 1, team: "Thunder FC", played: 6, wins: 5, draws: 1, losses: 0, gf: 18, ga: 8, gd: 10, points: 16 },
-    { pos: 2, team: "Rapid Fire", played: 6, wins: 4, draws: 1, losses: 1, gf: 15, ga: 10, gd: 5, points: 13 },
-    { pos: 3, team: "Storm Riders", played: 6, wins: 3, draws: 2, losses: 1, gf: 12, ga: 9, gd: 3, points: 11 },
-    { pos: 4, team: "Phoenix United", played: 6, wins: 2, draws: 3, losses: 1, gf: 11, ga: 10, gd: 1, points: 9 },
-    { pos: 5, team: "Blaze FC", played: 6, wins: 2, draws: 1, losses: 3, gf: 9, ga: 12, gd: -3, points: 7 },
-    { pos: 6, team: "Fire Hawks", played: 6, wins: 1, draws: 2, losses: 3, gf: 8, ga: 13, gd: -5, points: 5 },
-    { pos: 7, team: "Red Devils", played: 6, wins: 1, draws: 1, losses: 4, gf: 7, ga: 14, gd: -7, points: 4 },
-    { pos: 8, team: "Flame United", played: 6, wins: 0, draws: 1, losses: 5, gf: 5, ga: 16, gd: -11, points: 1 },
-  ]
-
-  const groupBStandings = [
-    { pos: 1, team: "Lightning United", played: 6, wins: 5, draws: 0, losses: 1, gf: 19, ga: 7, gd: 12, points: 15 },
-    { pos: 2, team: "Velocity FC", played: 6, wins: 4, draws: 2, losses: 0, gf: 16, ga: 8, gd: 8, points: 14 },
-    { pos: 3, team: "Dynamo FC", played: 6, wins: 3, draws: 2, losses: 1, gf: 13, ga: 9, gd: 4, points: 11 },
-    { pos: 4, team: "Electric FC", played: 6, wins: 3, draws: 1, losses: 2, gf: 12, ga: 11, gd: 1, points: 10 },
-    { pos: 5, team: "Bolt United", played: 6, wins: 2, draws: 2, losses: 2, gf: 10, ga: 11, gd: -1, points: 8 },
-    { pos: 6, team: "Power FC", played: 6, wins: 1, draws: 3, losses: 2, gf: 9, ga: 12, gd: -3, points: 6 },
-    { pos: 7, team: "Shock FC", played: 6, wins: 1, draws: 1, losses: 4, gf: 8, ga: 15, gd: -7, points: 4 },
-    { pos: 8, team: "Spark United", played: 6, wins: 0, draws: 1, losses: 5, gf: 6, ga: 17, gd: -11, points: 1 },
-  ]
-
   const [selectedFixtureTab, setSelectedFixtureTab] = useState("upcoming")
   const [selectedGroup, setSelectedGroup] = useState("all")
 
-  const upcomingMatches = [
-    {
-      id: 1,
-      date: "2024-02-15",
-      time: "19:00",
-      team1: "Thunder FC",
-      team2: "Lightning United",
-      group: "A",
-      venue: "Prime Arena 1",
-    },
-    {
-      id: 2,
-      date: "2024-02-15",
-      time: "20:00",
-      team1: "Storm Riders",
-      team2: "Velocity FC",
-      group: "B",
-      venue: "Prime Arena 2",
-    },
-    {
-      id: 3,
-      date: "2024-02-16",
-      time: "18:30",
-      team1: "Rapid Fire",
-      team2: "Blaze FC",
-      group: "A",
-      venue: "Prime Arena 1",
-    },
-    {
-      id: 4,
-      date: "2024-02-16",
-      time: "19:30",
-      team1: "Phoenix United",
-      team2: "Dynamo FC",
-      group: "B",
-      venue: "Prime Arena 2",
-    },
-  ]
+  // Fetch real data from database
+  const { data: teamsData, loading: teamsLoading, error: teamsError } = useQuery(GET_TEAMS)
+  const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
+  const { data: teamStatsData, loading: teamStatsLoading, error: teamStatsError } = useQuery(GET_TEAM_STATISTICS)
+  const { data: playerStatsData, loading: playerStatsLoading, error: playerStatsError } = useQuery(GET_TEAM_PLAYER_STATISTICS)
 
-  const pastResults = [
-    {
-      id: 1,
-      date: "2024-02-08",
-      team1: "Thunder FC",
-      team2: "Storm Riders",
-      score1: 3,
-      score2: 2,
-      group: "A",
-    },
-    {
-      id: 2,
-      date: "2024-02-08",
-      team2: "Lightning United",
-      team1: "Velocity FC",
-      score1: 1,
-      score2: 4,
-      group: "B",
-    },
-    {
-      id: 3,
-      date: "2024-02-09",
-      team1: "Rapid Fire",
-      team2: "Phoenix United",
-      score1: 2,
-      score2: 2,
-      group: "A",
-    },
-  ]
+  // Loading state
+  if (teamsLoading || matchesLoading || teamStatsLoading || playerStatsLoading) {
+    return (
+      <div className="min-h-screen relative">
+        <Navigation />
+        <div className="relative z-10 container mx-auto px-4 py-16">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 text-white/60 animate-spin mx-auto mb-4" />
+              <p className="text-white/60 text-lg">Loading statistics data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (teamsError || matchesError || teamStatsError || playerStatsError) {
+    return (
+      <div className="min-h-screen relative">
+        <Navigation />
+        <div className="relative z-10 container mx-auto px-4 py-16">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <XCircle className="w-8 h-8 text-red-400" />
+              </div>
+              <p className="text-white/60 text-lg">Error loading statistics data</p>
+              <p className="text-white/40 text-sm">Please try again later</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Calculate real data from database
+  const calculateLeagueStats = () => {
+    const teams = teamsData?.Teams || []
+    const matches = matchesData?.matches || []
+    const teamStats = teamStatsData?.team_statistics || []
+
+    // Calculate completed matches (only past matches with goals)
+    const completedMatches = matches.filter((match: any) => {
+      const matchDate = new Date(match.dateAndtime)
+      const now = new Date()
+      const isPastMatch = matchDate < now
+      const hasGoals = match.team1Goals !== null && match.team2Goals !== null
+      
+      return isPastMatch && hasGoals
+    })
+
+    // Calculate total goals using team statistics if available, otherwise from matches
+    let totalGoals = 0
+    let totalMatchesPlayed = 0
+
+    if (teamStats.length > 0) {
+      // Use accumulated team statistics from database
+      totalGoals = teamStats.reduce((sum: number, stat: any) => {
+        const goalsFor = parseInt(stat.goals_for) || 0
+        return sum + goalsFor
+      }, 0)
+      
+      totalMatchesPlayed = teamStats.reduce((sum: number, stat: any) => {
+        const played = parseInt(stat.played) || 0
+        return sum + played
+      }, 0)
+    } else {
+      // Fallback: Calculate from match results
+      totalGoals = completedMatches.reduce((sum: number, match: any) => {
+        const team1Goals = parseInt(match.team1Goals) || 0
+        const team2Goals = parseInt(match.team2Goals) || 0
+        
+        // Safety check: if goals are unreasonably high, cap them
+        const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
+        const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
+        
+        return sum + safeTeam1Goals + safeTeam2Goals
+      }, 0)
+      
+      totalMatchesPlayed = completedMatches.length
+    }
+
+    // Calculate average goals per match
+    const avgGoalsPerMatch = totalMatchesPlayed > 0 ? (totalGoals / totalMatchesPlayed).toFixed(2) : "0.00"
+
+    return [
+      { label: "Total Goals", value: totalGoals.toString(), icon: Target },
+      { label: "Total Matches", value: totalMatchesPlayed.toString(), icon: Users },
+      { label: "Average Goals/Match", value: avgGoalsPerMatch, icon: TrendingUp },
+      { label: "Total Teams", value: teams.length.toString(), icon: Award },
+    ]
+  }
+
+  const calculateTopScorers = () => {
+    const playerStats = playerStatsData?.player_statistics || []
+    const teams = teamsData?.Teams || []
+
+    // Group player statistics by player_id and sum goals
+    const playerGoalsMap: {[key: string]: {goals: number, assists: number, matches: number, playerId: string}} = {}
+    
+    playerStats.forEach((stat: any) => {
+      const playerId = stat.player_id
+      if (!playerGoalsMap[playerId]) {
+        playerGoalsMap[playerId] = { goals: 0, assists: 0, matches: 0, playerId }
+      }
+      playerGoalsMap[playerId].goals += parseInt(stat.goals) || 0
+      playerGoalsMap[playerId].assists += parseInt(stat.assists) || 0
+      playerGoalsMap[playerId].matches += 1
+    })
+
+    // Convert to array and sort by goals
+    const topScorers = Object.values(playerGoalsMap)
+      .sort((a, b) => b.goals - a.goals)
+      .slice(0, 5)
+      .map((player: any) => {
+        // Find team for this player (this is a simplified approach)
+        const team = teams.find((t: any) => t.players?.some((p: any) => p.id === player.playerId))
+        return {
+          name: `Player ${player.playerId.slice(0, 8)}`, // Simplified name since we don't have player names in the current schema
+          team: team?.name || "Unknown Team",
+          goals: player.goals,
+          matches: player.matches
+        }
+      })
+
+    return topScorers
+  }
+
+  const calculateTeamStats = () => {
+    const teams = teamsData?.Teams || []
+    const teamStats = teamStatsData?.team_statistics || []
+
+    if (teamStats.length === 0) {
+      return [
+        { team: "No Data", stat: "Most Goals", value: "0" },
+        { team: "No Data", stat: "Best Defense", value: "0 GA" },
+        { team: "No Data", stat: "Most Points", value: "0" },
+        { team: "No Data", stat: "Best Goal Difference", value: "0" },
+      ]
+    }
+
+    // Get team names
+    const getTeamName = (teamId: string) => {
+      const team = teams.find((t: any) => t.id === teamId)
+      return team?.name || "Unknown Team"
+    }
+
+    // Find team with most goals
+    const mostGoalsTeam = teamStats.reduce((max: any, stat: any) => {
+      const currentGoals = parseInt(stat.goals_for) || 0
+      const maxGoals = parseInt(max.goals_for) || 0
+      return currentGoals > maxGoals ? stat : max
+    })
+
+    // Find team with best defense (least goals against)
+    const bestDefenseTeam = teamStats.reduce((min: any, stat: any) => {
+      const currentGoalsAgainst = parseInt(stat.goals_against) || 0
+      const minGoalsAgainst = parseInt(min.goals_against) || 0
+      return currentGoalsAgainst < minGoalsAgainst ? stat : min
+    })
+
+    // Find team with most points
+    const mostPointsTeam = teamStats.reduce((max: any, stat: any) => {
+      const currentPoints = parseInt(stat.points) || 0
+      const maxPoints = parseInt(max.points) || 0
+      return currentPoints > maxPoints ? stat : max
+    })
+
+    // Find team with best goal difference
+    const bestGoalDiffTeam = teamStats.reduce((max: any, stat: any) => {
+      const currentGoalDiff = parseInt(stat.goal_diff) || 0
+      const maxGoalDiff = parseInt(max.goal_diff) || 0
+      return currentGoalDiff > maxGoalDiff ? stat : max
+    })
+
+    // Calculate win rate for most points team
+    const mostPointsPlayed = parseInt(mostPointsTeam.played) || 1
+    const mostPointsWins = parseInt(mostPointsTeam.wins) || 0
+    const winRate = mostPointsPlayed > 0 ? ((mostPointsWins / mostPointsPlayed) * 100).toFixed(1) : "0.0"
+
+    return [
+      { 
+        team: getTeamName(mostGoalsTeam.team_id), 
+        stat: "Most Goals Scored", 
+        value: `${mostGoalsTeam.goals_for} goals` 
+      },
+      { 
+        team: getTeamName(bestDefenseTeam.team_id), 
+        stat: "Best Defense", 
+        value: `${bestDefenseTeam.goals_against} goals conceded` 
+      },
+      { 
+        team: getTeamName(mostPointsTeam.team_id), 
+        stat: "Most Points", 
+        value: `${mostPointsTeam.points} pts (${winRate}% win rate)` 
+      },
+      { 
+        team: getTeamName(bestGoalDiffTeam.team_id), 
+        stat: "Best Goal Difference", 
+        value: `${bestGoalDiffTeam.goal_diff > 0 ? '+' : ''}${bestGoalDiffTeam.goal_diff}` 
+      },
+    ]
+  }
+
+  const calculateStandings = () => {
+    const teams = teamsData?.Teams || []
+    const teamStats = teamStatsData?.team_statistics || []
+
+    if (teamStats.length === 0) {
+      return { groupA: [], groupB: [] }
+    }
+
+    // Group teams by group (simplified - assuming we have 2 groups)
+    const groupAStats = teamStats.filter((stat: any) => {
+      // This is a simplified grouping - in reality you'd need to check the group_id
+      const index = teamStats.indexOf(stat)
+      return index < teamStats.length / 2
+    })
+
+    const groupBStats = teamStats.filter((stat: any) => {
+      const index = teamStats.indexOf(stat)
+      return index >= teamStats.length / 2
+    })
+
+    const formatStandings = (stats: any[]) => {
+      return stats
+        .map((stat: any) => {
+          const team = teams.find((t: any) => t.id === stat.team_id)
+          return {
+            pos: 0, // Will be set after sorting
+            team: team?.name || "Unknown Team",
+            played: parseInt(stat.played) || 0,
+            wins: parseInt(stat.wins) || 0,
+            draws: parseInt(stat.draws) || 0,
+            losses: parseInt(stat.losses) || 0,
+            gf: parseInt(stat.goals_for) || 0,
+            ga: parseInt(stat.goals_against) || 0,
+            gd: parseInt(stat.goal_diff) || 0,
+            points: parseInt(stat.points) || 0,
+          }
+        })
+        .sort((a, b) => {
+          // Sort by points, then goal difference, then goals for
+          if (b.points !== a.points) return b.points - a.points
+          if (b.gd !== a.gd) return b.gd - a.gd
+          return b.gf - a.gf
+        })
+        .map((team, index) => ({ ...team, pos: index + 1 }))
+    }
+
+    return {
+      groupA: formatStandings(groupAStats),
+      groupB: formatStandings(groupBStats)
+    }
+  }
+
+  const calculateFixtures = () => {
+    const matches = matchesData?.matches || []
+    const teams = teamsData?.Teams || []
+
+    const now = new Date()
+    
+    const upcomingMatches = matches
+      .filter((match: any) => {
+        const matchDate = new Date(match.dateAndtime)
+        return matchDate > now
+      })
+      .sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
+      .slice(0, 8)
+      .map((match: any) => {
+        const team1 = teams.find((t: any) => t.id === match.team1)
+        const team2 = teams.find((t: any) => t.id === match.team2)
+        return {
+          id: match.id,
+          date: match.dateAndtime.split('T')[0],
+          time: new Date(match.dateAndtime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          team1: team1?.name || "Unknown Team",
+          team2: team2?.name || "Unknown Team",
+          group: "A", // Simplified - would need proper group logic
+          venue: match.location || "Prime Arena",
+        }
+      })
+
+    const pastResults = matches
+      .filter((match: any) => {
+        const matchDate = new Date(match.dateAndtime)
+        const isPastMatch = matchDate < now
+        const hasGoals = match.team1Goals !== null && match.team2Goals !== null
+        return isPastMatch && hasGoals
+      })
+      .sort((a: any, b: any) => new Date(b.dateAndtime).getTime() - new Date(a.dateAndtime).getTime())
+      .slice(0, 8)
+      .map((match: any) => {
+        const team1 = teams.find((t: any) => t.id === match.team1)
+        const team2 = teams.find((t: any) => t.id === match.team2)
+        return {
+          id: match.id,
+          date: match.dateAndtime.split('T')[0],
+          team1: team1?.name || "Unknown Team",
+          team2: team2?.name || "Unknown Team",
+          score1: parseInt(match.team1Goals) || 0,
+          score2: parseInt(match.team2Goals) || 0,
+          group: "A", // Simplified - would need proper group logic
+        }
+      })
+
+    return { upcomingMatches, pastResults }
+  }
+
+  // Calculate all data
+  const leagueStats = calculateLeagueStats()
+  const topScorers = calculateTopScorers()
+  const teamStats = calculateTeamStats()
+  const standings = calculateStandings()
+  const fixtures = calculateFixtures()
+
+  const playerOfTheWeek = {
+    name: topScorers[0]?.name || "No Data",
+    team: topScorers[0]?.team || "No Team",
+    stats: `${topScorers[0]?.goals || 0} goals`,
+    week: "Current Week",
+  }
+
+  // Use calculated data instead of hardcoded data
+  const groupAStandings = standings.groupA
+  const groupBStandings = standings.groupB
+
+  // Use calculated fixtures data
+  const upcomingMatches = fixtures.upcomingMatches
+  const pastResults = fixtures.pastResults
 
   const filteredUpcoming =
-    selectedGroup === "all" ? upcomingMatches : upcomingMatches.filter((match) => match.group === selectedGroup)
+    selectedGroup === "all" ? upcomingMatches : upcomingMatches.filter((match: any) => match.group === selectedGroup)
 
   const filteredResults =
-    selectedGroup === "all" ? pastResults : pastResults.filter((match) => match.group === selectedGroup)
+    selectedGroup === "all" ? pastResults : pastResults.filter((match: any) => match.group === selectedGroup)
 
   const groupATeams = [
     { name: "Thunder FC", position: 1 },
@@ -640,7 +860,7 @@ export default function StatisticsPage() {
             {/* Upcoming Matches */}
             {selectedFixtureTab === "upcoming" && (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredUpcoming.map((match) => (
+                {filteredUpcoming.map((match: any) => (
                   <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                     <CardContent className="p-6">
                       <div className="text-center mb-4">
@@ -674,7 +894,7 @@ export default function StatisticsPage() {
             {/* Past Results */}
             {selectedFixtureTab === "results" && (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResults.map((match) => (
+                {filteredResults.map((match: any) => (
                   <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                     <CardContent className="p-6">
                       <div className="text-center mb-4">

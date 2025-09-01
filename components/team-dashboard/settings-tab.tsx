@@ -210,25 +210,25 @@ export function SettingsTab({
       {/* Manager Settings */}
       <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <User className="h-5 w-5" />
-            Manager Settings
-          </CardTitle>
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
+              <User className="h-5 w-5" />
+              Manager Settings
+            </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="manager-name" className="text-white/80">Full Name</Label>
-                <p className="text-white font-medium mt-1">{managerSettings.name || "Full Name Not Set"}</p>
+                  <p className="text-white font-medium mt-1">{managerSettings.name || "Full Name Not Set"}</p>
               </div>
               <div>
                 <Label htmlFor="manager-email" className="text-white/80">Email</Label>
-                <p className="text-white font-medium mt-1">{managerSettings.email || "Email Not Set"}</p>
+                  <p className="text-white font-medium mt-1">{managerSettings.email || "Email Not Set"}</p>
               </div>
               <div>
                 <Label htmlFor="manager-phone" className="text-white/80">Phone</Label>
-                <p className="text-white font-medium mt-1">{managerSettings.phone || "Phone Not Set"}</p>
+                  <p className="text-white font-medium mt-1">{managerSettings.phone || "Phone Not Set"}</p>
               </div>
             </div>
             <div className="space-y-4">
@@ -270,4 +270,4 @@ export function SettingsTab({
       </Card>
     </div>
   )
-}
+} 
