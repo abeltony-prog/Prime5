@@ -6,25 +6,39 @@ import { Users, Target, Shield, Clock, Zap, AlertTriangle, CheckCircle, Star, Ti
 export default function RulesPage() {
   const gamechangerModes = [
     {
-      title: "3v3 Showdown",
+      title: "PlusOne",
       icon: Users,
-      description: "Teams must reduce to 3 outfield players + goalkeeper",
-      effect: "Creates more space and opportunities for quick goals",
+      description: "Game starts with 1 vs 1 plus goalkeepers. After every goal, one player is added to each side. Goalkeepers cannot leave penalty area or engage in build-up play. Violation results in penalty.",
+      effect: "Dramatically increases intensity as teams grow larger with each goal",
       color: "from-red-500 to-orange-500",
     },
     {
-      title: "Double Points for Long-Range Goals",
-      icon: Target,
-      description: "Any goal scored outside the marked scoring zone counts as 2 goals",
-      effect: "Encourages risk-taking and spectacular strikes",
+      title: "FairPlay",
+      icon: Shield,
+      description: "Every foul results in being sent off for the remainder of the game along with a free kick or penalty. Deliberate handball and unsporting behavior also result in being sent off.",
+      effect: "Forces players to play clean and fair, raising the stakes significantly",
       color: "from-blue-500 to-cyan-500",
     },
     {
-      title: "Goalkeeper Restrictions",
-      icon: Shield,
-      description: "Goalkeepers cannot use their hands – only feet allowed",
-      effect: "Forces creative defending and keeps the tension high",
+      title: "3PLAY",
+      icon: Gamepad2,
+      description: "3 vs 3 (teams may but not have to select a goalkeeper). Substitution errors are penalized if they affect the game. Each attacking phase may last for a maximum of 30 seconds.",
+      effect: "Creates fast-paced, high-intensity gameplay with strict time limits",
       color: "from-purple-500 to-pink-500",
+    },
+    {
+      title: "1-On-1",
+      icon: Target,
+      description: "One at a time, single player from each team shoots from behind the halfway line. Opposing player stands in their half and may try to stop the goal (no hands allowed). Players may shoot from within the centre circle and must complete the shot within 15 seconds.",
+      effect: "Tests individual skill and nerve under extreme pressure",
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      title: "Fast Forward",
+      icon: Zap,
+      description: "After crossing the centreline, players may not play or dribble back into their own half. If they do, a free-kick is given from where the ball was last touched.",
+      effect: "Forces attacking play and prevents defensive retreating",
+      color: "from-yellow-500 to-orange-500",
     },
   ]
 
@@ -134,7 +148,7 @@ export default function RulesPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {gamechangerModes.map((mode, index) => (
               <Card
                 key={index}
@@ -164,6 +178,79 @@ export default function RulesPage() {
               </Card>
             ))}
           </div>
+        </section>
+
+        {/* Pressure Point */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-2xl">Pressure Point</h2>
+            <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-xl">
+              Special elimination format for high-stakes matches
+            </p>
+          </div>
+
+          <Card className="bg-gradient-to-r from-red-600/90 to-orange-600/90 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+            <CardContent className="p-8 md:p-12">
+              <div className="flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-6 mx-auto">
+                <Trophy className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 drop-shadow-2xl text-center">Pressure Point Format</h3>
+              
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                  <h4 className="font-bold text-white mb-4 drop-shadow-md text-lg">How It Works:</h4>
+                  <ul className="space-y-3 text-white/90">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Each team picks one player to represent them in a penalty shootout format</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Players take turns shooting penalties against each other</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>If you miss the penalty, you are eliminated</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>If you score, you continue until your team is the last standing</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>The winning team earns bonus points added to their overall match score</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-yellow-500/20 backdrop-blur-sm rounded-lg p-6 border border-yellow-500/30">
+                  <h4 className="font-bold text-yellow-200 mb-4 drop-shadow-md text-lg">Special Activation:</h4>
+                  <p className="text-yellow-100 leading-relaxed">
+                    <strong>This is a special format that is chosen by the partner/league organizers for semi-finals or finals.</strong> 
+                    It adds an extra layer of drama and individual skill to the most important matches of the season.
+                  </p>
+                </div>
+
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                  <h4 className="font-bold text-white mb-4 drop-shadow-md text-lg">Strategic Impact:</h4>
+                  <ul className="space-y-2 text-white/90">
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Teams must carefully select their most reliable penalty taker</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Mental pressure and composure become crucial factors</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Can dramatically swing the outcome of critical matches</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         {/* Purpose of Gamechanger */}
