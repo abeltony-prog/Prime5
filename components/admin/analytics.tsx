@@ -464,28 +464,28 @@ export function Analytics() {
       </div>
 
       {/* Player Statistics */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Users className="h-5 w-5" />
             Top Players
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {playerStats.map((player, index) => (
+              {playerStats.map((player, index) => (
               <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold text-white">{player.name}</h4>
                   <Badge variant="outline" className="text-xs">
                     {player.team}
                   </Badge>
-                </div>
+                    </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-white/70">Goals:</span>
                     <span className="text-white font-medium">{player.goals}</span>
-                  </div>
+                    </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-white/70">Assists:</span>
                     <span className="text-white font-medium">{player.assists}</span>
@@ -493,13 +493,13 @@ export function Analytics() {
                   <div className="flex justify-between text-sm">
                     <span className="text-white/70">Rating:</span>
                     <span className="text-white font-medium">{player.rating}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
     </div>
   )
 } 

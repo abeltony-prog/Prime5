@@ -248,10 +248,10 @@ export function Overview() {
   const generateRecentActivity = () => {
     const kpis = calculateKPIs()
     const activities: Array<{
-      type: string
-      description: string
-      time: string
-      status: "success" | "pending" | "info" | "warning"
+    type: string
+    description: string
+    time: string
+    status: "success" | "pending" | "info" | "warning"
     }> = []
 
     // Add recent match activities

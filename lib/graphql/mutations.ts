@@ -89,8 +89,8 @@ export const CREATE_GROUP = gql`
 
 // Mutation to create team statistics
 export const CREATE_TEAM_STATISTICS = gql`
-  mutation createTeamStatistics($team_id: uuid!, $group_id: uuid!, $season_id: uuid!) {
-    insert_team_statistics(objects: {team_id: $team_id, group_id: $group_id, season_id: $season_id, played: "0", wins: "0", draws: "0", losses: "0", goals_for: "0", goals_against: "0", goal_diff: "0", points: "0"}) {
+  mutation createTeamStatistics($team_id: uuid!, $group_id: uuid!, $season_id: uuid!, $played: String = "0", $wins: String = "0", $draws: String = "0", $losses: String = "0", $goals_for: String = "0", $goals_against: String = "0", $goal_diff: String = "0", $points: String = "0") {
+    insert_team_statistics(objects: {team_id: $team_id, group_id: $group_id, season_id: $season_id, played: $played, wins: $wins, draws: $draws, losses: $losses, goals_for: $goals_for, goals_against: $goals_against, goal_diff: $goal_diff, points: $points}) {
       affected_rows
       returning {
         id
@@ -197,24 +197,7 @@ export const CREATE_MATCH = gql`
   }
 `
 
-// Mutation to update match result
-export const UPDATE_MATCH_RESULT = gql`
-  mutation UpdateMatchResult($id: Int!, $team1_score: Int!, $team2_score: Int!, $status: String!) {
-    update_matches_by_pk(
-      pk_columns: { id: $id }
-      _set: {
-        team1_score: $team1_score
-        team2_score: $team2_score
-        status: $status
-      }
-    ) {
-      id
-      team1_score
-      team2_score
-      status
-    }
-  }
-`
+
 
 // Mutation to add a player to a team
 export const ADD_PLAYER = gql`
@@ -235,24 +218,7 @@ export const ADD_PLAYER = gql`
   }
 `
 
-// Mutation to update player statistics
-export const UPDATE_PLAYER_STATS = gql`
-  mutation UpdatePlayerStats($id: Int!, $updates: players_set_input!) {
-    update_players_by_pk(
-      pk_columns: { id: $id }
-      _set: $updates
-    ) {
-      id
-      goals
-      assists
-      yellow_cards
-      red_cards
-      matches_played
-      rating
-      status
-    }
-  }
-`
+
 
 // Mutation to update team standings after match
 export const UPDATE_TEAM_STANDINGS = gql`
@@ -317,4 +283,29 @@ export const ADD_TEAM_PLAYER_DETAILS = gql`
   }
 `
 
- 
+// Mutation to update player statistics
+export const UPDATE_PLAYER_STATS = gql`
+  mutation updatePlayerStats($player_id: uuid = "", $yellow_cards: String = "", $red_cards: String = "", $minutes_played: String = "", $goals: String = "", $assists: String = "") {
+    update_player_statistics(where: {player_id: {_eq: $player_id}}, _set: {yellow_cards: $yellow_cards, red_cards: $red_cards, minutes_played: $minutes_played, goals: $goals, assists: $assists}) {
+      affected_rows
+    }
+  }
+`
+
+// Mutation to update team statistics
+export const UPDATE_TEAM_STATISTICS = gql`
+  mutation updateTeamStatistics($teamid: uuid = "", $wins: String = "", $points: String = "", $played: String = "", $losses: String = "", $goals_against: String = "", $goals_for: String = "", $goal_diff: String = "", $draws: String = "") {
+    update_team_statistics(where: {team_id: {_eq: $teamid}}, _set: {wins: $wins, points: $points, played: $played, losses: $losses, goals_against: $goals_against, goals_for: $goals_for, goal_diff: $goal_diff, draws: $draws}) {
+      affected_rows
+    }
+  }
+`
+
+// Mutation to update match result with status
+export const UPDATE_MATCH_RESULT = gql`
+  mutation updateMatchGoals($matchId: uuid = "", $status: String = "", $team1Goals: String = "", $team2Goals: String = "") {
+    update_matches(where: {id: {_eq: $matchId}}, _set: {status: $status, team1Goals: $team1Goals, team2Goals: $team2Goals}) {
+      affected_rows
+    }
+  }
+`

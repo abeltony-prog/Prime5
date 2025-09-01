@@ -65,6 +65,7 @@ export const GET_MATCH_SCHEDULES = gql`
       id
       location
       season_id
+      status
       team1
       team1Goals
       team2
@@ -571,6 +572,46 @@ export const GET_TEAM_PLAYER_STATISTICS = gql`
       season_id
       updated_at
       yellow_cards
+    }
+  }
+`
+
+// Query to get team statistics
+export const GET_TEAM_STATISTICS = gql`
+  query getTeamStatistics {
+    team_statistics {
+      id
+      team_id
+      group_id
+      season_id
+      played
+      wins
+      draws
+      losses
+      goals_for
+      goals_against
+      goal_diff
+      points
+    }
+  }
+`
+
+// Query to get team statistics for a specific team
+export const GET_TEAM_STATISTICS_BY_TEAM_ID = gql`
+  query getTeamStatisticsByTeamId($teamId: uuid!) {
+    team_statistics(where: {team_id: {_eq: $teamId}}) {
+      id
+      team_id
+      group_id
+      season_id
+      played
+      wins
+      draws
+      losses
+      goals_for
+      goals_against
+      goal_diff
+      points
     }
   }
 `

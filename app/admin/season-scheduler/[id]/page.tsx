@@ -601,17 +601,17 @@ export default function SeasonDetailsPage() {
             }
 
             if (validMatchup) {
-              matches.push({
+                matches.push({
                 id: `match-${Date.now()}-w${weekend}-sat-${game}`,
                 team1_id: validMatchup.team1_id,
                 team2_id: validMatchup.team2_id,
-                date: saturday,
+                  date: saturday,
                 time: '',
                 group_id: validMatchup.groupId,
-                venue: defaultVenue,
-                status: 'scheduled',
+                  venue: defaultVenue,
+                  status: 'scheduled',
                 weekend: weekend,
-                day: 'Saturday',
+                  day: 'Saturday',
                 groupName: validMatchup.groupName,
                 type: 'group-stage'
               })
@@ -712,7 +712,7 @@ export default function SeasonDetailsPage() {
           }
 
           if (validMatchup) {
-            matches.push({
+                matches.push({
               id: `match-${Date.now()}-w3-sat-${game}`,
               team1_id: validMatchup.team1_id,
               team2_id: validMatchup.team2_id,
@@ -764,13 +764,13 @@ export default function SeasonDetailsPage() {
               id: `match-${Date.now()}-w3-sun-${game}`,
               team1_id: validMatchup.team1_id,
               team2_id: validMatchup.team2_id,
-              date: sunday,
+                  date: sunday,
               time: '',
               group_id: validMatchup.groupId,
-              venue: defaultVenue,
-              status: 'scheduled',
+                  venue: defaultVenue,
+                  status: 'scheduled',
               weekend: 3,
-              day: 'Sunday',
+                  day: 'Sunday',
               groupName: validMatchup.groupName,
               type: 'group-stage'
             })
@@ -961,17 +961,17 @@ export default function SeasonDetailsPage() {
         // Group A knockout matches: 1st vs 4th, 2nd vs 3rd
         if (groupARanked.length >= 4) {
           // 1st vs 4th
-          performanceMatches.push({
+                performanceMatches.push({
             id: `knockout-${Date.now()}-w4-sat-a1`,
             team1_id: groupARanked[0].team_id,
             team2_id: groupARanked[3].team_id,
-            date: saturday,
+                  date: saturday,
             time: '',
             group_id: groupTeamsWithStats[0].groupId,
-            venue: defaultVenue,
-            status: 'scheduled',
+                  venue: defaultVenue,
+                  status: 'scheduled',
             weekend: 4,
-            day: 'Saturday',
+                  day: 'Saturday',
             groupName: groupTeamsWithStats[0].groupName,
             type: 'knockout-qualifier',
             description: '1st vs 4th - Group A'
@@ -1015,15 +1015,15 @@ export default function SeasonDetailsPage() {
           })
 
           // 2nd vs 3rd
-          performanceMatches.push({
+                performanceMatches.push({
             id: `knockout-${Date.now()}-w4-sat-b2`,
             team1_id: groupBRanked[1].team_id,
             team2_id: groupBRanked[2].team_id,
             date: saturday,
             time: '',
             group_id: groupTeamsWithStats[1].groupId,
-            venue: defaultVenue,
-            status: 'scheduled',
+                  venue: defaultVenue,
+                  status: 'scheduled',
             weekend: 4,
             day: 'Saturday',
             groupName: groupTeamsWithStats[1].groupName,

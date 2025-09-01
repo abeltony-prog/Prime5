@@ -46,7 +46,7 @@ import { Progress } from "@/components/ui/progress"
 import { useAuth } from "@/contexts/auth-context"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useMutation, useQuery } from "@apollo/client"
-import { GET_ALL_PLAYERS_WHERE_TEAM_ID, GET_TEAM_COMPLETE_DATA, GET_TEAM_MATCHES, GET_CURRENT_SEASON_WITH_GROUPS, GET_TEAM_PLAYER_STATISTICS } from "@/lib/graphql/queries"
+import { GET_ALL_PLAYERS_WHERE_TEAM_ID, GET_TEAM_COMPLETE_DATA, GET_TEAM_MATCHES, GET_CURRENT_SEASON_WITH_GROUPS, GET_TEAM_PLAYER_STATISTICS, GET_TEAM_STATISTICS_BY_TEAM_ID } from "@/lib/graphql/queries"
 import { ADD_TEAM_PLAYER_DETAILS } from "@/lib/graphql/mutations"
 import { OverviewTab, PlayersTab, MatchesTab, AnalyticsTab, SettingsTab } from "@/components/team-dashboard"
 
@@ -88,6 +88,11 @@ function TeamDashboardContent() {
   })
 
   const { data: playerStatsData, loading: playerStatsLoading } = useQuery(GET_TEAM_PLAYER_STATISTICS, {
+    variables: { teamId: manager?.team?.id },
+    skip: !manager?.team?.id
+  })
+
+  const { data: teamStatsData, loading: teamStatsLoading } = useQuery(GET_TEAM_STATISTICS_BY_TEAM_ID, {
     variables: { teamId: manager?.team?.id },
     skip: !manager?.team?.id
   })
@@ -144,16 +149,16 @@ function TeamDashboardContent() {
         name: manager?.team?.name || "Team Dashboard",
         shortName: manager?.team?.shortName || "TFC",
         manager: manager?.name || "Unknown Manager",
-        email: manager?.email || null,
-        phone: null,
-        founded: null, // Not available in current database
-        group: currentSeason?.groups?.[0]?.name || null,
-        position: null, // Will be calculated from match results
+        email: manager?.email || "",
+        phone: "",
+        founded: "", // Not available in current database
+        group: currentSeason?.groups?.[0]?.name || "",
+        position: 0,
         points: 0,
         played: 0,
         wins: 0,
         draws: 0,
-    losses: 0,
+        losses: 0,
         goalsFor: 0,
         goalsAgainst: 0,
         goalDifference: 0,
@@ -163,78 +168,84 @@ function TeamDashboardContent() {
       }
     }
     
-    // Get current season and group
-    const currentSeasonId = currentSeason.id
-    const currentGroupId = currentSeason.groups?.[0]?.id
+    // Get team statistics from database for this team
+    const teamStats = teamStatsData?.team_statistics?.[0] // Since we're querying by team_id, we should get only one result
     
-    // Filter matches for current season and group
-    const seasonGroupMatches = teamMatches.filter((match: any) => 
-      match.season_id === currentSeasonId
-    )
-    
-    // Calculate statistics from actual match results
+    // Use database statistics if available, otherwise calculate from matches
     let wins = 0
     let draws = 0
     let losses = 0
     let goalsFor = 0
     let goalsAgainst = 0
+    let points = 0
+    let played = 0
     let cleanSheets = 0
     
-    seasonGroupMatches.forEach((match: any) => {
-      const isHome = match.team1 === manager?.team?.id
-      const teamGoals = isHome ? (match.team1Goals || 0) : (match.team2Goals || 0)
-      const opponentGoals = isHome ? (match.team2Goals || 0) : (match.team1Goals || 0)
+    if (teamStats) {
+      // Use statistics from database
+      wins = parseInt(teamStats.wins) || 0
+      draws = parseInt(teamStats.draws) || 0
+      losses = parseInt(teamStats.losses) || 0
+      goalsFor = parseInt(teamStats.goals_for) || 0
+      goalsAgainst = parseInt(teamStats.goals_against) || 0
+      points = parseInt(teamStats.points) || 0
+      played = parseInt(teamStats.played) || 0
+    } else {
+      // Fallback: Calculate from match results
+      const currentSeasonId = currentSeason.id
+      const seasonGroupMatches = teamMatches.filter((match: any) => 
+        match.season_id === currentSeasonId
+      )
       
-      // Count goals
-      goalsFor += teamGoals
-      goalsAgainst += opponentGoals
+      seasonGroupMatches.forEach((match: any) => {
+        const isHome = match.team1 === manager?.team?.id
+        const teamGoals = isHome ? (match.team1Goals || 0) : (match.team2Goals || 0)
+        const opponentGoals = isHome ? (match.team2Goals || 0) : (match.team1Goals || 0)
+        
+        goalsFor += teamGoals
+        goalsAgainst += opponentGoals
+        
+        if (teamGoals > opponentGoals) {
+          wins++
+        } else if (teamGoals < opponentGoals) {
+          losses++
+        } else {
+          draws++
+        }
+        
+        if (opponentGoals === 0) {
+          cleanSheets++
+        }
+      })
       
-      // Determine match result
-      if (teamGoals > opponentGoals) {
-        wins++
-      } else if (teamGoals < opponentGoals) {
-        losses++
-      } else {
-        draws++
-      }
-      
-      // Count clean sheets
-      if (opponentGoals === 0) {
-        cleanSheets++
-      }
-    })
+      played = wins + draws + losses
+      points = (wins * 3) + draws
+    }
     
-    const played = wins + draws + losses
-    const points = (wins * 3) + draws
     const goalDifference = goalsFor - goalsAgainst
-    const winRate = played > 0 ? ((wins / played) * 100).toFixed(1) : 0
-    const avgGoalsPerMatch = played > 0 ? (goalsFor / played).toFixed(1) : 0
-    
-    // Calculate position based on points and goal difference
-    // This would need to be compared with other teams in the same group
-    // For now, we'll use the team_statistics position if available
-    const position = currentTeam.team_statistics?.[0]?.position || null
+    const winRate = played > 0 ? parseFloat(((wins / played) * 100).toFixed(1)) : 0
+    const avgGoalsPerMatch = played > 0 ? parseFloat((goalsFor / played).toFixed(1)) : 0
     
     return {
       name: currentTeam.name || manager?.team?.name || "Team Dashboard",
       shortName: currentTeam.shortname || manager?.team?.shortName || "TFC",
       manager: manager?.name || "Unknown Manager",
-      email: manager?.email || null,
-      phone: null,
-      founded: null, // Not available in current database
-      group: currentSeason?.groups?.[0]?.name || null,
-      position, // From team_statistics or calculated from standings
-      points, // Calculated from match results
-      played, // Calculated from match results
-      wins, // Calculated from match results
-      draws, // Calculated from match results
-      losses, // Calculated from match results
-      goalsFor, // Calculated from match results
-      goalsAgainst, // Calculated from match results
-      goalDifference, // Calculated from match results
-      winRate, // Calculated from match results
-      cleanSheets, // Calculated from match results
-      avgGoalsPerMatch, // Calculated from match results
+      email: manager?.email || "",
+      phone: "",
+      founded: "", // Not available in current database
+      group: currentSeason?.groups?.[0]?.name || "",
+      position: teamStats?.position || 0,
+      points,
+      played,
+      wins,
+      draws,
+      losses,
+      goalsFor,
+      goalsAgainst,
+      goalDifference,
+      winRate,
+      cleanSheets,
+      avgGoalsPerMatch,
     }
   }
 
@@ -375,14 +386,14 @@ function TeamDashboardContent() {
     // Get current season and group
     const currentSeasonId = currentSeason?.id
     
-    // Filter matches for current season only (groups not accessible from matches)
+    // Filter matches for current season only
     const seasonGroupMatches = teamMatches.filter((match: any) => 
       match.season_id === currentSeasonId
     )
     
-    return seasonGroupMatches.slice(0, 6).map((match, index) => {
+    // Fallback: Use individual match data
+    return seasonGroupMatches.slice(0, 6).map((match: any, index: number) => {
       const isHome = match.team1 === manager?.team?.id
-      // Use actual goals from the match instead of team statistics
       const teamGoals = isHome ? (match.team1Goals || 0) : (match.team2Goals || 0)
       const teamGoalsAgainst = isHome ? (match.team2Goals || 0) : (match.team1Goals || 0)
       
