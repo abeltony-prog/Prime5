@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useQuery, useMutation } from '@apollo/client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,164 +13,22 @@ import { Label } from "@/components/ui/label"
 import { Briefcase, MapPin, Clock, Users, DollarSign, Calendar, Send, CheckCircle } from "lucide-react"
 import { Navigation } from "@/components/navigation"
 import { toast } from "sonner"
+import { GET_ALL_JOBS } from "@/lib/graphql/queries"
+import { CREATE_APPLICATION } from "@/lib/graphql/mutations"
 
 interface JobOpening {
   id: string
   title: string
-  department: string
   location: string
-  type: "Full-time" | "Part-time" | "Contract" | "Internship"
   experience: string
-  salary: string
+  amount: string
   description: string
-  requirements: string[]
-  benefits: string[]
-  postedDate: string
-  applicationDeadline: string
+  Requirements: string | string[]
+  Benefits: string | string[]
+  created_at: string
 }
 
-const jobOpenings: JobOpening[] = [
-  {
-    id: "1",
-    title: "Marketing Manager",
-    department: "Marketing",
-    location: "Kigali, Rwanda",
-    type: "Full-time",
-    experience: "3-5 years",
-    salary: "RWF 800,000 - 1,200,000",
-    description: "We are looking for a creative and strategic Marketing Manager to lead our marketing initiatives and help grow the Prime5 League brand across the region.",
-    requirements: [
-      "Bachelor's degree in Marketing, Communications, or related field",
-      "3-5 years of marketing experience, preferably in sports or entertainment",
-      "Strong digital marketing skills including social media, content creation, and analytics",
-      "Experience with event marketing and community engagement",
-      "Excellent communication and project management skills",
-      "Fluent in English and Kinyarwanda"
-    ],
-    benefits: [
-      "Competitive salary and performance bonuses",
-      "Health insurance coverage",
-      "Professional development opportunities",
-      "Flexible working hours",
-      "Access to league events and matches",
-      "Team building activities"
-    ],
-    postedDate: "2024-01-15",
-    applicationDeadline: "2024-02-15"
-  },
-  {
-    id: "2",
-    title: "Sports Data Analyst",
-    department: "Analytics",
-    location: "Kigali, Rwanda",
-    type: "Full-time",
-    experience: "2-4 years",
-    salary: "RWF 600,000 - 900,000",
-    description: "Join our analytics team to analyze match data, player performance, and league statistics to provide insights for teams and fans.",
-    requirements: [
-      "Bachelor's degree in Statistics, Mathematics, Computer Science, or related field",
-      "2-4 years of data analysis experience",
-      "Proficiency in Python, R, or SQL",
-      "Experience with data visualization tools (Tableau, Power BI, or similar)",
-      "Knowledge of sports analytics and statistics",
-      "Strong problem-solving and analytical thinking skills"
-    ],
-    benefits: [
-      "Competitive salary package",
-      "Health and dental insurance",
-      "Remote work flexibility",
-      "Access to cutting-edge analytics tools",
-      "Professional certification support",
-      "Sports industry networking opportunities"
-    ],
-    postedDate: "2024-01-20",
-    applicationDeadline: "2024-02-20"
-  },
-  {
-    id: "3",
-    title: "Event Coordinator",
-    department: "Operations",
-    location: "Kigali, Rwanda",
-    type: "Full-time",
-    experience: "1-3 years",
-    salary: "RWF 500,000 - 750,000",
-    description: "Coordinate and manage league events, matches, and special activities to ensure smooth operations and exceptional fan experience.",
-    requirements: [
-      "Bachelor's degree in Event Management, Sports Management, or related field",
-      "1-3 years of event coordination experience",
-      "Strong organizational and multitasking abilities",
-      "Excellent communication and interpersonal skills",
-      "Experience with vendor management and logistics",
-      "Ability to work evenings and weekends during match days"
-    ],
-    benefits: [
-      "Competitive compensation",
-      "Health insurance benefits",
-      "Event management training",
-      "Networking opportunities in sports industry",
-      "Performance-based bonuses",
-      "Career advancement opportunities"
-    ],
-    postedDate: "2024-01-25",
-    applicationDeadline: "2024-02-25"
-  },
-  {
-    id: "4",
-    title: "Content Creator",
-    department: "Media",
-    location: "Kigali, Rwanda",
-    type: "Part-time",
-    experience: "1-2 years",
-    salary: "RWF 300,000 - 500,000",
-    description: "Create engaging content for our social media platforms, website, and marketing materials to showcase the excitement of Prime5 League.",
-    requirements: [
-      "Bachelor's degree in Communications, Journalism, or related field",
-      "1-2 years of content creation experience",
-      "Proficiency in video editing software (Adobe Premiere, Final Cut Pro)",
-      "Strong photography and videography skills",
-      "Social media management experience",
-      "Creative writing and storytelling abilities"
-    ],
-    benefits: [
-      "Flexible working schedule",
-      "Creative freedom and autonomy",
-      "Access to professional equipment",
-      "Portfolio building opportunities",
-      "Performance-based incentives",
-      "Industry networking events"
-    ],
-    postedDate: "2024-01-30",
-    applicationDeadline: "2024-02-28"
-  },
-  {
-    id: "5",
-    title: "Community Manager",
-    department: "Community",
-    location: "Remote",
-    type: "Contract",
-    experience: "2-3 years",
-    salary: "RWF 400,000 - 600,000",
-    description: "Build and engage our community of fans, players, and supporters through social media, forums, and community events.",
-    requirements: [
-      "Bachelor's degree in Marketing, Communications, or related field",
-      "2-3 years of community management experience",
-      "Strong social media management skills",
-      "Experience with community platforms and tools",
-      "Excellent written and verbal communication",
-      "Passion for sports and community building"
-    ],
-    benefits: [
-      "Remote work flexibility",
-      "Competitive contract rates",
-      "Community building experience",
-      "Sports industry exposure",
-      "Flexible project timeline",
-      "Potential for long-term engagement"
-    ],
-    postedDate: "2024-02-01",
-    applicationDeadline: "2024-03-01"
-  }
-]
+
 
 export default function CareersPage() {
   const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null)
@@ -183,6 +42,12 @@ export default function CareersPage() {
     resume: null as File | null
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // GraphQL queries and mutations
+  const { data: jobsData, loading: jobsLoading, error: jobsError } = useQuery(GET_ALL_JOBS)
+  const [createApplication] = useMutation(CREATE_APPLICATION)
+
+  const jobOpenings: JobOpening[] = jobsData?.jobs || []
 
   const handleInputChange = (field: string, value: string) => {
     setApplicationForm(prev => ({
@@ -210,9 +75,21 @@ export default function CareersPage() {
 
     setIsSubmitting(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const applicationData = {
+        name: applicationForm.fullName,
+        email: applicationForm.email,
+        phone: applicationForm.phone,
+        years: applicationForm.experience,
+        cover_letter: applicationForm.coverLetter,
+        file: applicationForm.resume ? applicationForm.resume.name : null,
+        job_id: selectedJob.id
+      }
+
+      await createApplication({
+        variables: { application: applicationData }
+      })
+
       toast.success("Application submitted successfully! We'll get back to you soon.")
       setApplicationForm({
         fullName: "",
@@ -224,18 +101,15 @@ export default function CareersPage() {
         resume: null
       })
       setSelectedJob(null)
-    }, 2000)
-  }
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Full-time": return "bg-green-100 text-green-800"
-      case "Part-time": return "bg-blue-100 text-blue-800"
-      case "Contract": return "bg-purple-100 text-purple-800"
-      case "Internship": return "bg-orange-100 text-orange-800"
-      default: return "bg-gray-100 text-gray-800"
+    } catch (error) {
+      toast.error("Failed to submit application. Please try again.")
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
+
+
 
   return (
     <div className="min-h-screen relative">
@@ -275,52 +149,68 @@ export default function CareersPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {jobOpenings.map((job) => (
-              <Card key={job.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge className={getTypeColor(job.type)}>
-                      {job.type}
-                    </Badge>
-                    <span className="text-sm text-slate-500">
-                      {new Date(job.postedDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <CardTitle className="text-xl text-slate-900 group-hover:text-green-600 transition-colors">
-                    {job.title}
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    {job.department} • {job.location}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center text-sm text-slate-600">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    {job.salary}
-                  </div>
-                  <div className="flex items-center text-sm text-slate-600">
-                    <Clock className="h-4 w-4 mr-2" />
-                    {job.experience}
-                  </div>
-                  <p className="text-slate-700 text-sm leading-relaxed">
-                    {job.description}
-                  </p>
-                  <div className="pt-4">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          className="w-full bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => setSelectedJob(job)}
-                        >
-                          Apply Now
-                        </Button>
-                      </DialogTrigger>
+          {jobsLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-slate-600">Loading job openings...</p>
+            </div>
+          ) : jobsError ? (
+            <div className="text-center py-12">
+              <p className="text-red-600">Failed to load job openings. Please try again later.</p>
+            </div>
+          ) : jobOpenings.length === 0 ? (
+            <div className="text-center py-12">
+              <Briefcase className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">No job openings at the moment</h3>
+              <p className="text-slate-600">Check back later for new opportunities!</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {jobOpenings.map((job) => (
+                <Card key={job.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge className="bg-green-100 text-green-800">
+                        Available
+                      </Badge>
+                      <span className="text-sm text-slate-500">
+                        {new Date(job.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <CardTitle className="text-xl text-slate-900 group-hover:text-green-600 transition-colors">
+                      {job.title}
+                    </CardTitle>
+                    <CardDescription className="text-slate-600">
+                      {job.location}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center text-sm text-slate-600">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      {job.amount}
+                    </div>
+                    <div className="flex items-center text-sm text-slate-600">
+                      <Clock className="h-4 w-4 mr-2" />
+                      {job.experience}
+                    </div>
+                    <p className="text-slate-700 text-sm leading-relaxed">
+                      {job.description}
+                    </p>
+                    <div className="pt-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => setSelectedJob(job)}
+                          >
+                            Apply Now
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle className="text-2xl">{job.title}</DialogTitle>
                           <DialogDescription>
-                            {job.department} • {job.location} • {job.type}
+                            {job.location}
                           </DialogDescription>
                         </DialogHeader>
                         
@@ -329,7 +219,7 @@ export default function CareersPage() {
                           <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg">
                             <div className="flex items-center">
                               <DollarSign className="h-4 w-4 mr-2 text-slate-600" />
-                              <span className="text-sm font-medium">{job.salary}</span>
+                              <span className="text-sm font-medium">{job.amount}</span>
                             </div>
                             <div className="flex items-center">
                               <Clock className="h-4 w-4 mr-2 text-slate-600" />
@@ -341,7 +231,7 @@ export default function CareersPage() {
                             </div>
                             <div className="flex items-center">
                               <Calendar className="h-4 w-4 mr-2 text-slate-600" />
-                              <span className="text-sm font-medium">Apply by {new Date(job.applicationDeadline).toLocaleDateString()}</span>
+                              <span className="text-sm font-medium">Posted {new Date(job.created_at).toLocaleDateString()}</span>
                             </div>
                           </div>
 
@@ -354,21 +244,33 @@ export default function CareersPage() {
                           {/* Requirements */}
                           <div>
                             <h3 className="font-semibold text-lg mb-2">Requirements</h3>
-                            <ul className="list-disc list-inside space-y-1 text-slate-700">
-                              {job.requirements.map((req, index) => (
-                                <li key={index} className="text-sm">{req}</li>
-                              ))}
-                            </ul>
+                            <div className="text-slate-700">
+                              {Array.isArray(job.Requirements) ? (
+                                <ul className="list-disc list-inside space-y-1">
+                                  {job.Requirements.map((req, index) => (
+                                    <li key={index} className="text-sm">{req}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <div className="whitespace-pre-line text-sm">{job.Requirements}</div>
+                              )}
+                            </div>
                           </div>
 
                           {/* Benefits */}
                           <div>
                             <h3 className="font-semibold text-lg mb-2">Benefits</h3>
-                            <ul className="list-disc list-inside space-y-1 text-slate-700">
-                              {job.benefits.map((benefit, index) => (
-                                <li key={index} className="text-sm">{benefit}</li>
-                              ))}
-                            </ul>
+                            <div className="text-slate-700">
+                              {Array.isArray(job.Benefits) ? (
+                                <ul className="list-disc list-inside space-y-1">
+                                  {job.Benefits.map((benefit, index) => (
+                                    <li key={index} className="text-sm">{benefit}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <div className="whitespace-pre-line text-sm">{job.Benefits}</div>
+                              )}
+                            </div>
                           </div>
 
                           {/* Application Form */}
@@ -467,7 +369,8 @@ export default function CareersPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
