@@ -158,13 +158,7 @@ export default function AdminLoginPage() {
               </Button>
             </div>
             
-            <div className="mt-6 p-4 bg-white/5 rounded-lg">
-              <p className="text-xs text-slate-400 text-center">
-                <strong>Default Credentials:</strong><br/>
-                Username: adminPrime5<br/>
-                Password: 123Prime5ports!
-              </p>
-            </div>
+
           </CardContent>
         </Card>
       </div>
