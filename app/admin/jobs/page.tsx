@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Edit, Trash2, Briefcase, MapPin, DollarSign, Clock, Eye, Trophy, Target, Award, Bell, Settings } from "lucide-react"
 import { GET_ALL_JOBS, GET_ALL_APPLICATIONS } from "@/lib/graphql/queries"
-import { CREATE_JOB, UPDATE_JOB, DELETE_JOB } from "@/lib/graphql/mutations"
+import { CREATE_JOB, UPDATE_JOB, DELETE_JOB, DELETE_APPLICATION } from "@/lib/graphql/mutations"
 import { toast } from "sonner"
 import Link from "next/link"
 
@@ -73,6 +73,7 @@ export default function AdminJobsPage() {
   const [createJob] = useMutation(CREATE_JOB)
   const [updateJob] = useMutation(UPDATE_JOB)
   const [deleteJob] = useMutation(DELETE_JOB)
+  const [deleteApplication] = useMutation(DELETE_APPLICATION)
 
   const jobs: Job[] = jobsData?.jobs || []
   const applications: Application[] = applicationsData?.applications || []
@@ -150,18 +151,29 @@ export default function AdminJobsPage() {
   }
 
   const handleDeleteJob = async (jobId: string) => {
-    if (!confirm("Are you sure you want to delete this job?")) return
+    if (!confirm("Are you sure you want to delete this job? This will also delete all associated applications.")) return
 
     setIsDeleting(true)
     try {
+      // First delete all applications for this job
+      const jobApplications = applications.filter(app => app.job_id === jobId)
+      
+      for (const application of jobApplications) {
+        await deleteApplication({
+          variables: { id: application.id }
+        })
+      }
+
+      // Then delete the job
       await deleteJob({
         variables: { id: jobId }
       })
 
-      toast.success("Job deleted successfully!")
+      toast.success(`Job and ${jobApplications.length} associated application(s) deleted successfully!`)
       refetchJobs()
+      refetchApplications()
     } catch (error) {
-      toast.error("Failed to delete job")
+      toast.error("Failed to delete job and applications")
       console.error(error)
     } finally {
       setIsDeleting(false)
