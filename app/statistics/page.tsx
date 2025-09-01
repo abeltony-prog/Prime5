@@ -8,6 +8,8 @@ import { Target, Award, TrendingUp, Users, Trophy, TrendingDown, Calendar, Clock
 import { useState } from "react"
 import { useQuery } from '@apollo/client'
 import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_TEAM_STATISTICS, GET_TEAM_PLAYER_STATISTICS, GET_SEASONS } from "@/lib/graphql/queries"
+import { Bracket } from "@/components/bracket"
+
 
 
 export default function StatisticsPage() {
@@ -460,6 +462,160 @@ export default function StatisticsPage() {
   const fixtures = calculateFixtures()
   const leaderboard = calculateLeaderboard()
 
+  // Calculate knockout matches and group data
+  const calculateKnockoutData = () => {
+    if (!activeSeason) {
+      // Return dummy data for design preview
+      return {
+        knockoutMatches: { 
+          quarterfinals: [
+            { team1: "Thunder FC", team2: "Electric FC", winner: "Thunder FC", team1Score: 3, team2Score: 1, date: "Dec 15" },
+            { team1: "Lightning United", team2: "Phoenix United", winner: "Lightning United", team1Score: 2, team2Score: 0, date: "Dec 15" },
+            { team1: "Rapid Fire", team2: "Dynamo FC", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 16" },
+            { team1: "Velocity FC", team2: "Storm Riders", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 16" }
+          ], 
+          semifinals: [
+            { team1: "Thunder FC", team2: "Lightning United", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 22" },
+            { team1: "TBD", team2: "TBD", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 22" }
+          ], 
+          final: { team1: "TBD", team2: "TBD", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 29" }
+        },
+        groupATeams: [
+          { name: "Thunder FC", points: 12, goalDifference: 8, goalsFor: 15 },
+          { name: "Rapid Fire", points: 9, goalDifference: 3, goalsFor: 12 },
+          { name: "Storm Riders", points: 7, goalDifference: 1, goalsFor: 10 },
+          { name: "Phoenix United", points: 6, goalDifference: -2, goalsFor: 8 }
+        ],
+        groupBTeams: [
+          { name: "Lightning United", points: 11, goalDifference: 6, goalsFor: 14 },
+          { name: "Velocity FC", points: 8, goalDifference: 2, goalsFor: 11 },
+          { name: "Dynamo FC", points: 6, goalDifference: -1, goalsFor: 9 },
+          { name: "Electric FC", points: 4, goalDifference: -3, goalsFor: 7 }
+        ]
+      }
+    }
+
+    const allTeams = teamsData?.Teams || []
+    const allTeamStats = teamStatsData?.team_statistics || []
+    const allMatches = matchesData?.matches || []
+    
+    // Filter teams and stats for active season
+    const seasonTeamIds = activeSeason.teams || []
+    const seasonTeams = allTeams.filter((team: any) => seasonTeamIds.includes(team.id))
+    const seasonTeamStats = allTeamStats.filter((stat: any) => stat.season_id === activeSeason.id)
+    
+    // Sort teams by points for group standings
+    const sortedTeams = seasonTeams.map((team: any) => {
+      const teamStat = seasonTeamStats.find((stat: any) => stat.team_id === team.id)
+      return {
+        ...team,
+        points: teamStat ? parseInt(teamStat.points) || 0 : 0,
+        goalDifference: teamStat ? parseInt(teamStat.goal_diff) || 0 : 0,
+        goalsFor: teamStat ? parseInt(teamStat.goals_for) || 0 : 0
+      }
+    }).sort((a: any, b: any) => {
+      if (b.points !== a.points) return b.points - a.points
+      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference
+      return b.goalsFor - a.goalsFor
+    })
+
+    // Split into groups (top 4 teams from each group advance)
+    const groupATeams = sortedTeams.slice(0, 4)
+    const groupBTeams = sortedTeams.slice(4, 8)
+
+    // Filter playoff matches
+    const playoffMatches = allMatches.filter((match: any) => {
+      return match.location && (
+        match.location.toLowerCase().includes('semifinal') ||
+        match.location.toLowerCase().includes('final') ||
+        match.location.toLowerCase().includes('playoff') ||
+        match.location.toLowerCase().includes('quarterfinal')
+      )
+    })
+
+    // If no playoff matches found, use dummy data for design preview
+    if (playoffMatches.length === 0) {
+      return {
+        knockoutMatches: { 
+    quarterfinals: [
+            { team1: "Thunder FC", team2: "Electric FC", winner: "Thunder FC", team1Score: 3, team2Score: 1, date: "Dec 15" },
+            { team1: "Lightning United", team2: "Phoenix United", winner: "Lightning United", team1Score: 2, team2Score: 0, date: "Dec 15" },
+            { team1: "Rapid Fire", team2: "Dynamo FC", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 16" },
+            { team1: "Velocity FC", team2: "Storm Riders", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 16" }
+    ],
+    semifinals: [
+            { team1: "Thunder FC", team2: "Lightning United", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 22" },
+            { team1: "TBD", team2: "TBD", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 22" }
+          ], 
+          final: { team1: "TBD", team2: "TBD", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 29" }
+        },
+        groupATeams,
+        groupBTeams
+      }
+    }
+
+    // Create knockout matches from real data
+    const quarterfinals = playoffMatches
+      .filter((match: any) => match.location.toLowerCase().includes('quarterfinal'))
+      .map((match: any) => {
+        const team1 = allTeams.find((t: any) => t.id === match.team1) || { name: match.team1 }
+        const team2 = allTeams.find((t: any) => t.id === match.team2) || { name: match.team2 }
+        const winner = match.team1Goals > match.team2Goals ? team1.name : 
+                      match.team2Goals > match.team1Goals ? team2.name : "TBD"
+        
+        return {
+          team1: team1.name,
+          team2: team2.name,
+          winner,
+          team1Score: match.team1Goals || 0,
+          team2Score: match.team2Goals || 0,
+          date: new Date(match.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        }
+      })
+
+    const semifinals = playoffMatches
+      .filter((match: any) => match.location.toLowerCase().includes('semifinal'))
+      .map((match: any) => {
+        const team1 = allTeams.find((t: any) => t.id === match.team1) || { name: match.team1 }
+        const team2 = allTeams.find((t: any) => t.id === match.team2) || { name: match.team2 }
+        const winner = match.team1Goals > match.team2Goals ? team1.name : 
+                      match.team2Goals > match.team1Goals ? team2.name : "TBD"
+        
+        return {
+          team1: team1.name,
+          team2: team2.name,
+    winner,
+          team1Score: match.team1Goals || 0,
+          team2Score: match.team2Goals || 0,
+          date: new Date(match.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        }
+      })
+
+    const finalMatch = playoffMatches.find((match: any) => match.location.toLowerCase().includes('final'))
+    const final = finalMatch ? {
+      team1: allTeams.find((t: any) => t.id === finalMatch.team1)?.name || finalMatch.team1,
+      team2: allTeams.find((t: any) => t.id === finalMatch.team2)?.name || finalMatch.team2,
+      winner: finalMatch.team1Goals > finalMatch.team2Goals ? 
+              (allTeams.find((t: any) => t.id === finalMatch.team1)?.name || finalMatch.team1) :
+              finalMatch.team2Goals > finalMatch.team1Goals ? 
+              (allTeams.find((t: any) => t.id === finalMatch.team2)?.name || finalMatch.team2) : "TBD",
+      team1Score: finalMatch.team1Goals || 0,
+      team2Score: finalMatch.team2Goals || 0,
+      date: new Date(finalMatch.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    } : null
+
+    return {
+      knockoutMatches: { quarterfinals, semifinals, final },
+      groupATeams,
+      groupBTeams
+    }
+  }
+
+  const knockoutData = calculateKnockoutData()
+  const knockoutMatches = knockoutData.knockoutMatches
+  const groupATeams = knockoutData.groupATeams
+  const groupBTeams = knockoutData.groupBTeams
+
   const playerOfTheWeek = {
     name: topScorers[0]?.name || "No Data",
     team: topScorers[0]?.team || "No Team",
@@ -481,70 +637,13 @@ export default function StatisticsPage() {
   const filteredResults =
     selectedGroup === "all" ? pastResults : pastResults.filter((match: any) => match.group === selectedGroup)
 
-  const groupATeams = [
-    { name: "Thunder FC", position: 1 },
-    { name: "Rapid Fire", position: 2 },
-    { name: "Storm Riders", position: 3 },
-    { name: "Phoenix United", position: 4 },
-  ]
-
-  const groupBTeams = [
-    { name: "Lightning United", position: 1 },
-    { name: "Velocity FC", position: 2 },
-    { name: "Dynamo FC", position: 3 },
-    { name: "Electric FC", position: 4 },
-  ]
-
-  const knockoutMatches = {
-    quarterfinals: [
-      { team1: "Thunder FC", team2: "Electric FC", winner: "Thunder FC" },
-      { team1: "Lightning United", team2: "Phoenix United", winner: "Lightning United" },
-      { team1: "Rapid Fire", team2: "Dynamo FC", winner: "TBD" },
-      { team1: "Velocity FC", team2: "Storm Riders", winner: "TBD" },
-    ],
-    semifinals: [
-      { team1: "Thunder FC", team2: "Lightning United", winner: "TBD" },
-      { team1: "TBD", team2: "TBD", winner: "TBD" },
-    ],
-    final: { team1: "TBD", team2: "TBD", winner: "TBD" },
-  }
 
 
 
-  const MatchCard = ({
-    team1,
-    team2,
-    winner,
-    stage,
-  }: { team1: string; team2: string; winner: string; stage: string }) => (
-    <Card className={`bg-white/10 backdrop-blur-xl border-2 ${winner !== "TBD" ? "border-green-500/50 bg-green-500/20" : "border-white/20"} shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105`}>
-      <CardContent className="p-4">
-        <div className="text-center space-y-2">
-          <Badge variant="outline" className="mb-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
-            {stage}
-          </Badge>
-          <div className="space-y-1">
-            <p className={`font-semibold drop-shadow-md ${winner === team1 ? "text-green-300" : "text-white"}`}>{team1}</p>
-            <p className="text-white/80 text-sm">VS</p>
-            <p className={`font-semibold drop-shadow-md ${winner === team2 ? "text-green-300" : "text-white"}`}>{team2}</p>
-          </div>
-          {winner !== "TBD" && <Badge className="bg-green-500/90 backdrop-blur-md text-white mt-2">Winner: {winner}</Badge>}
-        </div>
-      </CardContent>
-    </Card>
-  )
 
-  const TeamCard = ({ team, group }: { team: { name: string; position: number }; group: string }) => (
-    <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-      <CardContent className="p-4 text-center">
-        <Badge variant="outline" className="mb-2 bg-white/20 backdrop-blur-sm border-white/30 text-white">
-          #{team.position}
-        </Badge>
-        <p className="font-semibold text-white drop-shadow-md">{team.name}</p>
-        <p className="text-sm text-white/80">Group {group}</p>
-      </CardContent>
-    </Card>
-  )
+
+
+
 
   const StandingsTable = ({ standings, groupName }: { standings: typeof groupAStandings; groupName: string }) => (
     <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
@@ -1040,72 +1139,19 @@ export default function StatisticsPage() {
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">Knockout Stage</h2>
               <p className="text-lg text-white/90 drop-shadow-xl">Tournament progression and results</p>
+              {(!activeSeason || knockoutMatches.quarterfinals.length === 0) && (
+                <Badge className="mt-2 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                  Design Preview
+                </Badge>
+              )}
             </div>
 
-              {/* Quarterfinals */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Quarterfinals</h3>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {knockoutMatches.quarterfinals.map((match, index) => (
-                  <MatchCard
-                    key={index}
-                    team1={match.team1}
-                    team2={match.team2}
-                    winner={match.winner}
-                    stage="Quarterfinal"
-                  />
-                  ))}
-                </div>
-              </div>
-
-              {/* Semifinals */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Semifinals</h3>
-                <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                  {knockoutMatches.semifinals.map((match, index) => (
-                  <MatchCard
-                    key={index}
-                    team1={match.team1}
-                    team2={match.team2}
-                    winner={match.winner}
-                    stage="Semifinal"
-                  />
-                  ))}
-                </div>
-              </div>
-
-              {/* Final */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">Final</h3>
-              <div className="max-w-md mx-auto">
-                  <MatchCard
-                    team1={knockoutMatches.final.team1}
-                    team2={knockoutMatches.final.team2}
-                    winner={knockoutMatches.final.winner}
-                  stage="Final"
-                />
-              </div>
-            </div>
-
-            {/* Group Winners */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white text-center drop-shadow-lg">Group A Winners</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {groupATeams.slice(0, 4).map((team, index) => (
-                    <TeamCard key={index} team={team} group="A" />
-                  ))}
-                    </div>
-                    </div>
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white text-center drop-shadow-lg">Group B Winners</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {groupBTeams.slice(0, 4).map((team, index) => (
-                    <TeamCard key={index} team={team} group="B" />
-                  ))}
-                    </div>
-                  </div>
-            </div>
+            <Bracket 
+              knockoutMatches={knockoutMatches}
+              groupATeams={groupATeams}
+              groupBTeams={groupBTeams}
+              activeSeason={activeSeason}
+            />
           </div>
         )}
 
