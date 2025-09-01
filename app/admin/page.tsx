@@ -156,7 +156,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/store">
+              <Link href="/admin/store">
                 <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
                   <Target className="w-4 h-4 mr-2" />
                   Store

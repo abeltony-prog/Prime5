@@ -5,378 +5,410 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  Target,
   ShoppingCart,
   Package,
-  DollarSign,
+  Star,
+  Heart,
+  Search,
+  Filter,
   Plus,
-  Edit,
-  Trash2,
-  Eye,
-  ArrowLeft,
-  Save,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  TrendingUp,
-  Users,
+  Minus,
+  ShoppingBag,
+  Truck,
+  Shield,
+  RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
+import { Navigation } from "@/components/navigation"
 
-export default function StorePage() {
-  const [activeTab, setActiveTab] = useState("products")
+export default function PublicStorePage() {
+  const [activeTab, setActiveTab] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [cart, setCart] = useState<{[key: number]: number}>({})
 
-  // Mock data for demonstration
+  // Mock store products
   const products = [
     {
       id: 1,
-      name: "Prime5 Jersey",
-      category: "Apparel",
-      price: 25.00,
-      stock: 50,
-      status: "In Stock"
+      name: "Prime5 Home Jersey",
+      category: "Jerseys",
+      price: 45.00,
+      originalPrice: 55.00,
+      image: "/placeholder.svg?height=300&width=300&text=Home+Jersey",
+      rating: 4.8,
+      reviews: 124,
+      description: "Official Prime5 League home jersey with premium quality fabric and team colors.",
+      inStock: true,
+      featured: true
     },
     {
       id: 2,
-      name: "Team Cap",
-      category: "Accessories",
-      price: 15.00,
-      stock: 30,
-      status: "In Stock"
+      name: "Prime5 Away Jersey",
+      category: "Jerseys",
+      price: 45.00,
+      originalPrice: 55.00,
+      image: "/placeholder.svg?height=300&width=300&text=Away+Jersey",
+      rating: 4.7,
+      reviews: 98,
+      description: "Official Prime5 League away jersey with modern design and comfortable fit.",
+      inStock: true,
+      featured: true
     },
     {
       id: 3,
+      name: "Team Cap",
+      category: "Accessories",
+      price: 25.00,
+      image: "/placeholder.svg?height=300&width=300&text=Team+Cap",
+      rating: 4.5,
+      reviews: 67,
+      description: "Stylish team cap with embroidered Prime5 League logo.",
+      inStock: true,
+      featured: false
+    },
+    {
+      id: 4,
       name: "Match Ball",
       category: "Equipment",
       price: 35.00,
-      stock: 0,
-      status: "Out of Stock"
-    }
-  ]
-
-  const orders = [
-    {
-      id: "ORD-001",
-      customer: "John Smith",
-      items: 2,
-      total: 40.00,
-      status: "Completed",
-      date: "2024-01-15"
+      image: "/placeholder.svg?height=300&width=300&text=Match+Ball",
+      rating: 4.9,
+      reviews: 89,
+      description: "Official match ball used in Prime5 League games.",
+      inStock: true,
+      featured: true
     },
     {
-      id: "ORD-002",
-      customer: "Mike Johnson",
-      items: 1,
-      total: 25.00,
-      status: "Pending",
-      date: "2024-01-16"
+      id: 5,
+      name: "Training Shorts",
+      category: "Apparel",
+      price: 30.00,
+      image: "/placeholder.svg?height=300&width=300&text=Training+Shorts",
+      rating: 4.6,
+      reviews: 45,
+      description: "Comfortable training shorts for practice sessions.",
+      inStock: true,
+      featured: false
+    },
+    {
+      id: 6,
+      name: "Team Scarf",
+      category: "Accessories",
+      price: 20.00,
+      image: "/placeholder.svg?height=300&width=300&text=Team+Scarf",
+      rating: 4.4,
+      reviews: 32,
+      description: "Warm team scarf perfect for supporting your team in any weather.",
+      inStock: false,
+      featured: false
     }
   ]
 
+  const categories = ["all", "Jerseys", "Apparel", "Accessories", "Equipment"]
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+    const matchesTab = activeTab === "all" || 
+                      (activeTab === "featured" && product.featured) ||
+                      (activeTab === "jerseys" && product.category === "Jerseys") ||
+                      (activeTab === "accessories" && product.category === "Accessories")
+    
+    return matchesSearch && matchesCategory && matchesTab
+  })
+
+  const addToCart = (productId: number) => {
+    setCart(prev => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + 1
+    }))
+  }
+
+  const removeFromCart = (productId: number) => {
+    setCart(prev => {
+      const newCart = { ...prev }
+      if (newCart[productId] > 1) {
+        newCart[productId] -= 1
+      } else {
+        delete newCart[productId]
+      }
+      return newCart
+    })
+  }
+
+  const getCartCount = () => {
+    return Object.values(cart).reduce((sum, count) => sum + count, 0)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
-      {/* Header */}
-      <div className="relative z-10">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/admin">
-                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Admin
-                </Button>
-              </Link>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-600/90 to-green-700/90 backdrop-blur-md rounded-xl flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-white" />
+    <div className="min-h-screen relative">
+      <Navigation />
+      
+      {/* Hero Section */}
+      <section className="relative py-16" style={{
+        backgroundImage: 'url(/mainbg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
+        <div className="relative z-10 container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
+              Prime5 Store
+            </h1>
+            <p className="text-xl text-white/90 max-w-2xl mx-auto drop-shadow-xl">
+              Official merchandise and gear from the Premier Futsal League
+            </p>
+          </div>
+
+          {/* Search and Filter Bar */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/40"
+                />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white drop-shadow-2xl">Store Management</h1>
-                <p className="text-sm text-white/90 drop-shadow-xl">Manage products, orders, and inventory</p>
-        </div>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full md:w-48 bg-white/10 border-white/20 text-white">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category} className="capitalize">
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="relative z-10 container mx-auto px-6 pb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+      {/* Main Content Section */}
+      <section className="relative" style={{
+        backgroundImage: 'url(/mainbg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
+        <div className="relative z-10 container mx-auto px-6 pb-16">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4 lg:w-fit lg:grid-cols-4 bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
             <TabsTrigger 
-              value="products" 
+              value="all" 
               className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
             >
-              Products
+              All Products
             </TabsTrigger>
             <TabsTrigger 
-              value="orders" 
+              value="featured" 
               className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
             >
-              Orders
+              Featured
             </TabsTrigger>
             <TabsTrigger 
-              value="inventory" 
+              value="jerseys" 
               className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
             >
-              Inventory
+              Jerseys
             </TabsTrigger>
             <TabsTrigger 
-              value="analytics" 
+              value="accessories" 
               className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
             >
-              Analytics
+              Accessories
             </TabsTrigger>
           </TabsList>
 
-          {/* Products Tab */}
-          <TabsContent value="products" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white drop-shadow-2xl">Products</h2>
-                <p className="text-white/90 drop-shadow-xl">Manage your store products</p>
+          <TabsContent value={activeTab} className="space-y-8">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-white/50 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">No products found</h3>
+                <p className="text-white/70">Try adjusting your search or filter criteria</p>
               </div>
-              <Button className="bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Product
-                </Button>
-            </div>
-
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-              <CardContent className="p-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-white/10">
-                      <TableHead className="text-white/80">Product</TableHead>
-                      <TableHead className="text-white/80">Category</TableHead>
-                      <TableHead className="text-white/80">Price</TableHead>
-                      <TableHead className="text-white/80">Stock</TableHead>
-                      <TableHead className="text-white/80">Status</TableHead>
-                      <TableHead className="text-white/80">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products.map((product) => (
-                      <TableRow key={product.id} className="border-white/10">
-                        <TableCell className="text-white font-medium">{product.name}</TableCell>
-                        <TableCell className="text-white/70">{product.category}</TableCell>
-                        <TableCell className="text-white">${product.price}</TableCell>
-                        <TableCell className="text-white">{product.stock}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            className={product.status === "In Stock" 
-                              ? "bg-green-500/20 text-green-300 border-green-500/30" 
-                              : "bg-red-500/20 text-red-300 border-red-500/30"
-                            }
-                          >
-                            {product.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/20">
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/20">
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/20">
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProducts.map((product) => (
+                  <Card key={product.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 overflow-hidden">
+                    <div className="relative">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        width={300}
+                        height={300}
+                        className="w-full h-64 object-cover"
+                      />
+                      {product.featured && (
+                        <Badge className="absolute top-4 left-4 bg-yellow-500/90 text-black font-bold">
+                          Featured
+                        </Badge>
+                      )}
+                      {!product.inStock && (
+                        <Badge className="absolute top-4 right-4 bg-red-500/90 text-white">
+                          Out of Stock
+                        </Badge>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="absolute top-4 right-4 bg-white/20 border-white/30 text-white hover:bg-white/30"
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <CardContent className="p-6">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
+                        <p className="text-white/80 text-sm mb-3">{product.description}</p>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < Math.floor(product.rating)
+                                    ? "text-yellow-400 fill-current"
+                                    : "text-white/30"
+                                }`}
+                              />
+                            ))}
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Orders Tab */}
-          <TabsContent value="orders" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white drop-shadow-2xl">Orders</h2>
-                <p className="text-white/90 drop-shadow-xl">Track and manage customer orders</p>
-          </div>
-        </div>
-
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-              <CardContent className="p-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-white/10">
-                      <TableHead className="text-white/80">Order ID</TableHead>
-                      <TableHead className="text-white/80">Customer</TableHead>
-                      <TableHead className="text-white/80">Items</TableHead>
-                      <TableHead className="text-white/80">Total</TableHead>
-                      <TableHead className="text-white/80">Status</TableHead>
-                      <TableHead className="text-white/80">Date</TableHead>
-                      <TableHead className="text-white/80">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((order) => (
-                      <TableRow key={order.id} className="border-white/10">
-                        <TableCell className="text-white font-medium">{order.id}</TableCell>
-                        <TableCell className="text-white">{order.customer}</TableCell>
-                        <TableCell className="text-white">{order.items}</TableCell>
-                        <TableCell className="text-white">${order.total}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            className={order.status === "Completed" 
-                              ? "bg-green-500/20 text-green-300 border-green-500/30" 
-                              : "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"
-                            }
-                          >
-                            {order.status}
-                  </Badge>
-                        </TableCell>
-                        <TableCell className="text-white/70">{order.date}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/20">
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/20">
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Inventory Tab */}
-          <TabsContent value="inventory" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white drop-shadow-2xl">Inventory</h2>
-                <p className="text-white/90 drop-shadow-xl">Monitor stock levels and manage inventory</p>
-              </div>
-                </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                      <Package className="w-6 h-6 text-green-300" />
-                    </div>
-                    <div>
-                      <p className="text-white/70 text-sm">Total Products</p>
-                      <p className="text-2xl font-bold text-white">{products.length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-blue-300" />
-                    </div>
-                    <div>
-                      <p className="text-white/70 text-sm">In Stock</p>
-                      <p className="text-2xl font-bold text-white">
-                        {products.filter(p => p.status === "In Stock").length}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-                      <XCircle className="w-6 h-6 text-red-300" />
-                    </div>
-                    <div>
-                      <p className="text-white/70 text-sm">Out of Stock</p>
-                      <p className="text-2xl font-bold text-white">
-                        {products.filter(p => p.status === "Out of Stock").length}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-          </div>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="flex items-center justify-between">
-        <div>
-                <h2 className="text-2xl font-bold text-white drop-shadow-2xl">Store Analytics</h2>
-                <p className="text-white/90 drop-shadow-xl">View sales performance and insights</p>
-            </div>
-          </div>
-          
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-                    <DollarSign className="h-5 w-5" />
-                    Sales Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">Total Sales</span>
-                      <span className="text-white font-bold">$1,250.00</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">Orders</span>
-                      <span className="text-white font-bold">{orders.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">Average Order</span>
-                      <span className="text-white font-bold">$32.50</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-                    <Users className="h-5 w-5" />
-                    Customer Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">Total Customers</span>
-                      <span className="text-white font-bold">24</span>
+                          <span className="text-white/70 text-sm">
+                            {product.rating} ({product.reviews} reviews)
+                          </span>
+                        </div>
                       </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">New This Month</span>
-                      <span className="text-white font-bold">8</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">Repeat Customers</span>
-                      <span className="text-white font-bold">16</span>
-                    </div>
-                    </div>
-                  </CardContent>
-                </Card>
-            </div>
+
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-bold text-white">${product.price}</span>
+                          {product.originalPrice && (
+                            <span className="text-lg text-white/50 line-through">
+                              ${product.originalPrice}
+                            </span>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="border-white/30 text-white/90">
+                          {product.category}
+                        </Badge>
+                      </div>
+
+                      {product.inStock ? (
+                        <div className="flex items-center gap-2">
+                          {cart[product.id] ? (
+                            <div className="flex items-center gap-2 flex-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removeFromCart(product.id)}
+                                className="border-white/30 text-white hover:bg-white/20"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                              <span className="text-white font-medium px-3">
+                                {cart[product.id]}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => addToCart(product.id)}
+                                className="border-white/30 text-white hover:bg-white/20"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => addToCart(product.id)}
+                              className="flex-1 bg-green-600/90 hover:bg-green-700/90 text-white"
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <Button
+                          disabled
+                          className="w-full bg-white/10 text-white/50 cursor-not-allowed"
+                        >
+                          Out of Stock
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
-      </div>
+
+        {/* Features Section */}
+        <section className="mt-16">
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Truck className="h-8 w-8 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Free Shipping</h3>
+                <p className="text-white/80">Free shipping on orders over $50</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-green-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Secure Payment</h3>
+                <p className="text-white/80">Safe and secure payment processing</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <RefreshCw className="h-8 w-8 text-purple-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Easy Returns</h3>
+                <p className="text-white/80">30-day return policy on all items</p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+        </div>
+      </section>
+
+      {/* Cart Button */}
+      {getCartCount() > 0 && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            size="lg"
+            className="bg-green-600/90 hover:bg-green-700/90 text-white shadow-2xl rounded-full w-16 h-16"
+          >
+            <ShoppingBag className="w-6 h-6" />
+            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
+              {getCartCount()}
+            </Badge>
+          </Button>
+        </div>
+      )}
     </div>
   )
-} 
+}
