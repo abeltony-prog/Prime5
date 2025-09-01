@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Briefcase, MapPin, DollarSign, Clock, Eye } from "lucide-react"
+import { Plus, Edit, Trash2, Briefcase, MapPin, DollarSign, Clock, Eye, Trophy, Target, Award, Bell, Settings } from "lucide-react"
 import { GET_ALL_JOBS, GET_ALL_APPLICATIONS } from "@/lib/graphql/queries"
 import { CREATE_JOB, UPDATE_JOB, DELETE_JOB } from "@/lib/graphql/mutations"
 import { toast } from "sonner"
+import Link from "next/link"
 
 interface Job {
   id: string
@@ -22,8 +23,8 @@ interface Job {
   location: string
   experience: string
   amount: string
-  Requirements: string[]
-  Benefits: string[]
+  Requirements: string[] | string
+  Benefits: string[] | string
   created_at: string
 }
 
@@ -50,6 +51,9 @@ export default function AdminJobsPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
   const [activeTab, setActiveTab] = useState<'jobs' | 'applications'>('jobs')
+  const [isCreating, setIsCreating] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [jobForm, setJobForm] = useState({
     title: "",
@@ -81,19 +85,18 @@ export default function AdminJobsPage() {
   }
 
   const handleCreateJob = async () => {
+    setIsCreating(true)
     try {
-      const jobData = {
-        title: jobForm.title,
-        description: jobForm.description,
-        location: jobForm.location,
-        experience: jobForm.experience,
-        amount: jobForm.amount,
-        Requirements: jobForm.requirements.split('\n').filter(req => req.trim()),
-        Benefits: jobForm.benefits.split('\n').filter(benefit => benefit.trim())
-      }
-
       await createJob({
-        variables: { job: jobData }
+        variables: { 
+          title: jobForm.title,
+          description: jobForm.description,
+          location: jobForm.location,
+          experience: jobForm.experience,
+          amount: jobForm.amount,
+          requirements: jobForm.requirements,
+          benefits: jobForm.benefits
+        }
       })
 
       toast.success("Job created successfully!")
@@ -111,27 +114,26 @@ export default function AdminJobsPage() {
     } catch (error) {
       toast.error("Failed to create job")
       console.error(error)
+    } finally {
+      setIsCreating(false)
     }
   }
 
   const handleEditJob = async () => {
     if (!selectedJob) return
 
+    setIsUpdating(true)
     try {
-      const jobData = {
-        title: jobForm.title,
-        description: jobForm.description,
-        location: jobForm.location,
-        experience: jobForm.experience,
-        amount: jobForm.amount,
-        Requirements: jobForm.requirements.split('\n').filter(req => req.trim()),
-        Benefits: jobForm.benefits.split('\n').filter(benefit => benefit.trim())
-      }
-
       await updateJob({
         variables: { 
           id: selectedJob.id,
-          updates: jobData
+          title: jobForm.title,
+          description: jobForm.description,
+          location: jobForm.location,
+          experience: jobForm.experience,
+          amount: jobForm.amount,
+          requirements: jobForm.requirements,
+          benefits: jobForm.benefits
         }
       })
 
@@ -142,12 +144,15 @@ export default function AdminJobsPage() {
     } catch (error) {
       toast.error("Failed to update job")
       console.error(error)
+    } finally {
+      setIsUpdating(false)
     }
   }
 
   const handleDeleteJob = async (jobId: string) => {
     if (!confirm("Are you sure you want to delete this job?")) return
 
+    setIsDeleting(true)
     try {
       await deleteJob({
         variables: { id: jobId }
@@ -158,6 +163,8 @@ export default function AdminJobsPage() {
     } catch (error) {
       toast.error("Failed to delete job")
       console.error(error)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -169,8 +176,8 @@ export default function AdminJobsPage() {
       location: job.location,
       experience: job.experience,
       amount: job.amount,
-      requirements: job.Requirements.join('\n'),
-      benefits: job.Benefits.join('\n')
+      requirements: Array.isArray(job.Requirements) ? job.Requirements.join('\n') : job.Requirements,
+      benefits: Array.isArray(job.Benefits) ? job.Benefits.join('\n') : job.Benefits
     })
     setIsEditDialogOpen(true)
   }
@@ -181,21 +188,72 @@ export default function AdminJobsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Jobs & Applications</h1>
-          <p className="text-slate-300">Manage job postings and review applications</p>
+    <div className="min-h-screen relative">
+      {/* Professional Header */}
+      <div className="relative z-10 bg-white/10 backdrop-blur-xl shadow-2xl border-b border-white/20">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-600/90 to-green-700/90 backdrop-blur-md rounded-xl flex items-center justify-center">
+                <Trophy className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white drop-shadow-2xl">Prime5 League</h1>
+                <p className="text-sm text-white/90 drop-shadow-xl">Jobs & Applications Management</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link href="/admin">
+                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/admin/store">
+                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+                  <Target className="w-4 h-4 mr-2" />
+                  Store
+                </Button>
+              </Link>
+              <Link href="/admin/upcoming-games">
+                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+                  <Clock className="w-4 h-4 mr-2" />
+                   Games
+                </Button>
+              </Link>
+              <Link href="/admin/jobs">
+                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md bg-white/20">
+                  <Award className="w-4 h-4 mr-2" />
+                  Jobs
+                </Button>
+              </Link>
+              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+                <Bell className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button 
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="bg-transparent border border-white/30 text-white hover:bg-white/20 hover:text-white"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Create Job
-        </Button>
       </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Page Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Jobs & Applications</h1>
+            <p className="text-slate-300">Manage job postings and review applications</p>
+          </div>
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="bg-green-600 hover:bg-green-700 text-white border-green-500 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Job
+          </Button>
+        </div>
 
       {/* Tabs */}
       <div className="flex space-x-1 bg-white/10 backdrop-blur-sm p-1 rounded-lg w-fit border border-white/20">
@@ -230,10 +288,20 @@ export default function AdminJobsPage() {
                 <p className="text-slate-300 mb-4">Create your first job posting to start receiving applications.</p>
                 <Button 
                   onClick={() => setIsCreateDialogOpen(true)}
-                  className="bg-transparent border border-white/30 text-white hover:bg-white/20 hover:text-white"
+                  disabled={isCreating}
+                  className="bg-transparent border border-white/30 text-white hover:bg-white/20 hover:text-white disabled:opacity-50"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create First Job
+                  {isCreating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create First Job
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -255,7 +323,8 @@ export default function AdminJobsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => openEditDialog(job)}
-                          className="border-white/30 text-white hover:bg-white/20 hover:text-white"
+                          disabled={isUpdating || isDeleting}
+                          className="border-white/30 text-white hover:bg-white/20 hover:text-white disabled:opacity-50"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -263,9 +332,14 @@ export default function AdminJobsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleDeleteJob(job.id)}
-                          className="border-white/30 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+                          disabled={isUpdating || isDeleting}
+                          className="border-white/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {isDeleting ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -286,7 +360,7 @@ export default function AdminJobsPage() {
                     </div>
                     <div className="mt-3">
                       <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
-                        {job.Requirements.length} requirements
+                        {Array.isArray(job.Requirements) ? job.Requirements.length : job.Requirements.split('\n').filter(r => r.trim()).length} requirements
                       </Badge>
                     </div>
                   </CardContent>
@@ -449,8 +523,19 @@ export default function AdminJobsPage() {
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateJob} className="bg-green-600 hover:bg-green-700">
-                Create Job
+              <Button 
+                onClick={handleCreateJob} 
+                disabled={isCreating}
+                className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
+              >
+                {isCreating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </>
+                ) : (
+                  "Create Job"
+                )}
               </Button>
             </div>
           </div>
@@ -547,8 +632,19 @@ export default function AdminJobsPage() {
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleEditJob} className="bg-green-600 hover:bg-green-700">
-                Update Job
+              <Button 
+                onClick={handleEditJob} 
+                disabled={isUpdating}
+                className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Updating...
+                  </>
+                ) : (
+                  "Update Job"
+                )}
               </Button>
             </div>
           </div>
@@ -652,6 +748,7 @@ export default function AdminJobsPage() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }

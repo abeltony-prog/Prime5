@@ -312,8 +312,16 @@ export const UPDATE_MATCH_RESULT = gql`
 
 // Mutation to create a new job
 export const CREATE_JOB = gql`
-  mutation CreateJob($job: jobs_insert_input!) {
-    insert_jobs_one(object: $job) {
+  mutation CreateJob($title: String!, $description: String!, $location: String!, $experience: String!, $amount: String!, $requirements: String!, $benefits: String!) {
+    insert_jobs_one(object: {
+      title: $title,
+      description: $description,
+      location: $location,
+      experience: $experience,
+      amount: $amount,
+      Requirements: $requirements,
+      Benefits: $benefits
+    }) {
       id
       title
       description
@@ -329,10 +337,18 @@ export const CREATE_JOB = gql`
 
 // Mutation to update a job
 export const UPDATE_JOB = gql`
-  mutation UpdateJob($id: uuid!, $updates: jobs_set_input!) {
+  mutation UpdateJob($id: uuid!, $title: String, $description: String, $location: String, $experience: String, $amount: String, $requirements: String, $benefits: String) {
     update_jobs_by_pk(
       pk_columns: { id: $id }
-      _set: $updates
+      _set: {
+        title: $title,
+        description: $description,
+        location: $location,
+        experience: $experience,
+        amount: $amount,
+        Requirements: $requirements,
+        Benefits: $benefits
+      }
     ) {
       id
       title
