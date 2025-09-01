@@ -309,3 +309,77 @@ export const UPDATE_MATCH_RESULT = gql`
     }
   }
 `
+
+// Mutation to create a new job
+export const CREATE_JOB = gql`
+  mutation CreateJob($job: jobs_insert_input!) {
+    insert_jobs_one(object: $job) {
+      id
+      title
+      description
+      location
+      experience
+      amount
+      Requirements
+      Benefits
+      created_at
+    }
+  }
+`
+
+// Mutation to update a job
+export const UPDATE_JOB = gql`
+  mutation UpdateJob($id: uuid!, $updates: jobs_set_input!) {
+    update_jobs_by_pk(
+      pk_columns: { id: $id }
+      _set: $updates
+    ) {
+      id
+      title
+      description
+      location
+      experience
+      amount
+      Requirements
+      Benefits
+      created_at
+    }
+  }
+`
+
+// Mutation to delete a job
+export const DELETE_JOB = gql`
+  mutation DeleteJob($id: uuid!) {
+    delete_jobs_by_pk(id: $id) {
+      id
+      title
+    }
+  }
+`
+
+// Mutation to create a new application
+export const CREATE_APPLICATION = gql`
+  mutation CreateApplication($application: applications_insert_input!) {
+    insert_applications_one(object: $application) {
+      id
+      name
+      email
+      phone
+      years
+      cover_letter
+      file
+      job_id
+      created_at
+    }
+  }
+`
+
+// Mutation to delete an application
+export const DELETE_APPLICATION = gql`
+  mutation DeleteApplication($id: uuid!) {
+    delete_applications_by_pk(id: $id) {
+      id
+      name
+    }
+  }
+`

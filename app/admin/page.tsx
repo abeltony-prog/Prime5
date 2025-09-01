@@ -168,6 +168,12 @@ export default function AdminDashboard() {
                    Games
                 </Button>
               </Link>
+              <Link href="/admin/jobs">
+                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+                  <Award className="w-4 h-4 mr-2" />
+                  Jobs
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
                 <Bell className="w-4 h-4" />
               </Button>

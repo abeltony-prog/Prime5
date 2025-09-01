@@ -15,6 +15,7 @@ export function Navigation() {
     { href: "/store", label: "Store" },
     { href: "/rules", label: "Rules" },
     { href: "/sponsors", label: "Partners" },
+    { href: "/careers", label: "Careers" },
     { href: "/about", label: "About" },
   ]
 

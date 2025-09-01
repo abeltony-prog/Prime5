@@ -616,4 +616,102 @@ export const GET_TEAM_STATISTICS_BY_TEAM_ID = gql`
   }
 `
 
+// Query to get all jobs
+export const GET_ALL_JOBS = gql`
+  query GetAllJobs {
+    jobs {
+      Benefits
+      Requirements
+      amount
+      created_at
+      description
+      experience
+      id
+      location
+      title
+    }
+  }
+`
+
+// Query to get job by ID
+export const GET_JOB_BY_ID = gql`
+  query GetJobById($id: uuid!) {
+    jobs_by_pk(id: $id) {
+      Benefits
+      Requirements
+      amount
+      created_at
+      description
+      experience
+      id
+      location
+      title
+    }
+  }
+`
+
+// Query to get all applications
+export const GET_ALL_APPLICATIONS = gql`
+  query GetAllApplications {
+    applications {
+      cover_letter
+      created_at
+      email
+      file
+      id
+      job_id
+      name
+      phone
+      years
+      job {
+        title
+        location
+      }
+    }
+  }
+`
+
+// Query to get applications by job ID
+export const GET_APPLICATIONS_BY_JOB_ID = gql`
+  query GetApplicationsByJobId($job_id: uuid!) {
+    applications(where: {job_id: {_eq: $job_id}}) {
+      cover_letter
+      created_at
+      email
+      file
+      id
+      job_id
+      name
+      phone
+      years
+      job {
+        title
+        location
+      }
+    }
+  }
+`
+
+// Query to get application by ID
+export const GET_APPLICATION_BY_ID = gql`
+  query GetApplicationById($id: uuid!) {
+    applications_by_pk(id: $id) {
+      cover_letter
+      created_at
+      email
+      file
+      id
+      job_id
+      name
+      phone
+      years
+      job {
+        title
+        location
+        description
+      }
+    }
+  }
+`
+
  
