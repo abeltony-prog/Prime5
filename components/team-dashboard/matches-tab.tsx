@@ -50,7 +50,7 @@ export function MatchesTab({ teamId }: MatchesTabProps) {
   const teamMatches = matchesData?.matches || []
 
   // Debug: Log the data being received
-  console.log('Team Matches Data:', { teamId, matchesData, teamMatches })
+
 
   // Separate upcoming and completed matches
   const upcomingMatches = teamMatches.filter((match: Match) => {

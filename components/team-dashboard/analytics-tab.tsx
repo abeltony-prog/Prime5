@@ -13,13 +13,6 @@ interface AnalyticsTabProps {
 }
 
 export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
-  console.log('AnalyticsTab Component Debug:', {
-    teamId,
-    teamIdType: typeof teamId,
-    teamIdLength: teamId?.length,
-    isValid: !!teamId && teamId.length > 0
-  })
-  
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6']
 
   // Fetch team complete data
@@ -39,29 +32,7 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
     fetchPolicy: 'cache-and-network'
   })
 
-  console.log('GraphQL Queries Debug:', {
-    teamId,
-    teamLoading,
-    teamError,
-    matchesLoading,
-    matchesError,
-    playerStatsLoading,
-    playerStatsError,
-    teamData: !!teamData,
-    matchesData: !!matchesData,
-    playerStatsData: !!playerStatsData
-  })
 
-  // Log specific errors
-  if (teamError) {
-    console.error('Team Data Error:', teamError)
-  }
-  if (matchesError) {
-    console.error('Matches Error:', matchesError)
-  }
-  if (playerStatsError) {
-    console.error('Player Stats Error:', playerStatsError)
-  }
 
   // Loading state
   if (teamLoading || matchesLoading || playerStatsLoading) {

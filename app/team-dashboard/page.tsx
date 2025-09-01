@@ -702,30 +702,19 @@ function TeamDashboardContent() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            {(() => {
-              console.log('Analytics Tab Debug:', {
-                manager,
-                teamId: manager?.team?.id,
-                hasTeam: !!manager?.team?.id,
-                managerType: typeof manager,
-                teamType: typeof manager?.team,
-                idType: typeof manager?.team?.id
-              })
-              
-              return manager?.team?.id ? (
-                <AnalyticsTab teamId={manager.team.id} />
-              ) : (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Activity className="w-8 h-8 text-yellow-400" />
-                    </div>
-                    <p className="text-white/60 text-lg">No team selected</p>
-                    <p className="text-white/40 text-sm">Please select a team to view analytics</p>
+            {manager?.team?.id ? (
+              <AnalyticsTab teamId={manager.team.id} />
+            ) : (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Activity className="w-8 h-8 text-yellow-400" />
                   </div>
+                  <p className="text-white/60 text-lg">No team selected</p>
+                  <p className="text-white/40 text-sm">Please select a team to view analytics</p>
                 </div>
-              )
-            })()}
+              </div>
+            )}
           </TabsContent>
 
           {/* Settings Tab */}
