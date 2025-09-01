@@ -66,8 +66,8 @@ export default function AdminJobsPage() {
   })
 
   // Queries
-  const { data: jobsData, loading: jobsLoading, refetch: refetchJobs } = useQuery(GET_ALL_JOBS)
-  const { data: applicationsData, loading: applicationsLoading, refetch: refetchApplications } = useQuery(GET_ALL_APPLICATIONS)
+  const { data: jobsData, loading: jobsLoading, error: jobsError, refetch: refetchJobs } = useQuery(GET_ALL_JOBS)
+  const { data: applicationsData, loading: applicationsLoading, error: applicationsError, refetch: refetchApplications } = useQuery(GET_ALL_APPLICATIONS)
 
   // Mutations
   const [createJob] = useMutation(CREATE_JOB)
@@ -77,6 +77,12 @@ export default function AdminJobsPage() {
 
   const jobs: Job[] = jobsData?.jobs || []
   const applications: Application[] = applicationsData?.applications || []
+
+  // Debug logging
+  console.log('Applications data:', applicationsData)
+  console.log('Applications array:', applications)
+  console.log('Applications loading:', applicationsLoading)
+  console.log('Applications error:', applicationsError)
 
   const handleInputChange = (field: string, value: string) => {
     setJobForm(prev => ({
@@ -386,14 +392,34 @@ export default function AdminJobsPage() {
       {/* Applications Tab */}
       {activeTab === 'applications' && (
         <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Job Applications</h2>
+              <p className="text-slate-300">Review and manage job applications</p>
+            </div>
+            <Button 
+              onClick={() => refetchApplications()}
+              className="bg-transparent border border-white/30 text-white hover:bg-white/20 hover:text-white"
+            >
+              Refresh Applications
+            </Button>
+          </div>
           {applicationsLoading ? (
             <div className="text-center py-8 text-white">Loading applications...</div>
+          ) : applicationsError ? (
+            <div className="text-center py-8">
+              <p className="text-red-400">Failed to load applications. Please try again later.</p>
+            </div>
           ) : applications.length === 0 ? (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="text-center py-8">
                 <Eye className="h-12 w-12 text-white/60 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">No applications yet</h3>
                 <p className="text-slate-300">Applications will appear here once candidates start applying.</p>
+                <div className="mt-4 text-xs text-slate-400">
+                  <p>Debug: Found {applications.length} applications</p>
+                  <p>Data: {applicationsData ? 'Loaded' : 'No data'}</p>
+                </div>
               </CardContent>
             </Card>
           ) : (
@@ -716,14 +742,35 @@ export default function AdminJobsPage() {
                 <div>
                   <Label className="text-sm font-medium text-slate-600">Resume/CV</Label>
                   <div className="bg-slate-50 p-3 rounded-lg">
-                    <a 
-                      href={selectedApplication.file} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Download Resume
-                    </a>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-900">
+                          {selectedApplication.file.includes('/') 
+                            ? selectedApplication.file.split('/').pop() 
+                            : selectedApplication.file
+                          }
+                        </p>
+                        <p className="text-sm text-slate-600">
+                          {selectedApplication.file.includes('resumes/') ? 'File uploaded' : 'File attached'}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
+                        {selectedApplication.file.startsWith('http') || selectedApplication.file.startsWith('/') ? (
+                          <a 
+                            href={selectedApplication.file} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline text-sm"
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          <span className="text-sm text-slate-500">
+                            {selectedApplication.file}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

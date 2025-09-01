@@ -663,7 +663,7 @@ export const GET_ALL_APPLICATIONS = gql`
       name
       phone
       years
-      job {
+      jobs {
         title
         location
       }
