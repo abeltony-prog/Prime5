@@ -684,7 +684,7 @@ export const GET_APPLICATIONS_BY_JOB_ID = gql`
       name
       phone
       years
-      job {
+      jobs {
         title
         location
       }
@@ -705,7 +705,7 @@ export const GET_APPLICATION_BY_ID = gql`
       name
       phone
       years
-      job {
+      jobs {
         title
         location
         description

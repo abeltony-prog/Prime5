@@ -38,7 +38,7 @@ interface Application {
   file: string
   job_id: string
   created_at: string
-  job: {
+  jobs: {
     title: string
     location: string
   }
@@ -78,11 +78,7 @@ export default function AdminJobsPage() {
   const jobs: Job[] = jobsData?.jobs || []
   const applications: Application[] = applicationsData?.applications || []
 
-  // Debug logging
-  console.log('Applications data:', applicationsData)
-  console.log('Applications array:', applications)
-  console.log('Applications loading:', applicationsLoading)
-  console.log('Applications error:', applicationsError)
+
 
   const handleInputChange = (field: string, value: string) => {
     setJobForm(prev => ({
@@ -416,10 +412,7 @@ export default function AdminJobsPage() {
                 <Eye className="h-12 w-12 text-white/60 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">No applications yet</h3>
                 <p className="text-slate-300">Applications will appear here once candidates start applying.</p>
-                <div className="mt-4 text-xs text-slate-400">
-                  <p>Debug: Found {applications.length} applications</p>
-                  <p>Data: {applicationsData ? 'Loaded' : 'No data'}</p>
-                </div>
+
               </CardContent>
             </Card>
           ) : (
@@ -444,8 +437,8 @@ export default function AdminJobsPage() {
                       <TableCell className="text-slate-300">{application.phone}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium text-white">{application.job.title}</div>
-                          <div className="text-sm text-slate-300">{application.job.location}</div>
+                          <div className="font-medium text-white">{application.jobs.title}</div>
+                          <div className="text-sm text-slate-300">{application.jobs.location}</div>
                         </div>
                       </TableCell>
                       <TableCell className="text-slate-300">{application.years} years</TableCell>
@@ -726,8 +719,8 @@ export default function AdminJobsPage() {
               <div>
                 <Label className="text-sm font-medium text-slate-600">Applied for</Label>
                 <div className="bg-slate-50 p-3 rounded-lg">
-                  <p className="font-semibold">{selectedApplication.job.title}</p>
-                  <p className="text-slate-600">{selectedApplication.job.location}</p>
+                  <p className="font-semibold">{selectedApplication.jobs.title}</p>
+                  <p className="text-slate-600">{selectedApplication.jobs.location}</p>
                 </div>
               </div>
 
@@ -794,8 +787,8 @@ export default function AdminJobsPage() {
                 </Button>
                 <Button 
                   onClick={() => {
-                    const subject = encodeURIComponent(`Re: Application for ${selectedApplication.job.title}`);
-                    const body = encodeURIComponent(`Dear ${selectedApplication.name},\n\nThank you for your interest in the ${selectedApplication.job.title} position at Prime5 League.\n\nBest regards,\nPrime5 League Team`);
+                    const subject = encodeURIComponent(`Re: Application for ${selectedApplication.jobs.title}`);
+                    const body = encodeURIComponent(`Dear ${selectedApplication.name},\n\nThank you for your interest in the ${selectedApplication.jobs.title} position at Prime5 League.\n\nBest regards,\nPrime5 League Team`);
                     window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedApplication.email}&su=${subject}&body=${body}`, '_blank');
                   }}
                   className="bg-green-600 hover:bg-green-700"
