@@ -37,7 +37,6 @@ import {
   MoreHorizontal,
   Bell,
   Settings,
-  DollarSign,
   Award,
   CheckCircle,
   XCircle,
@@ -60,85 +59,7 @@ export default function AdminDashboard() {
   // Fetch managers data using GraphQL
   const { data: managersData, loading: managersLoading, error: managersError } = useQuery(GET_ALL_MANAGERS_DETAILS)
 
-  // Mock data for charts
-  const matchesData = [
-    { month: "Jan", matches: 12, goals: 38 },
-    { month: "Feb", matches: 16, goals: 52 },
-    { month: "Mar", matches: 14, goals: 45 },
-    { month: "Apr", matches: 18, goals: 61 },
-    { month: "May", matches: 20, goals: 68 },
-    { month: "Jun", matches: 15, goals: 48 },
-  ]
 
-  const teamPerformanceData = [
-    { name: "Thunder FC", points: 16, matches: 6 },
-    { name: "Lightning United", points: 15, matches: 6 },
-    { name: "Velocity FC", points: 14, matches: 6 },
-    { name: "Storm Riders", points: 11, matches: 6 },
-    { name: "Dynamo FC", points: 11, matches: 6 },
-  ]
-
-  const registrationStatusData = [
-    { name: "Approved", value: 13, color: "#10b981" },
-    { name: "Pending", value: 3, color: "#f59e0b" },
-    { name: "Rejected", value: 2, color: "#ef4444" },
-  ]
-
-  const kpiData = [
-    {
-      title: "Total Revenue",
-      value: "$24,500",
-      change: "+12.5%",
-      trend: "up" as const,
-      icon: DollarSign,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-    },
-    {
-      title: "Active Teams",
-      value: "16",
-      change: "+2",
-      trend: "up" as const,
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-    {
-      title: "Matches Played",
-      value: "48",
-      change: "+8",
-      trend: "up" as const,
-      icon: Trophy,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-    },
-    {
-      title: "Avg Goals/Match",
-      value: "3.25",
-      change: "-0.1",
-      trend: "down" as const,
-      icon: Target,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-    },
-  ]
-
-  const recentActivity = [
-    { type: "match", description: "Thunder FC vs Storm Riders completed", time: "2 hours ago", status: "success" as const },
-    {
-      type: "registration",
-      description: "New team registration from Fire Hawks",
-      time: "4 hours ago",
-      status: "pending" as const,
-    },
-    {
-      type: "update",
-      description: "Player statistics updated for Lightning United",
-      time: "6 hours ago",
-      status: "info" as const,
-    },
-    { type: "alert", description: "Payment overdue for Velocity FC", time: "1 day ago", status: "warning" as const },
-  ]
 
   const teams = [
     {
@@ -293,13 +214,7 @@ export default function AdminDashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview">
-            <Overview
-              kpiData={kpiData}
-              matchesData={matchesData}
-              teamPerformanceData={teamPerformanceData}
-              registrationStatusData={registrationStatusData}
-              recentActivity={recentActivity}
-            />
+            <Overview />
           </TabsContent>
 
           {/* Teams Tab */}
@@ -342,11 +257,7 @@ export default function AdminDashboard() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <Analytics
-              matchesData={matchesData}
-              teamPerformanceData={teamPerformanceData}
-              registrationStatusData={registrationStatusData}
-            />
+            <Analytics />
           </TabsContent>
 
           {/* Registrations Tab */}

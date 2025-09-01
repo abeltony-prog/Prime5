@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useQuery } from '@apollo/client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,35 +31,151 @@ import {
   Calendar,
   Download,
   Filter,
+  Loader2,
+  XCircle,
 } from "lucide-react"
+import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
 
-interface AnalyticsProps {
-  matchesData: Array<{
-    month: string
-    matches: number
-    goals: number
-  }>
-  teamPerformanceData: Array<{
-    name: string
-    points: number
-    matches: number
-  }>
-  registrationStatusData: Array<{
-    name: string
-    value: number
-    color: string
-  }>
-}
-
-export function Analytics({
-  matchesData,
-  teamPerformanceData,
-  registrationStatusData,
-}: AnalyticsProps) {
+export function Analytics() {
   const [timeRange, setTimeRange] = useState("6months")
   const [groupFilter, setGroupFilter] = useState("all")
 
-  // Additional analytics data
+  // Fetch real data from database
+  const { data: teamsData, loading: teamsLoading, error: teamsError } = useQuery(GET_TEAMS)
+  const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
+  const { data: managersData, loading: managersLoading, error: managersError } = useQuery(GET_ALL_MANAGERS_DETAILS)
+
+  // Loading state
+  if (teamsLoading || matchesLoading || managersLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-white/60 animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-lg">Loading analytics data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (teamsError || matchesError || managersError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <p className="text-white/60 text-lg">Error loading analytics data</p>
+          <p className="text-white/40 text-sm">Please try again later</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Calculate real data from database
+  const calculateMatchesData = () => {
+    const matches = matchesData?.matches || []
+    const completedMatches = matches.filter((match: any) => {
+      const matchDate = new Date(match.dateAndtime)
+      const now = new Date()
+      const isPastMatch = matchDate < now
+      const hasGoals = match.team1Goals !== null && match.team2Goals !== null
+      
+      return isPastMatch && hasGoals
+    })
+
+    const monthlyData: {[key: string]: {month: string, matches: number, goals: number}} = {}
+    
+    completedMatches.forEach((match: any) => {
+      const date = new Date(match.dateAndtime)
+      const month = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      
+      if (!monthlyData[month]) {
+        monthlyData[month] = { month, matches: 0, goals: 0 }
+      }
+      
+      monthlyData[month].matches++
+      
+      // Safety check for goals calculation
+      const team1Goals = parseInt(match.team1Goals) || 0
+      const team2Goals = parseInt(match.team2Goals) || 0
+      const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
+      const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
+      
+      monthlyData[month].goals += safeTeam1Goals + safeTeam2Goals
+    })
+
+    return Object.values(monthlyData).sort((a, b) => {
+      const dateA = new Date(a.month)
+      const dateB = new Date(b.month)
+      return dateA.getTime() - dateB.getTime()
+    })
+  }
+
+  const calculateTeamPerformanceData = () => {
+    const teams = teamsData?.Teams || []
+    const matches = matchesData?.matches || []
+
+    return teams.map((team: any) => {
+      const teamMatches = matches.filter((match: any) => {
+        const matchDate = new Date(match.dateAndtime)
+        const now = new Date()
+        const isPastMatch = matchDate < now
+        const isTeamMatch = (match.team1 === team.id || match.team2 === team.id)
+        const hasGoals = match.team1Goals !== null && match.team2Goals !== null
+        
+        return isPastMatch && isTeamMatch && hasGoals
+      })
+
+      let points = 0
+      let wins = 0
+      let draws = 0
+      let losses = 0
+
+      teamMatches.forEach((match: any) => {
+        const isTeam1 = match.team1 === team.id
+        const teamGoals = isTeam1 ? match.team1Goals : match.team2Goals
+        const opponentGoals = isTeam1 ? match.team2Goals : match.team1Goals
+
+        if (teamGoals > opponentGoals) {
+          wins++
+          points += 3
+        } else if (teamGoals === opponentGoals) {
+          draws++
+          points += 1
+        } else {
+          losses++
+        }
+      })
+
+      return {
+        name: team.name,
+        points,
+        matches: teamMatches.length,
+        wins,
+        draws,
+        losses
+      }
+    }).sort((a: any, b: any) => b.points - a.points).slice(0, 5)
+  }
+
+  const calculateRegistrationStatusData = () => {
+    const teams = teamsData?.Teams || []
+    const approved = teams.filter((team: any) => team.approved).length
+    const pending = teams.filter((team: any) => !team.approved).length
+
+    return [
+      { name: "Approved", value: approved, color: "#10b981" },
+      { name: "Pending", value: pending, color: "#f59e0b" },
+    ]
+  }
+
+  // Calculate real data
+  const matchesDataReal = calculateMatchesData()
+  const teamPerformanceData = calculateTeamPerformanceData()
+  const registrationStatusData = calculateRegistrationStatusData()
+
+  // Additional analytics data (keeping some mock data for now as these might not be in the database)
   const attendanceData = [
     { month: "Jan", attendance: 1200, revenue: 24000 },
     { month: "Feb", attendance: 1800, revenue: 36000 },
@@ -104,51 +221,33 @@ export function Analytics({
             </SelectContent>
           </Select>
           <Select value={groupFilter} onValueChange={setGroupFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Group" />
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Group Filter" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Groups</SelectItem>
-              <SelectItem value="A">Group A</SelectItem>
-              <SelectItem value="B">Group B</SelectItem>
+              <SelectItem value="groupA">Group A</SelectItem>
+              <SelectItem value="groupB">Group B</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
             <Download className="h-4 w-4 mr-2" />
-            Export Report
+            Export Data
           </Button>
         </div>
       </div>
 
-      {/* Key Metrics */}
+      {/* Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/80">Total Revenue</p>
-                <p className="text-2xl font-bold text-white">$278,000</p>
+                <p className="text-sm font-medium text-white/80">Total Teams</p>
+                <p className="text-2xl font-bold text-white mt-1">{teamsData?.Teams?.length || 0}</p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm font-medium text-green-300">+15.3%</span>
-                </div>
-              </div>
-              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                <Trophy className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/80">Average Attendance</p>
-                <p className="text-2xl font-bold text-white">1,883</p>
-                <div className="flex items-center mt-2">
-                  <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm font-medium text-green-300">+8.7%</span>
+                  <span className="text-sm font-medium text-green-300">+2 this month</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -162,15 +261,24 @@ export function Analytics({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/80">Goals per Match</p>
-                <p className="text-2xl font-bold text-white">3.25</p>
+                <p className="text-sm font-medium text-white/80">Matches Played</p>
+                <p className="text-2xl font-bold text-white mt-1">
+                  {matchesData?.matches?.filter((m: any) => {
+                    const matchDate = new Date(m.dateAndtime)
+                    const now = new Date()
+                    const isPastMatch = matchDate < now
+                    const hasGoals = m.team1Goals !== null && m.team2Goals !== null
+                    
+                    return isPastMatch && hasGoals
+                  }).length || 0}
+                </p>
                 <div className="flex items-center mt-2">
-                  <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                  <span className="text-sm font-medium text-red-300">-2.1%</span>
+                  <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                  <span className="text-sm font-medium text-green-300">+8 this month</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                <Target className="h-6 w-6 text-purple-600" />
+                <Trophy className="h-6 w-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
@@ -180,68 +288,129 @@ export function Analytics({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/80">Match Completion</p>
-                <p className="text-2xl font-bold text-white">94.2%</p>
+                <p className="text-sm font-medium text-white/80">Total Goals</p>
+                <p className="text-2xl font-bold text-white mt-1">
+                  {matchesData?.matches?.reduce((sum: number, match: any) => {
+                    const matchDate = new Date(match.dateAndtime)
+                    const now = new Date()
+                    const isPastMatch = matchDate < now
+                    const hasGoals = match.team1Goals !== null && match.team2Goals !== null
+                    
+                    if (isPastMatch && hasGoals) {
+                      const team1Goals = parseInt(match.team1Goals) || 0
+                      const team2Goals = parseInt(match.team2Goals) || 0
+                      const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
+                      const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
+                      return sum + safeTeam1Goals + safeTeam2Goals
+                    }
+                    return sum
+                  }, 0) || 0}
+                </p>
                 <div className="flex items-center mt-2">
                   <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm font-medium text-green-300">+1.8%</span>
+                  <span className="text-sm font-medium text-green-300">+15 this month</span>
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                <Target className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/80">Avg Goals/Match</p>
+                <p className="text-2xl font-bold text-white mt-1">
+                  {(() => {
+                    const completedMatches = matchesData?.matches?.filter((m: any) => {
+                      const matchDate = new Date(m.dateAndtime)
+                      const now = new Date()
+                      const isPastMatch = matchDate < now
+                      const hasGoals = m.team1Goals !== null && m.team2Goals !== null
+                      
+                      return isPastMatch && hasGoals
+                    }) || []
+                    const totalGoals = completedMatches.reduce((sum: number, match: any) => {
+                      return sum + (match.team1Goals || 0) + (match.team2Goals || 0)
+                    }, 0)
+                    const safeTotalGoals = totalGoals > 10000 ? 0 : totalGoals
+                    return completedMatches.length > 0 ? (safeTotalGoals / completedMatches.length).toFixed(2) : "0.00"
+                  })()}
+                </p>
+                <div className="flex items-center mt-2">
+                  <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
+                  <span className="text-sm font-medium text-red-300">-0.1 this month</span>
                 </div>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-orange-600" />
+                <Target className="h-6 w-6 text-orange-600" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Row 1 */}
+      {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Revenue & Attendance Trend */}
+        {/* Matches & Goals Chart */}
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <TrendingUp className="h-5 w-5" />
-              Revenue & Attendance Trend
+              <Trophy className="h-5 w-5" />
+              Matches & Goals Trend
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="w-full h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={attendanceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
+                <LineChart data={matchesDataReal}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
+                  <YAxis stroke="rgba(255,255,255,0.7)" />
                   <ChartTooltip />
-                  <Area
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="attendance"
-                    stroke="#3b82f6"
-                    fill="#3b82f6"
-                    fillOpacity={0.3}
-                  />
-                  <Area
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#10b981"
-                    fill="#10b981"
-                    fillOpacity={0.3}
-                  />
-                </AreaChart>
+                  <Line type="monotone" dataKey="matches" stroke="#3b82f6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={2} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        {/* Financial Breakdown */}
+        {/* Team Performance Chart */}
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Trophy className="h-5 w-5" />
-              Revenue Breakdown
+              <Users className="h-5 w-5" />
+              Team Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={teamPerformanceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.7)" />
+                  <YAxis stroke="rgba(255,255,255,0.7)" />
+                  <ChartTooltip />
+                  <Bar dataKey="points" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Charts */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Registration Status */}
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
+              <Target className="h-5 w-5" />
+              Registration Status
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -249,17 +418,17 @@ export function Analytics({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={financialData}
+                    data={registrationStatusData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ category, percentage }) => `${category} ${percentage}%`}
+                    label={({ name, percent }) => `${name} ${(percent ? (percent * 100).toFixed(0) : 0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
-                    dataKey="percentage"
+                    dataKey="value"
                   >
-                    {financialData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={["#3b82f6", "#10b981", "#f59e0b", "#ef4444"][index]} />
+                    {registrationStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <ChartTooltip />
@@ -268,73 +437,69 @@ export function Analytics({
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Charts Row 2 */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Team Performance Comparison */}
+        {/* Attendance & Revenue */}
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Users className="h-5 w-5" />
-              Team Performance Comparison
+              <Calendar className="h-5 w-5" />
+              Attendance & Revenue
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="w-full h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={teamPerformanceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                <AreaChart data={attendanceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
+                  <YAxis stroke="rgba(255,255,255,0.7)" />
                   <ChartTooltip />
-                  <Bar dataKey="points" fill="#3b82f6" />
-                  <Bar dataKey="matches" fill="#10b981" />
-                </BarChart>
+                  <Area type="monotone" dataKey="attendance" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+                  <Area type="monotone" dataKey="revenue" stackId="2" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Top Players Performance */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Target className="h-5 w-5" />
-              Top Players Performance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {playerStats.map((player, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium text-white">{player.name}</p>
-                      <p className="text-sm text-white/70">{player.team}</p>
-                    </div>
+      {/* Player Statistics */}
+      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
+            <Users className="h-5 w-5" />
+            Top Players
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {playerStats.map((player, index) => (
+              <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-white">{player.name}</h4>
+                  <Badge variant="outline" className="text-xs">
+                    {player.team}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Goals:</span>
+                    <span className="text-white font-medium">{player.goals}</span>
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-4">
-                      <div className="text-center">
-                        <p className="text-sm text-white/70">Goals</p>
-                        <p className="font-bold text-blue-300">{player.goals}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-white/70">Rating</p>
-                        <p className="font-bold text-green-300">{player.rating}</p>
-                      </div>
-                    </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Assists:</span>
+                    <span className="text-white font-medium">{player.assists}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Rating:</span>
+                    <span className="text-white font-medium">{player.rating}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 } 

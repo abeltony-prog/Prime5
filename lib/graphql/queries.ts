@@ -99,6 +99,7 @@ export const GET_TEAMS = gql`
       name
       shortname
       team_manager
+      created_at
       matche1 {
         created_at
         dateAndtime
