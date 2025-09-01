@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Briefcase, MapPin, DollarSign, Clock, Eye, Trophy, Target, Award, Bell, Settings } from "lucide-react"
+import { Plus, Edit, Trash2, Briefcase, MapPin, DollarSign, Clock, Eye, Trophy, Target, Award, Bell, Settings, Mail } from "lucide-react"
 import { GET_ALL_JOBS, GET_ALL_APPLICATIONS } from "@/lib/graphql/queries"
 import { CREATE_JOB, UPDATE_JOB, DELETE_JOB, DELETE_APPLICATION } from "@/lib/graphql/mutations"
 import { toast } from "sonner"
@@ -51,6 +51,11 @@ export default function AdminJobsPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
   const [activeTab, setActiveTab] = useState<'jobs' | 'applications'>('jobs')
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    message: ''
+  })
   const [isCreating, setIsCreating] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -199,6 +204,26 @@ export default function AdminJobsPage() {
   const openViewDialog = (application: Application) => {
     setSelectedApplication(application)
     setIsViewDialogOpen(true)
+  }
+
+  const openEmailDialog = (application: Application) => {
+    setSelectedApplication(application)
+    setEmailForm({
+      subject: `Re: Application for ${application.jobs.title}`,
+      message: `Dear ${application.name},\n\n`
+    })
+    setIsEmailDialogOpen(true)
+  }
+
+  const handleSendCustomEmail = () => {
+    if (!selectedApplication || !emailForm.subject || !emailForm.message) return
+    
+    const subject = encodeURIComponent(emailForm.subject)
+    const body = encodeURIComponent(`${emailForm.message}\n\nBest regards,\nPrime5 League HR Team\n\n---\nPrime5 League\nEmail: prime5leaguerw@gmail.com`)
+    
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedApplication.email}&su=${subject}&body=${body}`, '_blank')
+    setIsEmailDialogOpen(false)
+    setEmailForm({ subject: '', message: '' })
   }
 
   return (
@@ -460,14 +485,24 @@ export default function AdminJobsPage() {
                         {new Date(application.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openViewDialog(application)}
-                          className="border-white/30 text-white hover:bg-white/20 hover:text-white"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openViewDialog(application)}
+                            className="border-white/30 text-white hover:bg-white/20 hover:text-white"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEmailDialog(application)}
+                            className="border-white/30 text-white hover:bg-white/20 hover:text-white"
+                          >
+                            <Bell className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -847,19 +882,103 @@ export default function AdminJobsPage() {
                 <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                   Close
                 </Button>
-                <Button 
-                  onClick={() => {
-                    const subject = encodeURIComponent(`Re: Application for ${selectedApplication.jobs.title}`);
-                    const body = encodeURIComponent(`Dear ${selectedApplication.name},\n\nThank you for your interest in the ${selectedApplication.jobs.title} position at Prime5 League.\n\nBest regards,\nPrime5 League Team`);
-                    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedApplication.email}&su=${subject}&body=${body}`, '_blank');
-                  }}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Reply via Email
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={() => {
+                      const subject = encodeURIComponent(`Re: Application for ${selectedApplication.jobs.title} - Initial Response`);
+                      const body = encodeURIComponent(`Dear ${selectedApplication.name},\n\nThank you for your interest in the ${selectedApplication.jobs.title} position at Prime5 League.\n\nWe have received your application and will review it carefully. We will get back to you within 5-7 business days with an update on the next steps.\n\nIf you have any questions in the meantime, please don't hesitate to contact us.\n\nBest regards,\nPrime5 League HR Team\n\n---\nPrime5 League\nEmail: prime5leaguerw@gmail.com`);
+                      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedApplication.email}&su=${subject}&body=${body}`, '_blank');
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Initial Response
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      const subject = encodeURIComponent(`Re: Application for ${selectedApplication.jobs.title} - Interview Invitation`);
+                      const body = encodeURIComponent(`Dear ${selectedApplication.name},\n\nThank you for your application for the ${selectedApplication.jobs.title} position at Prime5 League.\n\nWe are impressed with your qualifications and would like to invite you for an interview.\n\nPlease let us know your availability for the following week, and we will schedule a convenient time for both parties.\n\nInterview Details:\n- Format: Video/Phone Interview\n- Duration: 30-45 minutes\n- Topics: Role discussion, experience review, and Q&A\n\nWe look forward to speaking with you soon.\n\nBest regards,\nPrime5 League HR Team\n\n---\nPrime5 League\nEmail: prime5leaguerw@gmail.com`);
+                      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedApplication.email}&su=${subject}&body=${body}`, '_blank');
+                    }}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Interview Invite
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      const subject = encodeURIComponent(`Re: Application for ${selectedApplication.jobs.title} - Thank You`);
+                      const body = encodeURIComponent(`Dear ${selectedApplication.name},\n\nThank you for your interest in the ${selectedApplication.jobs.title} position at Prime5 League.\n\nAfter careful consideration, we have decided to move forward with other candidates for this role. However, we were impressed with your qualifications and would like to keep your information on file for future opportunities.\n\nWe encourage you to continue following our career page for other positions that may be a good fit for your skills and experience.\n\nThank you again for your time and interest in Prime5 League.\n\nBest regards,\nPrime5 League HR Team\n\n---\nPrime5 League\nEmail: prime5leaguerw@gmail.com`);
+                      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedApplication.email}&su=${subject}&body=${body}`, '_blank');
+                    }}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    Thank You
+                  </Button>
+                  <Button 
+                    onClick={() => openEmailDialog(selectedApplication)}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    Custom Email
+                  </Button>
+                </div>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Email Dialog */}
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Compose Email</DialogTitle>
+            <DialogDescription>
+              Send a custom email to {selectedApplication?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email-subject">Subject</Label>
+              <Input
+                id="email-subject"
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, subject: e.target.value }))}
+                placeholder="Email subject"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="email-message">Message</Label>
+              <Textarea
+                id="email-message"
+                value={emailForm.message}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, message: e.target.value }))}
+                placeholder="Type your message here..."
+                rows={8}
+              />
+            </div>
+            
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <p className="text-sm text-slate-600">
+                <strong>To:</strong> {selectedApplication?.email}<br/>
+                <strong>Position:</strong> {selectedApplication?.jobs.title}<br/>
+                <strong>Applied:</strong> {selectedApplication ? new Date(selectedApplication.created_at).toLocaleDateString() : ''}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendCustomEmail}
+              disabled={!emailForm.subject || !emailForm.message}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Open in Gmail
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       </div>
