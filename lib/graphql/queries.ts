@@ -59,7 +59,7 @@ export const GET_SEASON_TEAM_STATISTICS = gql`
 
 export const GET_MATCH_SCHEDULES = gql`
   query getMatchSchedules {
-    matches {
+    matches(order_by: {dateAndtime: desc}) {
       created_at
       dateAndtime
       id
@@ -84,17 +84,6 @@ export const GET_MATCH_SCHEDULES = gql`
         name
         shortname
         team_manager
-      }
-      seasons {
-        id
-        name
-        startDate
-        EndDate
-      }
-      groups {
-        id
-        name
-        season_id
       }
     }
   }
@@ -537,7 +526,7 @@ export const GET_CURRENT_SEASON_WITH_GROUPS = gql`
 // Query to get matches for a specific team
 export const GET_TEAM_MATCHES = gql`
   query getTeamMatches($teamId: uuid!) {
-    matches(where: {_or: [{team1: {_eq: $teamId}}, {team2: {_eq: $teamId}}]}) {
+    matches(where: {_or: [{team1: {_eq: $teamId}}, {team2: {_eq: $teamId}}]}, order_by: {dateAndtime: desc}) {
       created_at
       dateAndtime
       id
@@ -569,7 +558,7 @@ export const GET_TEAM_MATCHES = gql`
 
 // Query to get player statistics for a specific team
 export const GET_TEAM_PLAYER_STATISTICS = gql`
-  query getTeamPlayerStatistics($teamId: uuid!) {
+  query getTeamPlayerStatistics {
     player_statistics {
       assists
       goals

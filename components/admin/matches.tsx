@@ -43,6 +43,8 @@ interface Match {
   season_id: string
   team1: string
   team2: string
+  team1Goals?: number
+  team2Goals?: number
   Team1?: {
     id: string
     location: string
@@ -50,7 +52,7 @@ interface Match {
     name: string
     shortname: string
     team_manager: string
-}
+  }
   Team2?: {
     id: string
     location: string
@@ -69,7 +71,7 @@ export function Matches() {
   // Use the hook to get matches from database
   const { matches, loading, error, refetch } = useMatchSchedules()
 
-  const filteredMatches = matches.filter((match) => {
+  const filteredMatches = matches.filter((match: Match) => {
     const team1Name = match.Team1?.name || match.team1 || ""
     const team2Name = match.Team2?.name || match.team2 || ""
     
@@ -77,13 +79,13 @@ export function Matches() {
                          team2Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          match.location.toLowerCase().includes(searchTerm.toLowerCase())
     
-    // For now, we'll use a default status since it's not in the current query
-    const matchStatus = "scheduled" // This could be enhanced when status is added to the query
+    // Since status field doesn't exist in database, use default "scheduled"
+    const matchStatus = "scheduled"
     const matchesStatus = statusFilter === "all" || matchStatus === statusFilter
     
-    // For now, we'll use a default group since it's not in the current query
-    const matchGroup = "A" // This could be enhanced when group is added to the query
-    const matchesGroup = groupFilter === "all" || matchGroup === statusFilter
+    // Since groups field doesn't exist in database, use default "A"
+    const matchGroup = "A"
+    const matchesGroup = groupFilter === "all" || matchGroup === groupFilter
     
     return matchesSearch && matchesStatus && matchesGroup
   })
@@ -280,80 +282,99 @@ export function Matches() {
                 <TableRow>
                     <TableHead className="text-white/90">Date & Time</TableHead>
                     <TableHead className="text-white/90">Teams</TableHead>
+                    <TableHead className="text-white/90">Score</TableHead>
                     <TableHead className="text-white/90">Location</TableHead>
                     <TableHead className="text-white/90">Season</TableHead>
+                    <TableHead className="text-white/90">Status</TableHead>
                     <TableHead className="text-white/90">Created</TableHead>
                     <TableHead className="text-white/90">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                  {filteredMatches.map((match) => {
+                  {filteredMatches.map((match: Match) => {
                     const { date, time } = formatDateTime(match.dateAndtime)
                     const team1Name = match.Team1?.name || match.team1 || "Unknown Team"
                     const team2Name = match.Team2?.name || match.team2 || "Unknown Team"
                     
                     return (
                       <TableRow key={match.id} className="hover:bg-white/10">
-                    <TableCell>
-                      <div>
+                        <TableCell>
+                          <div>
                             <div className="font-medium text-white">{date}</div>
                             <div className="text-sm text-white/70 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
+                              <Clock className="h-3 w-3" />
                               {time}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">
                             <div className="text-white">{team1Name}</div>
                             <div className="text-white/70">vs</div>
                             <div className="text-white">{team2Name}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-center">
+                            {match.team1Goals !== undefined && match.team2Goals !== undefined ? (
+                              <div className="font-bold text-white">
+                                {match.team1Goals} - {match.team2Goals}
+                              </div>
+                            ) : (
+                              <span className="text-white/50">TBD</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-1 text-sm text-white/80">
                             <MapPin className="h-3 w-3" />
                             {match.location || "TBD"}
-                        </div>
-                    </TableCell>
-                    <TableCell>
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="outline" className="font-medium">
                             {match.season_id ? `Season ${match.season_id.substring(0, 8)}...` : "No Season"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell>
+                          <Badge className={getStatusColor("scheduled")}>
+                            scheduled
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           <div className="text-sm text-white/70">
                             {formatCreatedAt(match.created_at)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Match
-                          </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Play className="h-4 w-4 mr-2" />
-                              Start Match
-                            </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Match
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Match
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Play className="h-4 w-4 mr-2" />
+                                Start Match
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Match
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
                     )
                   })}
               </TableBody>

@@ -65,21 +65,21 @@ function TeamDashboardContent() {
 
   // GraphQL hooks
   const [addPlayer] = useMutation(ADD_TEAM_PLAYER_DETAILS, {
-    refetchQueries: [{ query: GET_ALL_PLAYERS_WHERE_TEAM_ID, variables: { teamId: manager?.team?.id || "" } }]
+    refetchQueries: [{ query: GET_ALL_PLAYERS_WHERE_TEAM_ID, variables: { teamId: manager?.team?.id } }]
   })
 
   const { data: playersData, loading: playersLoading } = useQuery(GET_ALL_PLAYERS_WHERE_TEAM_ID, {
-    variables: { teamId: manager?.team?.id || "" },
+    variables: { teamId: manager?.team?.id },
     skip: !manager?.team?.id
   })
 
   const { data: teamData, loading: teamLoading } = useQuery(GET_TEAM_COMPLETE_DATA, {
-    variables: { teamId: manager?.team?.id || "" },
+    variables: { teamId: manager?.team?.id },
     skip: !manager?.team?.id
   })
 
   const { data: matchesData, loading: matchesLoading } = useQuery(GET_TEAM_MATCHES, {
-    variables: { teamId: manager?.team?.id || "" },
+    variables: { teamId: manager?.team?.id },
     skip: !manager?.team?.id
   })
 
@@ -88,7 +88,7 @@ function TeamDashboardContent() {
   })
 
   const { data: playerStatsData, loading: playerStatsLoading } = useQuery(GET_TEAM_PLAYER_STATISTICS, {
-    variables: { teamId: manager?.team?.id || "" },
+    variables: { teamId: manager?.team?.id },
     skip: !manager?.team?.id
   })
 
@@ -411,8 +411,7 @@ function TeamDashboardContent() {
   const realTeamSettings = getRealTeamSettings()
   const realPerformanceData = getRealPerformanceData()
 
-  // Debug: Log team settings data
-  console.log('Team Settings Data:', { currentTeam, realTeamSettings, manager: manager?.team })
+
 
   // Manager settings using real data
   const managerSettings = {
@@ -436,8 +435,7 @@ function TeamDashboardContent() {
     logout()
   }
 
-  // Debug: Log settings data before rendering
-  console.log('Settings Tab Data:', { realTeamSettings, managerSettings })
+
 
   return (
     <div className="min-h-screen relative">
@@ -704,7 +702,30 @@ function TeamDashboardContent() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <AnalyticsTab analyticsData={realAnalyticsData || {}} />
+            {(() => {
+              console.log('Analytics Tab Debug:', {
+                manager,
+                teamId: manager?.team?.id,
+                hasTeam: !!manager?.team?.id,
+                managerType: typeof manager,
+                teamType: typeof manager?.team,
+                idType: typeof manager?.team?.id
+              })
+              
+              return manager?.team?.id ? (
+                <AnalyticsTab teamId={manager.team.id} />
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Activity className="w-8 h-8 text-yellow-400" />
+                    </div>
+                    <p className="text-white/60 text-lg">No team selected</p>
+                    <p className="text-white/40 text-sm">Please select a team to view analytics</p>
+                  </div>
+                </div>
+              )
+            })()}
           </TabsContent>
 
           {/* Settings Tab */}

@@ -49,6 +49,9 @@ export function MatchesTab({ teamId }: MatchesTabProps) {
   // Filter matches for this team
   const teamMatches = matchesData?.matches || []
 
+  // Debug: Log the data being received
+  console.log('Team Matches Data:', { teamId, matchesData, teamMatches })
+
   // Separate upcoming and completed matches
   const upcomingMatches = teamMatches.filter((match: Match) => {
     const matchDate = new Date(match.dateAndtime)
@@ -218,7 +221,7 @@ export function MatchesTab({ teamId }: MatchesTabProps) {
                     <p className="text-sm">Check back later for new fixtures</p>
                   </div>
                 ) : (
-                  upcomingMatches.map((match) => (
+                  upcomingMatches.map((match: Match) => (
                     <div key={match.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -282,7 +285,7 @@ export function MatchesTab({ teamId }: MatchesTabProps) {
                     <p className="text-sm">Results will appear here after matches are played</p>
                   </div>
                 ) : (
-                  completedMatches.map((match) => (
+                  completedMatches.map((match: Match) => (
                     <div key={match.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all duration-200">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-4">

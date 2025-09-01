@@ -1,60 +1,97 @@
 "use client"
 
+import { useQuery } from '@apollo/client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts"
-import { TrendingUp, Target, Shield, Zap, Activity, Star, Trophy, Users, Calendar, BarChart3 } from "lucide-react"
-
-interface AnalyticsData {
-  teamStats: {
-    totalMatches: number
-    winPercentage: number
-    drawPercentage: number
-    lossPercentage: number
-    goalsScored: number
-    goalsConceded: number
-    cleanSheets: number
-    avgGoalsPerMatch: number
-    possession: number
-    passAccuracy: number
-    shotsOnTarget: number
-    fouls: number
-    yellowCards: number
-    redCards: number
-  }
-  monthlyPerformance: Array<{
-    month: string
-    wins: number
-    draws: number
-    losses: number
-    goals: number
-    points: number
-  }>
-  playerStats: Array<{
-    name: string
-    goals: number
-    assists: number
-    matches: number
-    rating: number
-  }>
-  formData: Array<{
-    match: string
-    result: 'W' | 'D' | 'L'
-    goalsFor: number
-    goalsAgainst: number
-  }>
-}
+import { TrendingUp, Target, Shield, Zap, Activity, Star, Trophy, Users, Calendar, BarChart3, Loader2 } from "lucide-react"
+import { GET_TEAM_COMPLETE_DATA, GET_TEAM_MATCHES, GET_TEAM_PLAYER_STATISTICS } from "@/lib/graphql/queries"
 
 interface AnalyticsTabProps {
-  analyticsData: AnalyticsData
+  teamId: string
 }
 
-export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
+export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
+  console.log('AnalyticsTab Component Debug:', {
+    teamId,
+    teamIdType: typeof teamId,
+    teamIdLength: teamId?.length,
+    isValid: !!teamId && teamId.length > 0
+  })
+  
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6']
 
-  // Add safety check for analyticsData
-  if (!analyticsData || !analyticsData.teamStats) {
+  // Fetch team complete data
+  const { data: teamData, loading: teamLoading, error: teamError } = useQuery(GET_TEAM_COMPLETE_DATA, {
+    variables: { teamId },
+    fetchPolicy: 'cache-and-network'
+  })
+
+  // Fetch team matches
+  const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_TEAM_MATCHES, {
+    variables: { teamId },
+    fetchPolicy: 'cache-and-network'
+  })
+
+  // Fetch player statistics
+  const { data: playerStatsData, loading: playerStatsLoading, error: playerStatsError } = useQuery(GET_TEAM_PLAYER_STATISTICS, {
+    fetchPolicy: 'cache-and-network'
+  })
+
+  console.log('GraphQL Queries Debug:', {
+    teamId,
+    teamLoading,
+    teamError,
+    matchesLoading,
+    matchesError,
+    playerStatsLoading,
+    playerStatsError,
+    teamData: !!teamData,
+    matchesData: !!matchesData,
+    playerStatsData: !!playerStatsData
+  })
+
+  // Log specific errors
+  if (teamError) {
+    console.error('Team Data Error:', teamError)
+  }
+  if (matchesError) {
+    console.error('Matches Error:', matchesError)
+  }
+  if (playerStatsError) {
+    console.error('Player Stats Error:', playerStatsError)
+  }
+
+  // Loading state
+  if (teamLoading || matchesLoading || playerStatsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-white/60 animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-lg">Loading analytics data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (teamError || matchesError || playerStatsError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-8 h-8 text-red-400" />
+          </div>
+          <p className="text-white/60 text-lg">Error loading analytics data</p>
+          <p className="text-white/40 text-sm">Please try again later</p>
+        </div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!teamData?.Teams?.[0] || !matchesData?.matches) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -67,6 +104,131 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
       </div>
     )
   }
+
+  const team = teamData.Teams[0]
+  const matches = matchesData.matches || []
+  const teamStats = team.team_statistics?.[0]
+  const players = team.players || []
+  const playerStats = playerStatsData?.player_statistics || []
+
+  // Calculate analytics data from database
+  const calculateAnalyticsData = () => {
+    const totalMatches = matches.length
+    const completedMatches = matches.filter((match: any) => 
+      match.team1Goals !== null && match.team2Goals !== null
+    )
+    
+    let wins = 0, draws = 0, losses = 0
+    let goalsScored = 0, goalsConceded = 0, cleanSheets = 0
+    const formData: Array<{match: string, result: 'W' | 'D' | 'L', goalsFor: number, goalsAgainst: number}> = []
+    
+    completedMatches.forEach((match: any) => {
+      const isTeam1 = match.team1 === teamId
+      const teamGoals = isTeam1 ? match.team1Goals : match.team2Goals
+      const opponentGoals = isTeam1 ? match.team2Goals : match.team1Goals
+      
+      goalsScored += teamGoals
+      goalsConceded += opponentGoals
+      
+      if (teamGoals > opponentGoals) {
+        wins++
+        formData.push({ match: `vs ${isTeam1 ? match.Team2?.name : match.Team1?.name}`, result: 'W', goalsFor: teamGoals, goalsAgainst: opponentGoals })
+      } else if (teamGoals === opponentGoals) {
+        draws++
+        formData.push({ match: `vs ${isTeam1 ? match.Team2?.name : match.Team1?.name}`, result: 'D', goalsFor: teamGoals, goalsAgainst: opponentGoals })
+      } else {
+        losses++
+        formData.push({ match: `vs ${isTeam1 ? match.Team2?.name : match.Team1?.name}`, result: 'L', goalsFor: teamGoals, goalsAgainst: opponentGoals })
+      }
+      
+      if (opponentGoals === 0) cleanSheets++
+    })
+    
+    const winPercentage = totalMatches > 0 ? (wins / totalMatches) * 100 : 0
+    const drawPercentage = totalMatches > 0 ? (draws / totalMatches) * 100 : 0
+    const lossPercentage = totalMatches > 0 ? (losses / totalMatches) * 100 : 0
+    const avgGoalsPerMatch = totalMatches > 0 ? goalsScored / totalMatches : 0
+    
+    // Calculate season performance
+    const seasonData: {[key: string]: {period: string, wins: number, draws: number, losses: number, goals: number, points: number}} = {}
+    completedMatches.forEach((match: any) => {
+      const date = new Date(match.dateAndtime)
+      const period = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      
+      if (!seasonData[period]) {
+        seasonData[period] = { period, wins: 0, draws: 0, losses: 0, goals: 0, points: 0 }
+      }
+      
+      const isTeam1 = match.team1 === teamId
+      const teamGoals = isTeam1 ? match.team1Goals : match.team2Goals
+      const opponentGoals = isTeam1 ? match.team2Goals : match.team1Goals
+      
+      seasonData[period].goals += teamGoals
+      
+      if (teamGoals > opponentGoals) {
+        seasonData[period].wins++
+        seasonData[period].points += 3
+      } else if (teamGoals === opponentGoals) {
+        seasonData[period].draws++
+        seasonData[period].points += 1
+      } else {
+        seasonData[period].losses++
+      }
+    })
+    
+    const seasonPerformance = Object.values(seasonData)
+    
+    // Calculate player statistics
+    const playerStatsMap: {[key: string]: {goals: number, assists: number, matches: number, rating: number}} = {}
+    playerStats.forEach((stat: any) => {
+      if (!playerStatsMap[stat.player_id]) {
+        playerStatsMap[stat.player_id] = { goals: 0, assists: 0, matches: 0, rating: 0 }
+      }
+      playerStatsMap[stat.player_id].goals += stat.goals || 0
+      playerStatsMap[stat.player_id].assists += stat.assists || 0
+      playerStatsMap[stat.player_id].matches++
+    })
+    
+    // Calculate ratings after all stats are collected
+    Object.keys(playerStatsMap).forEach((playerId: string) => {
+      const player = playerStatsMap[playerId]
+      const totalGoals = player.goals || 0
+      const totalAssists = player.assists || 0
+      const totalMatches = player.matches || 1
+      
+      // Calculate rating with safety checks
+      player.rating = totalMatches > 0 ? (totalGoals * 2 + totalAssists) / totalMatches : 0
+    })
+    
+    const topPlayers = players.map((player: any) => ({
+      name: player.name,
+      ...playerStatsMap[player.id]
+    })).sort((a: any, b: any) => b.rating - a.rating).slice(0, 5)
+    
+    return {
+      teamStats: {
+        totalMatches,
+        winPercentage: isNaN(winPercentage) ? 0 : Math.round(winPercentage * 10) / 10,
+        drawPercentage: isNaN(drawPercentage) ? 0 : Math.round(drawPercentage * 10) / 10,
+        lossPercentage: isNaN(lossPercentage) ? 0 : Math.round(lossPercentage * 10) / 10,
+        goalsScored,
+        goalsConceded,
+        cleanSheets,
+        avgGoalsPerMatch: isNaN(avgGoalsPerMatch) ? 0 : Math.round(avgGoalsPerMatch * 10) / 10,
+        possession: teamStats?.possession || 50,
+        passAccuracy: teamStats?.pass_accuracy || 75,
+        shotsOnTarget: teamStats?.shots_on_target || 0,
+        fouls: teamStats?.fouls || 0,
+        yellowCards: teamStats?.yellow_cards || 0,
+        redCards: teamStats?.red_cards || 0
+      },
+      seasonPerformance,
+      playerStats: topPlayers,
+      formData: formData.slice(-5) // Last 5 matches
+    }
+  }
+
+  const analyticsData = calculateAnalyticsData()
 
   const getFormColor = (result: string) => {
     switch (result) {
@@ -148,14 +310,14 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Activity className="h-5 w-5" />
-              Monthly Performance
+              Season Performance
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={analyticsData.monthlyPerformance || []}>
+              <LineChart data={analyticsData.seasonPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
+                <XAxis dataKey="period" stroke="rgba(255,255,255,0.7)" />
                 <YAxis stroke="rgba(255,255,255,0.7)" />
                 <Line 
                   type="monotone" 
@@ -185,9 +347,9 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analyticsData.monthlyPerformance || []}>
+              <BarChart data={analyticsData.seasonPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
+                <XAxis dataKey="period" stroke="rgba(255,255,255,0.7)" />
                 <YAxis stroke="rgba(255,255,255,0.7)" />
                 <Bar dataKey="wins" fill="#10b981" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="draws" fill="#f59e0b" radius={[4, 4, 0, 0]} />
@@ -239,7 +401,7 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {(analyticsData.playerStats || []).slice(0, 5).map((player, index) => (
+              {(analyticsData.playerStats || []).slice(0, 5).map((player: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center">
@@ -252,7 +414,9 @@ export function AnalyticsTab({ analyticsData }: AnalyticsTabProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4 text-yellow-400" />
-                    <span className="text-white font-medium">{player.rating}</span>
+                    <span className="text-white font-medium">
+                      {isNaN(player.rating) ? '0.0' : (Math.round(player.rating * 10) / 10).toFixed(1)}
+                    </span>
                   </div>
                 </div>
               ))}

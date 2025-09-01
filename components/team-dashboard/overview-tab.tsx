@@ -69,18 +69,18 @@ export function OverviewTab({ teamData, performanceData, isEditing, setIsEditing
                 <Shield className="w-10 h-10 text-white" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-bold text-white drop-shadow-lg">
+                <CardTitle className="text-3xl font-bold text-black drop-shadow-lg">
                   {teamData.name}
                 </CardTitle>
-                <p className="text-white/80 text-lg">{teamData.shortName}</p>
-                <p className="text-white/60">Managed by {teamData.manager}</p>
+                <p className="text-black/80 text-lg">{teamData.shortName}</p>
+                <p className="text-black/60">Managed by {teamData.manager}</p>
               </div>
             </div>
             <div className="text-right">
               <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-lg px-4 py-2">
                 Group {teamData.group}
               </Badge>
-              <div className="text-white/80 mt-2">
+              <div className="text-black/80 mt-2">
                 <p>Position: #{teamData.position}</p>
                 <p>Points: {teamData.points}</p>
               </div>

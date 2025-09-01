@@ -457,112 +457,399 @@ export default function SeasonDetailsPage() {
     setIsScheduling(true)
     
     try {
-      const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
-      const totalWeekends = weekendDates.length
-      
-      if (totalWeekends < 2) {
+      // Validate we have exactly 2 groups with 4 teams each
+      if (seasonGroups.length !== 2) {
         toast({
-          title: "Season Too Short",
-          description: "Season must be at least 2 weeks long to schedule matches",
+          title: "Invalid Group Structure",
+          description: "This format requires exactly 2 groups",
           variant: "destructive"
         })
-        setIsScheduling(false)
         return
       }
 
-      const matches: any[] = []
-      
-      // Get teams from each group
-      const groupTeams = seasonGroups.map(group => {
-        const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
-        return {
-          groupId: group.id,
-          groupName: group.name,
-          teams: groupTeamStats.map((stat: any) => ({
-            team_id: stat.team_id,
-            teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`
-          }))
-        }
-      })
+      const groupA = seasonGroups[0]
+      const groupB = seasonGroups[1]
 
-      // Schedule matches for first 2 weekends
-      for (let weekend = 0; weekend < Math.min(2, Math.floor(totalWeekends / 2)); weekend++) {
-        const saturdayIndex = weekend * 2
-        const sundayIndex = weekend * 2 + 1
+      // Get teams from each group
+      const groupATeams = seasonTeamStatistics
+        .filter((stat: any) => stat.group_id === groupA.id)
+        .map((stat: any) => ({
+          team_id: stat.team_id,
+          teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
+          groupId: groupA.id,
+          groupName: groupA.name
+        }))
+
+      const groupBTeams = seasonTeamStatistics
+        .filter((stat: any) => stat.group_id === groupB.id)
+        .map((stat: any) => ({
+          team_id: stat.team_id,
+          teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
+          groupId: groupB.id,
+          groupName: groupB.name
+        }))
+
+      if (groupATeams.length !== 4 || groupBTeams.length !== 4) {
+        toast({
+          title: "Invalid Team Distribution",
+          description: "Each group must have exactly 4 teams",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
+      const totalWeekends = weekendDates.length
+      
+      if (totalWeekends < 4) {
+        toast({
+          title: "Season Too Short",
+          description: "Season must be at least 4 weeks long to schedule matches",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const defaultVenue = "Prime Arena"
+      const matches = []
+
+      // Generate all possible group matchups (round-robin within each group)
+      const groupAMatchups = []
+      const groupBMatchups = []
+
+      // Group A round-robin (6 matches: 4 teams = 6 unique pairings)
+      for (let i = 0; i < groupATeams.length; i++) {
+        for (let j = i + 1; j < groupATeams.length; j++) {
+          groupAMatchups.push({
+            team1_id: groupATeams[i].team_id,
+            team2_id: groupATeams[j].team_id,
+            team1Name: groupATeams[i].teamName,
+            team2Name: groupATeams[j].teamName,
+            groupId: groupA.id,
+            groupName: groupA.name
+          })
+        }
+      }
+
+      // Group B round-robin (6 matches: 4 teams = 6 unique pairings)
+      for (let i = 0; i < groupBTeams.length; i++) {
+        for (let j = i + 1; j < groupBTeams.length; j++) {
+          groupBMatchups.push({
+            team1_id: groupBTeams[i].team_id,
+            team2_id: groupBTeams[j].team_id,
+            team1Name: groupBTeams[i].teamName,
+            team2Name: groupBTeams[j].teamName,
+            groupId: groupB.id,
+            groupName: groupB.name
+          })
+        }
+      }
+
+      // Shuffle matchups within each group
+      const shuffledGroupA = [...groupAMatchups].sort(() => Math.random() - 0.5)
+      const shuffledGroupB = [...groupBMatchups].sort(() => Math.random() - 0.5)
+
+      // Track teams that have played on each day
+      const teamsPlayedPerDay = new Map()
+      const teamsPlayedPerWeekend = new Map()
+      
+      // Initialize tracking maps
+      for (let weekend = 1; weekend <= 4; weekend++) {
+        teamsPlayedPerWeekend.set(weekend, new Set())
+      }
+
+      // Schedule Group Stage (Weekends 1-3): 12 matches total (6 per group)
+      let groupAIndex = 0
+      let groupBIndex = 0
+
+      // Weekend 1 & 2: 8 matches (4 per weekend)
+      for (let weekend = 1; weekend <= 2; weekend++) {
+        const saturdayIndex = (weekend - 1) * 2
+        const sundayIndex = (weekend - 1) * 2 + 1
         
         if (saturdayIndex < weekendDates.length && sundayIndex < weekendDates.length) {
           const saturday = weekendDates[saturdayIndex]
           const sunday = weekendDates[sundayIndex]
           
-          // Randomize which group plays on Saturday vs Sunday for fairness
-          const saturdayGroupIndex = Math.random() < 0.5 ? 0 : 1
-          const sundayGroupIndex = saturdayGroupIndex === 0 ? 1 : 0
+          // Initialize day tracking
+          if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
+          if (!teamsPlayedPerDay.has(sunday)) teamsPlayedPerDay.set(sunday, new Set())
           
-          const weekendNumber = weekend + 1
-          
-          // Schedule Saturday matches
-          const saturdayGroup = groupTeams[saturdayGroupIndex]
-          if (saturdayGroup && saturdayGroup.teams.length >= 2) {
-            const shuffledTeams = [...saturdayGroup.teams].sort(() => Math.random() - 0.5)
-            const maxGamesPerDay = Math.min(4, Math.floor(saturdayGroup.teams.length / 2))
-            
-            for (let game = 0; game < maxGamesPerDay; game++) {
-              const team1Index = game * 2
-              const team2Index = game * 2 + 1
+          // Saturday: 2 matches (1 from each group)
+          for (let game = 0; game < 2; game++) {
+            let validMatchup = null
+
+            // Try Group A first, then Group B
+            if (game === 0 && groupAIndex < shuffledGroupA.length) {
+              const potentialMatchup = shuffledGroupA[groupAIndex]
+              const saturdayTeams = teamsPlayedPerDay.get(saturday)
               
-              if (team2Index < shuffledTeams.length) {
-                matches.push({
-                  id: `match-${Date.now()}-w${weekendNumber}-sat-${game}`,
-                  team1_id: shuffledTeams[team1Index].team_id,
-                  team2_id: shuffledTeams[team2Index].team_id,
-                  date: saturday,
-                  time: '', // Will be set manually
-                  group_id: saturdayGroup.groupId,
-                  venue: defaultVenue,
-                  status: 'scheduled',
-                  weekend: weekendNumber,
-                  day: 'Saturday',
-                  groupName: saturdayGroup.groupName
-                })
+              if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                  !saturdayTeams.has(potentialMatchup.team2_id)) {
+                validMatchup = potentialMatchup
+                groupAIndex++
               }
+            } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
+              const potentialMatchup = shuffledGroupB[groupBIndex]
+              const saturdayTeams = teamsPlayedPerDay.get(saturday)
+              
+              if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                  !saturdayTeams.has(potentialMatchup.team2_id)) {
+                validMatchup = potentialMatchup
+                groupBIndex++
+              }
+            }
+
+            if (validMatchup) {
+              matches.push({
+                id: `match-${Date.now()}-w${weekend}-sat-${game}`,
+                team1_id: validMatchup.team1_id,
+                team2_id: validMatchup.team2_id,
+                date: saturday,
+                time: '',
+                group_id: validMatchup.groupId,
+                venue: defaultVenue,
+                status: 'scheduled',
+                weekend: weekend,
+                day: 'Saturday',
+                groupName: validMatchup.groupName,
+                type: 'group-stage'
+              })
+              
+              // Mark teams as played
+              teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
+              teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
+              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
+              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
             }
           }
           
-          // Schedule Sunday matches
-          const sundayGroup = groupTeams[sundayGroupIndex]
-          if (sundayGroup && sundayGroup.teams.length >= 2) {
-            const shuffledTeams = [...sundayGroup.teams].sort(() => Math.random() - 0.5)
-            const maxGamesPerDay = Math.min(4, Math.floor(sundayGroup.teams.length / 2))
-            
-            for (let game = 0; game < maxGamesPerDay; game++) {
-              const team1Index = game * 2
-              const team2Index = game * 2 + 1
+          // Sunday: 2 matches (1 from each group)
+          for (let game = 0; game < 2; game++) {
+            let validMatchup = null
+
+            // Try Group A first, then Group B
+            if (game === 0 && groupAIndex < shuffledGroupA.length) {
+              const potentialMatchup = shuffledGroupA[groupAIndex]
+              const sundayTeams = teamsPlayedPerDay.get(sunday)
               
-              if (team2Index < shuffledTeams.length) {
-                matches.push({
-                  id: `match-${Date.now()}-w${weekendNumber}-sun-${game}`,
-                  team1_id: shuffledTeams[team1Index].team_id,
-                  team2_id: shuffledTeams[team2Index].team_id,
-                  date: sunday,
-                  time: '', // Will be set manually
-                  group_id: sundayGroup.groupId,
-                  venue: defaultVenue,
-                  status: 'scheduled',
-                  weekend: weekendNumber,
-                  day: 'Sunday',
-                  groupName: sundayGroup.groupName
-                })
+              if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                  !sundayTeams.has(potentialMatchup.team2_id)) {
+                validMatchup = potentialMatchup
+                groupAIndex++
               }
+            } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
+              const potentialMatchup = shuffledGroupB[groupBIndex]
+              const sundayTeams = teamsPlayedPerDay.get(sunday)
+              
+              if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                  !sundayTeams.has(potentialMatchup.team2_id)) {
+                validMatchup = potentialMatchup
+                groupBIndex++
+              }
+            }
+
+            if (validMatchup) {
+              matches.push({
+                id: `match-${Date.now()}-w${weekend}-sun-${game}`,
+                team1_id: validMatchup.team1_id,
+                team2_id: validMatchup.team2_id,
+                date: sunday,
+                time: '',
+                group_id: validMatchup.groupId,
+                venue: defaultVenue,
+                status: 'scheduled',
+                weekend: weekend,
+                day: 'Sunday',
+                groupName: validMatchup.groupName,
+                type: 'group-stage'
+              })
+              
+              // Mark teams as played
+              teamsPlayedPerDay.get(sunday).add(validMatchup.team1_id)
+              teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
+              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
+              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
             }
           }
         }
       }
+      
+      // Weekend 3: Remaining group matches (4 matches)
+      const weekend3SaturdayIndex = 4
+      const weekend3SundayIndex = 5
+      
+      if (weekend3SaturdayIndex < weekendDates.length && weekend3SundayIndex < weekendDates.length) {
+        const saturday = weekendDates[weekend3SaturdayIndex]
+        const sunday = weekendDates[weekend3SundayIndex]
+        
+        // Initialize day tracking
+        if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
+        if (!teamsPlayedPerDay.has(sunday)) teamsPlayedPerDay.set(sunday, new Set())
+        
+        // Saturday: 2 matches (1 from each group)
+        for (let game = 0; game < 2; game++) {
+          let validMatchup = null
+
+          if (game === 0 && groupAIndex < shuffledGroupA.length) {
+            const potentialMatchup = shuffledGroupA[groupAIndex]
+            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+            
+            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                !saturdayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupAIndex++
+            }
+          } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
+            const potentialMatchup = shuffledGroupB[groupBIndex]
+            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+            
+            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                !saturdayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupBIndex++
+            }
+          }
+
+          if (validMatchup) {
+            matches.push({
+              id: `match-${Date.now()}-w3-sat-${game}`,
+              team1_id: validMatchup.team1_id,
+              team2_id: validMatchup.team2_id,
+              date: saturday,
+              time: '',
+              group_id: validMatchup.groupId,
+              venue: defaultVenue,
+              status: 'scheduled',
+              weekend: 3,
+              day: 'Saturday',
+              groupName: validMatchup.groupName,
+              type: 'group-stage'
+            })
+            
+            // Mark teams as played
+            teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
+            teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
+            teamsPlayedPerWeekend.get(3).add(validMatchup.team1_id)
+            teamsPlayedPerWeekend.get(3).add(validMatchup.team2_id)
+          }
+        }
+        
+        // Sunday: 2 matches (1 from each group)
+        for (let game = 0; game < 2; game++) {
+          let validMatchup = null
+
+          if (game === 0 && groupAIndex < shuffledGroupA.length) {
+            const potentialMatchup = shuffledGroupA[groupAIndex]
+            const sundayTeams = teamsPlayedPerDay.get(sunday)
+            
+            if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                !sundayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupAIndex++
+            }
+          } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
+            const potentialMatchup = shuffledGroupB[groupBIndex]
+            const sundayTeams = teamsPlayedPerDay.get(sunday)
+            
+            if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                !sundayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupBIndex++
+            }
+          }
+
+          if (validMatchup) {
+            matches.push({
+              id: `match-${Date.now()}-w3-sun-${game}`,
+              team1_id: validMatchup.team1_id,
+              team2_id: validMatchup.team2_id,
+              date: sunday,
+              time: '',
+              group_id: validMatchup.groupId,
+              venue: defaultVenue,
+              status: 'scheduled',
+              weekend: 3,
+              day: 'Sunday',
+              groupName: validMatchup.groupName,
+              type: 'group-stage'
+            })
+            
+            // Mark teams as played
+            teamsPlayedPerDay.get(sunday).add(validMatchup.team1_id)
+            teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
+            teamsPlayedPerWeekend.get(3).add(validMatchup.team1_id)
+            teamsPlayedPerWeekend.get(3).add(validMatchup.team2_id)
+          }
+        }
+      }
+      
+      // Weekend 4 - Saturday: Knockout Qualifier (4 matches - 2 from each group)
+      const weekend4SaturdayIndex = 6
+      
+      if (weekend4SaturdayIndex < weekendDates.length) {
+        const saturday = weekendDates[weekend4SaturdayIndex]
+        
+        // Initialize day tracking
+        if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
+        
+        // Schedule remaining group matches (max 4 - 2 from each group)
+        for (let game = 0; game < 4; game++) {
+          let validMatchup = null
+
+          if (game < 2 && groupAIndex < shuffledGroupA.length) {
+            const potentialMatchup = shuffledGroupA[groupAIndex]
+            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+            
+            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                !saturdayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupAIndex++
+            }
+          } else if (game >= 2 && groupBIndex < shuffledGroupB.length) {
+            const potentialMatchup = shuffledGroupB[groupBIndex]
+            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+            
+            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                !saturdayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupBIndex++
+            }
+          }
+
+          if (validMatchup) {
+            matches.push({
+              id: `match-${Date.now()}-w4-sat-${game}`,
+              team1_id: validMatchup.team1_id,
+              team2_id: validMatchup.team2_id,
+              date: saturday,
+              time: '',
+              group_id: validMatchup.groupId,
+              venue: defaultVenue,
+              status: 'scheduled',
+              weekend: 4,
+              day: 'Saturday',
+              groupName: validMatchup.groupName,
+              type: 'knockout-qualifier'
+            })
+            
+            // Mark teams as played
+            teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
+            teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
+            teamsPlayedPerWeekend.get(4).add(validMatchup.team1_id)
+            teamsPlayedPerWeekend.get(4).add(validMatchup.team2_id)
+          }
+        }
+      }
+      
+      // Note: Weekend 4 Sunday is reserved for playoffs and is NOT included in randomization
+      // Playoffs will be scheduled separately after league standings are finalized
 
       setScheduledMatches(matches)
       
       toast({
-        title: "Matches Scheduled!",
-        description: `${matches.length} matches have been scheduled for the first 2 weekends. Groups are randomly assigned to Saturday vs Sunday for fairness.`,
+        title: "Group Stage Matches Scheduled!",
+        description: `${matches.length} group stage matches have been scheduled across weekends 1-3 and Saturday of weekend 4. Each group plays round-robin within their group. Sunday of weekend 4 is reserved for playoffs and will be scheduled separately.`,
       })
       
     } catch (error) {
@@ -589,6 +876,16 @@ export default function SeasonDetailsPage() {
     setIsSchedulingPerformance(true)
     
     try {
+      // Validate we have exactly 2 groups
+      if (seasonGroups.length !== 2) {
+        toast({
+          title: "Invalid Group Structure",
+          description: "This format requires exactly 2 groups",
+          variant: "destructive"
+        })
+        return
+      }
+
       const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
       const totalWeekends = weekendDates.length
       
@@ -598,14 +895,14 @@ export default function SeasonDetailsPage() {
           description: "Season must be at least 4 weeks long to schedule performance matches",
           variant: "destructive"
         })
-        setIsSchedulingPerformance(false)
         return
       }
 
       const performanceMatches: any[] = []
+      const defaultVenue = "Prime Arena"
       
-      // Get teams from each group with their statistics
-      const groupTeamsWithStats = seasonGroups.map(group => {
+      // Get teams from each group with their complete statistics
+      const groupTeamsWithStats = seasonGroups.map((group: any) => {
         const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
         return {
           groupId: group.id,
@@ -616,111 +913,139 @@ export default function SeasonDetailsPage() {
             points: parseInt(stat.points || '0'),
             goalDiff: parseInt(stat.goal_diff || '0'),
             goalsFor: parseInt(stat.goals_for || '0'),
+            goalsAgainst: parseInt(stat.goals_against || '0'),
+            wins: parseInt(stat.wins || '0'),
+            draws: parseInt(stat.draws || '0'),
+            losses: parseInt(stat.losses || '0'),
             played: parseInt(stat.played || '0')
           }))
         }
       })
 
-      // Schedule performance matches for weekends 3-4 (if season is long enough)
-      const performanceWeekendStart = 2 // Start from weekend 3
-      const maxPerformanceWeekends = Math.min(2, Math.floor((totalWeekends - 4) / 2)) // Max 2 more weekends
+      // Ranking function based on team_statistics priority rules
+      const rankTeams = (teams: any[]) => {
+        return [...teams].sort((a, b) => {
+          // 1. Points (highest first)
+          if (a.points !== b.points) return b.points - a.points
+          
+          // 2. Goal difference (highest first)
+          if (a.goalDiff !== b.goalDiff) return b.goalDiff - a.goalDiff
+          
+          // 3. Goals for (highest first)
+          if (a.goalsFor !== b.goalsFor) return b.goalsFor - a.goalsFor
+          
+          // 4. Goals against (lowest first)
+          if (a.goalsAgainst !== b.goalsAgainst) return a.goalsAgainst - b.goalsAgainst
+          
+          // 5. Wins (highest first)
+          if (a.wins !== b.wins) return b.wins - a.wins
+          
+          // 6. Draws (highest first)
+          if (a.draws !== b.draws) return b.draws - a.draws
+          
+          // 7. Random tie-breaker (if all above are equal)
+          return Math.random() - 0.5
+        })
+      }
+
+      // Get ranked teams for each group
+      const groupARanked = rankTeams(groupTeamsWithStats[0].teams)
+      const groupBRanked = rankTeams(groupTeamsWithStats[1].teams)
+
+      // Weekend 4 - Saturday: Knockout Qualifier (based on rankings)
+      const weekend4SaturdayIndex = 6
       
-      for (let weekend = 0; weekend < maxPerformanceWeekends; weekend++) {
-        const weekendNumber = performanceWeekendStart + weekend + 1
-        const saturdayIndex = (performanceWeekendStart + weekend) * 2
-        const sundayIndex = (performanceWeekendStart + weekend) * 2 + 1
+      if (weekend4SaturdayIndex < weekendDates.length) {
+        const saturday = weekendDates[weekend4SaturdayIndex]
         
-        if (saturdayIndex < weekendDates.length && sundayIndex < weekendDates.length) {
-          const saturday = weekendDates[saturdayIndex]
-          const sunday = weekendDates[sundayIndex]
-          
-          // Randomize which group plays on Saturday vs Sunday for fairness
-          const saturdayGroupIndex = Math.random() < 0.5 ? 0 : 1
-          const sundayGroupIndex = saturdayGroupIndex === 0 ? 1 : 0
-          
-          // Schedule Saturday performance matches
-          const saturdayGroup = groupTeamsWithStats[saturdayGroupIndex]
-          if (saturdayGroup && saturdayGroup.teams.length >= 2) {
-            // Sort teams by performance (points, goal difference, goals for)
-            const sortedTeams = [...saturdayGroup.teams].sort((a, b) => {
-              if (a.points !== b.points) return b.points - a.points
-              if (a.goalDiff !== b.goalDiff) return b.goalDiff - a.goalDiff
-              return b.goalsFor - a.goalsFor
-            })
-            
-            const maxGamesPerDay = Math.min(4, Math.floor(sortedTeams.length / 2))
-            
-            for (let game = 0; game < maxGamesPerDay; game++) {
-              const team1Index = game * 2
-              const team2Index = game * 2 + 1
-              
-              if (team2Index < sortedTeams.length) {
-                performanceMatches.push({
-                  id: `perf-match-${Date.now()}-w${weekendNumber}-sat-${game}`,
-                  team1_id: sortedTeams[team1Index].team_id,
-                  team2_id: sortedTeams[team2Index].team_id,
-                  date: saturday,
-                  time: '', // Will be set manually
-                  group_id: saturdayGroup.groupId,
-                  venue: defaultVenue,
-                  status: 'scheduled',
-                  weekend: weekendNumber,
-                  day: 'Saturday',
-                  groupName: saturdayGroup.groupName,
-                  type: 'performance'
-                })
-              }
-            }
-          }
-          
-          // Schedule Sunday performance matches
-          const sundayGroup = groupTeamsWithStats[sundayGroupIndex]
-          if (sundayGroup && sundayGroup.teams.length >= 2) {
-            // Sort teams by performance (points, goal difference, goals for)
-            const sortedTeams = [...sundayGroup.teams].sort((a, b) => {
-              if (a.points !== b.points) return b.points - a.points
-              if (a.goalDiff !== b.goalDiff) return b.goalDiff - a.goalDiff
-              return b.goalsFor - a.goalsFor
-            })
-            
-            const maxGamesPerDay = Math.min(4, Math.floor(sortedTeams.length / 2))
-            
-            for (let game = 0; game < maxGamesPerDay; game++) {
-              const team1Index = game * 2
-              const team2Index = game * 2 + 1
-              
-              if (team2Index < sortedTeams.length) {
-                performanceMatches.push({
-                  id: `perf-match-${Date.now()}-w${weekendNumber}-sun-${game}`,
-                  team1_id: sortedTeams[team1Index].team_id,
-                  team2_id: sortedTeams[team2Index].team_id,
-                  date: sunday,
-                  time: '', // Will be set manually
-                  group_id: sundayGroup.groupId,
-                  venue: defaultVenue,
-                  status: 'scheduled',
-                  weekend: weekendNumber,
-                  day: 'Sunday',
-                  groupName: sundayGroup.groupName,
-                  type: 'performance'
-                })
-              }
-            }
-          }
+        // Group A knockout matches: 1st vs 4th, 2nd vs 3rd
+        if (groupARanked.length >= 4) {
+          // 1st vs 4th
+          performanceMatches.push({
+            id: `knockout-${Date.now()}-w4-sat-a1`,
+            team1_id: groupARanked[0].team_id,
+            team2_id: groupARanked[3].team_id,
+            date: saturday,
+            time: '',
+            group_id: groupTeamsWithStats[0].groupId,
+            venue: defaultVenue,
+            status: 'scheduled',
+            weekend: 4,
+            day: 'Saturday',
+            groupName: groupTeamsWithStats[0].groupName,
+            type: 'knockout-qualifier',
+            description: '1st vs 4th - Group A'
+          })
+
+          // 2nd vs 3rd
+          performanceMatches.push({
+            id: `knockout-${Date.now()}-w4-sat-a2`,
+            team1_id: groupARanked[1].team_id,
+            team2_id: groupARanked[2].team_id,
+            date: saturday,
+            time: '',
+            group_id: groupTeamsWithStats[0].groupId,
+            venue: defaultVenue,
+            status: 'scheduled',
+            weekend: 4,
+            day: 'Saturday',
+            groupName: groupTeamsWithStats[0].groupName,
+            type: 'knockout-qualifier',
+            description: '2nd vs 3rd - Group A'
+          })
+        }
+
+        // Group B knockout matches: 1st vs 4th, 2nd vs 3rd
+        if (groupBRanked.length >= 4) {
+          // 1st vs 4th
+          performanceMatches.push({
+            id: `knockout-${Date.now()}-w4-sat-b1`,
+            team1_id: groupBRanked[0].team_id,
+            team2_id: groupBRanked[3].team_id,
+            date: saturday,
+            time: '',
+            group_id: groupTeamsWithStats[1].groupId,
+            venue: defaultVenue,
+            status: 'scheduled',
+            weekend: 4,
+            day: 'Saturday',
+            groupName: groupTeamsWithStats[1].groupName,
+            type: 'knockout-qualifier',
+            description: '1st vs 4th - Group B'
+          })
+
+          // 2nd vs 3rd
+          performanceMatches.push({
+            id: `knockout-${Date.now()}-w4-sat-b2`,
+            team1_id: groupBRanked[1].team_id,
+            team2_id: groupBRanked[2].team_id,
+            date: saturday,
+            time: '',
+            group_id: groupTeamsWithStats[1].groupId,
+            venue: defaultVenue,
+            status: 'scheduled',
+            weekend: 4,
+            day: 'Saturday',
+            groupName: groupTeamsWithStats[1].groupName,
+            type: 'knockout-qualifier',
+            description: '2nd vs 3rd - Group B'
+          })
         }
       }
 
-      // Add performance matches to existing scheduled matches
-      setScheduledMatches(prev => [...prev, ...performanceMatches])
+      // Note: Weekend 4 Sunday is reserved for manual scheduling of semifinals and finals
+      // These will be scheduled manually after the knockout qualifier results are known
+
+      setScheduledMatches(performanceMatches)
       
       toast({
-        title: "Performance Matches Scheduled!",
-        description: `${performanceMatches.length} performance matches have been scheduled based on team statistics.`,
+        title: "Performance-Based Matches Scheduled!",
+        description: `${performanceMatches.length} knockout qualifier matches scheduled for Weekend 4 Saturday based on team rankings (1st vs 4th, 2nd vs 3rd in each group). Weekend 4 Sunday is reserved for manual scheduling of semifinals and finals.`,
       })
       
     } catch (error) {
       toast({
-        title: "Performance Scheduling Error",
+        title: "Scheduling Error",
         description: "An error occurred while scheduling performance matches. Please try again.",
         variant: "destructive"
       })
@@ -835,17 +1160,18 @@ export default function SeasonDetailsPage() {
   const [isScheduleMatchesModalOpen, setIsScheduleMatchesModalOpen] = useState(false)
   const [scheduledMatches, setScheduledMatches] = useState<Array<{
     id: string
-    team1_id: string
-    team2_id: string
+    team1_id: string | 'TBD'
+    team2_id: string | 'TBD'
     date: string
     time: string
-    group_id: string
+    group_id: string | null
     venue: string
     status: string
     weekend: number
     day: string
     groupName: string
-    type?: 'performance'
+    type?: 'performance' | 'knockout-qualifier' | 'playoff'
+    description?: string
   }>>([])
   const [isScheduling, setIsScheduling] = useState(false)
   const [groups, setGroups] = useState<Array<{
@@ -2141,7 +2467,7 @@ export default function SeasonDetailsPage() {
                                     </span>
                                   </div>
                                   <div className="text-sm text-gray-500 mt-1">
-                                    Group: {seasonGroups.find(g => g.id === match.group_id)?.name || 'N/A'} | 
+                                                                         Group: {seasonGroups.find((g: any) => g.id === match.group_id)?.name || 'N/A'} | 
                                     Weekend {match.weekend} - {match.day}
                                     {match.type === 'performance' && (
                                       <Badge variant="secondary" className="ml-2">Performance</Badge>
