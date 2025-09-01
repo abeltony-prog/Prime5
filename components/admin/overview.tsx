@@ -32,16 +32,17 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react"
-import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
+import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_ALL_MANAGERS_DETAILS, GET_TEAM_STATISTICS } from "@/lib/graphql/queries"
 
 export function Overview() {
   // Fetch real data from database
   const { data: teamsData, loading: teamsLoading, error: teamsError } = useQuery(GET_TEAMS)
   const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
   const { data: managersData, loading: managersLoading, error: managersError } = useQuery(GET_ALL_MANAGERS_DETAILS)
+  const { data: teamStatsData, loading: teamStatsLoading, error: teamStatsError } = useQuery(GET_TEAM_STATISTICS)
 
   // Loading state
-  if (teamsLoading || matchesLoading || managersLoading) {
+  if (teamsLoading || matchesLoading || managersLoading || teamStatsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -53,7 +54,7 @@ export function Overview() {
   }
 
   // Error state
-  if (teamsError || matchesError || managersError) {
+  if (teamsError || matchesError || managersError || teamStatsError) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -72,6 +73,7 @@ export function Overview() {
     const teams = teamsData?.Teams || []
     const matches = matchesData?.matches || []
     const managers = managersData?.managers || []
+    const teamStats = teamStatsData?.team_statistics || []
 
     // Calculate total teams
     const totalTeams = teams.length
@@ -89,31 +91,50 @@ export function Overview() {
       return isPastMatch && hasGoals
     })
 
-    // Calculate total goals with safety checks
-    const totalGoals = completedMatches.reduce((sum: number, match: any) => {
-      const team1Goals = parseInt(match.team1Goals) || 0
-      const team2Goals = parseInt(match.team2Goals) || 0
+    // Calculate total goals using team statistics if available, otherwise from matches
+    let totalGoals = 0
+    let totalMatchesPlayed = 0
+
+    if (teamStats.length > 0) {
+      // Use accumulated team statistics from database
+      totalGoals = teamStats.reduce((sum: number, stat: any) => {
+        const goalsFor = parseInt(stat.goals_for) || 0
+        return sum + goalsFor
+      }, 0)
       
-      // Debug: log any suspicious goal values
-      if (team1Goals > 100 || team2Goals > 100) {
-        console.warn('Suspicious goal values found:', {
-          matchId: match.id,
-          team1Goals: match.team1Goals,
-          team2Goals: match.team2Goals,
-          parsedTeam1: team1Goals,
-          parsedTeam2: team2Goals
-        })
-      }
+      totalMatchesPlayed = teamStats.reduce((sum: number, stat: any) => {
+        const played = parseInt(stat.played) || 0
+        return sum + played
+      }, 0)
+    } else {
+      // Fallback: Calculate from match results
+      totalGoals = completedMatches.reduce((sum: number, match: any) => {
+        const team1Goals = parseInt(match.team1Goals) || 0
+        const team2Goals = parseInt(match.team2Goals) || 0
+        
+        // Debug: log any suspicious goal values
+        if (team1Goals > 100 || team2Goals > 100) {
+          console.warn('Suspicious goal values found:', {
+            matchId: match.id,
+            team1Goals: match.team1Goals,
+            team2Goals: match.team2Goals,
+            parsedTeam1: team1Goals,
+            parsedTeam2: team2Goals
+          })
+        }
+        
+        // Safety check: if goals are unreasonably high, cap them
+        const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
+        const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
+        
+        return sum + safeTeam1Goals + safeTeam2Goals
+      }, 0)
       
-      // Safety check: if goals are unreasonably high, cap them
-      const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
-      const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
-      
-      return sum + safeTeam1Goals + safeTeam2Goals
-    }, 0)
+      totalMatchesPlayed = completedMatches.length
+    }
 
     // Calculate average goals per match
-    const avgGoalsPerMatch = completedMatches.length > 0 ? (totalGoals / completedMatches.length).toFixed(2) : "0.00"
+    const avgGoalsPerMatch = totalMatchesPlayed > 0 ? (totalGoals / totalMatchesPlayed).toFixed(2) : "0.00"
 
     // Calculate approved vs pending teams
     const approvedTeams = teams.filter((team: any) => team.approved).length
@@ -135,7 +156,7 @@ export function Overview() {
     return {
       totalTeams,
       totalMatches,
-      completedMatches: completedMatches.length,
+      completedMatches: totalMatchesPlayed,
       totalGoals,
       avgGoalsPerMatch,
       approvedTeams,
@@ -147,54 +168,79 @@ export function Overview() {
   // Calculate team performance data
   const calculateTeamPerformance = () => {
     const teams = teamsData?.Teams || []
-    const matches = matchesData?.matches || []
+    const teamStats = teamStatsData?.team_statistics || []
 
     return teams.map((team: any) => {
-      const teamMatches = matches.filter((match: any) => {
-        const matchDate = new Date(match.dateAndtime)
-        const now = new Date()
-        const isPastMatch = matchDate < now
-        const isTeamMatch = (match.team1 === team.id || match.team2 === team.id)
-        const hasGoals = match.team1Goals !== null && match.team2Goals !== null
-        
-        return isPastMatch && isTeamMatch && hasGoals
-      })
+      // Find team statistics from database
+      const teamStat = teamStats.find((stat: any) => stat.team_id === team.id)
+      
+      if (teamStat) {
+        // Use database statistics
+        const points = parseInt(teamStat.points) || 0
+        const wins = parseInt(teamStat.wins) || 0
+        const draws = parseInt(teamStat.draws) || 0
+        const losses = parseInt(teamStat.losses) || 0
+        const played = parseInt(teamStat.played) || 0
 
-      let points = 0
-      let wins = 0
-      let draws = 0
-      let losses = 0
-
-      teamMatches.forEach((match: any) => {
-        const isTeam1 = match.team1 === team.id
-        const teamGoals = isTeam1 ? match.team1Goals : match.team2Goals
-        const opponentGoals = isTeam1 ? match.team2Goals : match.team1Goals
-
-        if (teamGoals > opponentGoals) {
-          wins++
-          points += 3
-        } else if (teamGoals === opponentGoals) {
-          draws++
-          points += 1
-        } else {
-          losses++
+        return {
+          name: team.name,
+          points,
+          matches: played,
+          wins,
+          draws,
+          losses
         }
-      })
+      } else {
+        // Fallback: Calculate from match results
+        const matches = matchesData?.matches || []
+        const teamMatches = matches.filter((match: any) => {
+          const matchDate = new Date(match.dateAndtime)
+          const now = new Date()
+          const isPastMatch = matchDate < now
+          const isTeamMatch = (match.team1 === team.id || match.team2 === team.id)
+          const hasGoals = match.team1Goals !== null && match.team2Goals !== null
+          
+          return isPastMatch && isTeamMatch && hasGoals
+        })
 
-      return {
-        name: team.name,
-        points,
-        matches: teamMatches.length,
-        wins,
-        draws,
-        losses
+        let points = 0
+        let wins = 0
+        let draws = 0
+        let losses = 0
+
+        teamMatches.forEach((match: any) => {
+          const isTeam1 = match.team1 === team.id
+          const teamGoals = isTeam1 ? match.team1Goals : match.team2Goals
+          const opponentGoals = isTeam1 ? match.team2Goals : match.team1Goals
+
+          if (teamGoals > opponentGoals) {
+            wins++
+            points += 3
+          } else if (teamGoals === opponentGoals) {
+            draws++
+            points += 1
+          } else {
+            losses++
+          }
+        })
+
+        return {
+          name: team.name,
+          points,
+          matches: teamMatches.length,
+          wins,
+          draws,
+          losses
+        }
       }
     }).sort((a: any, b: any) => b.points - a.points).slice(0, 5)
   }
 
-  // Calculate matches and goals trend by month
+  // Calculate matches and goals trend by week
   const calculateMatchesTrend = () => {
     const matches = matchesData?.matches || []
+    
+    // Filter completed matches (past matches with goals)
     const completedMatches = matches.filter((match: any) => {
       const matchDate = new Date(match.dateAndtime)
       const now = new Date()
@@ -204,32 +250,100 @@ export function Overview() {
       return isPastMatch && hasGoals
     })
 
-    const monthlyData: {[key: string]: {month: string, matches: number, goals: number}} = {}
+    // Helper function to get week number and year
+    const getWeekKey = (date: Date) => {
+      const year = date.getFullYear()
+      const startOfYear = new Date(year, 0, 1)
+      const days = Math.floor((date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+      const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
+      return `Week ${weekNumber}, ${year}`
+    }
+
+    // If no completed matches, show all matches for trend
+    if (completedMatches.length === 0) {
+      // Show all matches (including future ones) for trend visualization
+      const allMatches = matches.filter((match: any) => {
+        return match.dateAndtime // Just check if date exists
+      })
+
+      if (allMatches.length === 0) {
+        return []
+      }
+
+      const weeklyData: {[key: string]: {week: string, matches: number, goals: number}} = {}
+      
+      allMatches.forEach((match: any) => {
+        const date = new Date(match.dateAndtime)
+        const weekKey = getWeekKey(date)
+        
+        if (!weeklyData[weekKey]) {
+          weeklyData[weekKey] = { week: weekKey, matches: 0, goals: 0 }
+        }
+        
+        weeklyData[weekKey].matches++
+        
+        // For matches without goals, show 0 goals
+        const team1Goals = parseInt(match.team1Goals) || 0
+        const team2Goals = parseInt(match.team2Goals) || 0
+        const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
+        const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
+        
+        weeklyData[weekKey].goals += safeTeam1Goals + safeTeam2Goals
+      })
+
+      const sortedData = [...Object.values(weeklyData)].sort((a, b) => {
+        const weekA = parseInt(a.week.match(/Week (\d+)/)?.[1] || '0')
+        const weekB = parseInt(b.week.match(/Week (\d+)/)?.[1] || '0')
+        const yearA = parseInt(a.week.match(/(\d{4})/)?.[1] || '0')
+        const yearB = parseInt(b.week.match(/(\d{4})/)?.[1] || '0')
+        
+        if (yearA !== yearB) return yearA - yearB
+        return weekA - weekB
+      })
+
+
+
+      return sortedData
+    }
+
+    const weeklyData: {[key: string]: {week: string, matches: number, goals: number}} = {}
     
+    // Group matches by week and calculate goals
     completedMatches.forEach((match: any) => {
       const date = new Date(match.dateAndtime)
-      const month = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      const weekKey = getWeekKey(date)
       
-      if (!monthlyData[month]) {
-        monthlyData[month] = { month, matches: 0, goals: 0 }
+      if (!weeklyData[weekKey]) {
+        weeklyData[weekKey] = { week: weekKey, matches: 0, goals: 0 }
       }
       
-      monthlyData[month].matches++
+      weeklyData[weekKey].matches++
       
-      // Safety check for goals calculation
+      // Calculate goals for this match
       const team1Goals = parseInt(match.team1Goals) || 0
       const team2Goals = parseInt(match.team2Goals) || 0
+      
+      // Safety check: if goals are unreasonably high, cap them
       const safeTeam1Goals = team1Goals > 100 ? 0 : team1Goals
       const safeTeam2Goals = team2Goals > 100 ? 0 : team2Goals
       
-      monthlyData[month].goals += safeTeam1Goals + safeTeam2Goals
+      weeklyData[weekKey].goals += safeTeam1Goals + safeTeam2Goals
     })
 
-    return [...Object.values(monthlyData)].sort((a, b) => {
-      const dateA = new Date(a.month)
-      const dateB = new Date(b.month)
-      return dateA.getTime() - dateB.getTime()
+    // Convert to array and sort by date
+    const sortedData = [...Object.values(weeklyData)].sort((a, b) => {
+      const weekA = parseInt(a.week.match(/Week (\d+)/)?.[1] || '0')
+      const weekB = parseInt(b.week.match(/Week (\d+)/)?.[1] || '0')
+      const yearA = parseInt(a.week.match(/(\d{4})/)?.[1] || '0')
+      const yearB = parseInt(b.week.match(/(\d{4})/)?.[1] || '0')
+      
+      if (yearA !== yearB) return yearA - yearB
+      return weekA - weekB
     })
+
+
+
+    return sortedData
   }
 
   // Calculate registration status
@@ -344,6 +458,9 @@ export function Overview() {
   const registrationStatusData = calculateRegistrationStatus()
   const recentActivity = generateRecentActivity()
 
+  // Debug logging for chart data
+  
+
   // KPI data
   const kpiData = [
     {
@@ -452,21 +569,31 @@ export function Overview() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
               <Trophy className="h-5 w-5" />
-              Matches & Goals Trend
+              Weekly Matches & Goals Trend
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="w-full h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={matchesTrendData}>
+              {matchesTrendData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                                  <LineChart data={matchesTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
+                  <XAxis dataKey="week" stroke="rgba(255,255,255,0.7)" />
                   <YAxis stroke="rgba(255,255,255,0.7)" />
                   <ChartTooltip />
                   <Line type="monotone" dataKey="matches" stroke="#3b82f6" strokeWidth={2} />
                   <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={2} />
                 </LineChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <Trophy className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                    <p className="text-white/60 text-lg">No match data available</p>
+                    <p className="text-white/40 text-sm">Matches will appear here once scheduled</p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
