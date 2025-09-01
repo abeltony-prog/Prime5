@@ -33,7 +33,7 @@ export default function RulesPage() {
       category: "Team Composition",
       rules: [
         "5 players per team on the court (4 outfield + 1 goalkeeper)",
-        "Maximum 12 players per squad",
+        "Maximum 10 players per squad",
         "Unlimited substitutions during play",
         "Substitutions must occur in designated areas",
       ],

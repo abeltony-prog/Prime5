@@ -7,7 +7,7 @@ import { Navigation } from "@/components/navigation"
 import { Target, Award, TrendingUp, Users, Trophy, TrendingDown, Calendar, Clock, MapPin, Loader2, XCircle, Shield } from "lucide-react"
 import { useState } from "react"
 import { useQuery } from '@apollo/client'
-import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_TEAM_STATISTICS, GET_TEAM_PLAYER_STATISTICS } from "@/lib/graphql/queries"
+import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_TEAM_STATISTICS, GET_TEAM_PLAYER_STATISTICS, GET_SEASONS } from "@/lib/graphql/queries"
 
 
 export default function StatisticsPage() {
@@ -16,13 +16,14 @@ export default function StatisticsPage() {
   const [selectedGroup, setSelectedGroup] = useState("all")
 
   // Fetch real data from database
+  const { data: seasonsData, loading: seasonsLoading, error: seasonsError } = useQuery(GET_SEASONS)
   const { data: teamsData, loading: teamsLoading, error: teamsError } = useQuery(GET_TEAMS)
   const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
   const { data: teamStatsData, loading: teamStatsLoading, error: teamStatsError } = useQuery(GET_TEAM_STATISTICS)
   const { data: playerStatsData, loading: playerStatsLoading, error: playerStatsError } = useQuery(GET_TEAM_PLAYER_STATISTICS)
 
   // Loading state
-  if (teamsLoading || matchesLoading || teamStatsLoading || playerStatsLoading) {
+  if (seasonsLoading || teamsLoading || matchesLoading || teamStatsLoading || playerStatsLoading) {
     return (
       <div className="min-h-screen relative">
         <Navigation />
@@ -39,7 +40,7 @@ export default function StatisticsPage() {
   }
 
   // Error state
-  if (teamsError || matchesError || teamStatsError || playerStatsError) {
+  if (seasonsError || teamsError || matchesError || teamStatsError || playerStatsError) {
     return (
       <div className="min-h-screen relative">
         <Navigation />
@@ -332,9 +333,38 @@ export default function StatisticsPage() {
     return { upcomingMatches, pastResults }
   }
 
+  // Find active season
+  const findActiveSeason = () => {
+    const seasons = seasonsData?.seasons || []
+    const now = new Date()
+    
+    // Find season where current date is between startDate and EndDate
+    const activeSeason = seasons.find((season: any) => {
+      const startDate = new Date(season.startDate)
+      const endDate = new Date(season.EndDate)
+      return now >= startDate && now <= endDate
+    })
+    
+    return activeSeason
+  }
+
+  const activeSeason = findActiveSeason()
+
   const calculateLeaderboard = () => {
-    const teams = teamsData?.Teams || []
-    const teamStats = teamStatsData?.team_statistics || []
+    // If no active season, return empty array
+    if (!activeSeason) {
+      return []
+    }
+
+    const allTeams = teamsData?.Teams || []
+    const allTeamStats = teamStatsData?.team_statistics || []
+    
+    // Filter teams that are part of the active season
+    const seasonTeamIds = activeSeason.teams || []
+    const teams = allTeams.filter((team: any) => seasonTeamIds.includes(team.id))
+    
+    // Filter team statistics for the active season
+    const teamStats = allTeamStats.filter((stat: any) => stat.season_id === activeSeason.id)
 
     if (teamStats.length === 0) {
       return teams.map((team: any, index: number) => ({
@@ -643,10 +673,46 @@ export default function StatisticsPage() {
           <div className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">League Leaderboard</h2>
-              <p className="text-lg text-white/90 drop-shadow-xl">Complete team rankings and statistics</p>
+              <p className="text-lg text-white/90 drop-shadow-xl">
+                {activeSeason ? `Complete team rankings and statistics - ${activeSeason.name}` : "No active season"}
+              </p>
             </div>
 
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+            {!activeSeason ? (
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <CardContent className="p-12 text-center">
+                  <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Trophy className="h-8 w-8 text-yellow-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">No Active Season</h3>
+                  <p className="text-white/80 text-lg mb-6">
+                    There is currently no active season. The leaderboard will be available once a season is active.
+                  </p>
+                  <div className="text-white/60">
+                    <p>• Check back when the season starts</p>
+                    <p>• Teams will appear here once they're registered for the active season</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : leaderboard.length === 0 ? (
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <CardContent className="p-12 text-center">
+                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Users className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">No Teams in Active Season</h3>
+                  <p className="text-white/80 text-lg mb-6">
+                    The active season "{activeSeason.name}" has no teams registered yet.
+                  </p>
+                  <div className="text-white/60">
+                    <p>• Teams need to be registered for this season</p>
+                    <p>• Leaderboard will populate once teams are added</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
               <CardHeader className="bg-gradient-to-r from-purple-600/90 to-purple-700/90 backdrop-blur-md text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5" />
@@ -730,7 +796,8 @@ export default function StatisticsPage() {
               </CardContent>
             </Card>
 
-            {/* Summary Stats */}
+            {/* Summary Stats - Only show when there are teams */}
+            {leaderboard.length > 0 && (
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
                 <CardContent className="p-6 text-center">
@@ -769,6 +836,9 @@ export default function StatisticsPage() {
                 </CardContent>
               </Card>
             </div>
+            )}
+              </>
+            )}
           </div>
         )}
 
