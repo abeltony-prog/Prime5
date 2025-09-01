@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import { useAuth } from "@/contexts/AuthContext"
 import { useQuery, useMutation } from '@apollo/client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,7 +46,8 @@ interface Application {
   }
 }
 
-export default function AdminJobsPage() {
+function AdminJobsPage() {
+  const { logout } = useAuth()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -285,13 +288,49 @@ export default function AdminJobsPage() {
             <h1 className="text-3xl font-bold text-white">Jobs & Applications</h1>
             <p className="text-slate-300">Manage job postings and review applications</p>
           </div>
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white border-green-500 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Job
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <div className="text-xs">
+                <span className={`${(() => {
+                  const loginTime = localStorage.getItem("adminLoginTime")
+                  if (loginTime) {
+                    const loginDate = new Date(loginTime)
+                    const now = new Date()
+                    const hoursDiff = 24 - Math.ceil((now.getTime() - loginDate.getTime()) / (1000 * 60 * 60))
+                    if (hoursDiff <= 1) return "text-red-400"
+                    if (hoursDiff <= 4) return "text-yellow-400"
+                    return "text-slate-300"
+                  }
+                  return "text-slate-300"
+                })()}`}>
+                  Session: {(() => {
+                    const loginTime = localStorage.getItem("adminLoginTime")
+                    if (loginTime) {
+                      const loginDate = new Date(loginTime)
+                      const now = new Date()
+                      const hoursDiff = 24 - Math.ceil((now.getTime() - loginDate.getTime()) / (1000 * 60 * 60))
+                      return `${hoursDiff}h left`
+                    }
+                    return "Unknown"
+                  })()}
+                </span>
+              </div>
+              <Button 
+                onClick={logout}
+                variant="outline"
+                className="border-red-500/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 bg-red-500/10"
+              >
+                Logout
+              </Button>
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="bg-green-600 hover:bg-green-700 text-white border-green-500 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create Job
+              </Button>
+            </div>
+          </div>
         </div>
 
       {/* Tabs */}
@@ -983,5 +1022,13 @@ export default function AdminJobsPage() {
       </Dialog>
       </div>
     </div>
+  )
+}
+
+export default function AdminJobsPageWrapper() {
+  return (
+    <ProtectedRoute>
+      <AdminJobsPage />
+    </ProtectedRoute>
   )
 }

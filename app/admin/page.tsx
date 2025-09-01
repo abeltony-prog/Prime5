@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import { useAuth } from "@/contexts/AuthContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -53,8 +55,9 @@ import { Matches } from "@/components/admin/matches"
 import { Analytics } from "@/components/admin/analytics"
 import { Registrations } from "@/components/admin/registrations"
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+  const { logout } = useAuth()
 
   // Fetch managers data using GraphQL
   const { data: managersData, loading: managersLoading, error: managersError } = useQuery(GET_ALL_MANAGERS_DETAILS)
@@ -180,8 +183,41 @@ export default function AdminDashboard() {
               <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
                 <Settings className="w-4 h-4" />
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={logout}
+                className="border-red-500/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 bg-red-500/10 backdrop-blur-md"
+              >
+                Logout
+              </Button>
+              <div className="flex items-center gap-2 text-xs">
+                <span className={`${(() => {
+                  const loginTime = localStorage.getItem("adminLoginTime")
+                  if (loginTime) {
+                    const loginDate = new Date(loginTime)
+                    const now = new Date()
+                    const hoursDiff = 24 - Math.ceil((now.getTime() - loginDate.getTime()) / (1000 * 60 * 60))
+                    if (hoursDiff <= 1) return "text-red-400"
+                    if (hoursDiff <= 4) return "text-yellow-400"
+                    return "text-slate-300"
+                  }
+                  return "text-slate-300"
+                })()}`}>
+                  Session: {(() => {
+                    const loginTime = localStorage.getItem("adminLoginTime")
+                    if (loginTime) {
+                      const loginDate = new Date(loginTime)
+                      const now = new Date()
+                      const hoursDiff = 24 - Math.ceil((now.getTime() - loginDate.getTime()) / (1000 * 60 * 60))
+                      return `${hoursDiff}h left`
+                    }
+                    return "Unknown"
+                  })()}
+                </span>
+              </div>
               <div className="w-8 h-8 bg-green-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-green-500/30">
-                <span className="text-sm font-semibold text-green-300">JD</span>
+                <span className="text-sm font-semibold text-green-300">AD</span>
               </div>
             </div>
           </div>
@@ -429,5 +465,13 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
     </div>
+  )
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <ProtectedRoute>
+      <AdminDashboard />
+    </ProtectedRoute>
   )
 }

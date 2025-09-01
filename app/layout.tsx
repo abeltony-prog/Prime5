@@ -3,6 +3,8 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 import { ApolloWrapper } from '@/components/apollo-provider'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'Prime5 League - Professional Futsal',
@@ -43,9 +45,12 @@ html {
         {/* Background overlay for better readability */}
         <div className="absolute inset-0 bg-black/20"></div>
         <ApolloWrapper>
-          <div className="relative z-10">
-            {children}
-          </div>
+          <AuthProvider>
+            <div className="relative z-10">
+              {children}
+            </div>
+            <Toaster position="top-right" richColors />
+          </AuthProvider>
         </ApolloWrapper>
       </body>
     </html>
