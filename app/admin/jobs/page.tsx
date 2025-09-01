@@ -425,6 +425,7 @@ export default function AdminJobsPage() {
                     <TableHead className="text-white">Phone</TableHead>
                     <TableHead className="text-white">Job Position</TableHead>
                     <TableHead className="text-white">Experience</TableHead>
+                    <TableHead className="text-white">Resume</TableHead>
                     <TableHead className="text-white">Applied</TableHead>
                     <TableHead className="text-white">Actions</TableHead>
                   </TableRow>
@@ -442,6 +443,19 @@ export default function AdminJobsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-slate-300">{application.years} years</TableCell>
+                      <TableCell className="text-slate-300">
+                        {application.file ? (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span className="text-green-400 text-sm">Attached</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <span className="text-gray-400 text-sm">No file</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="text-slate-300">
                         {new Date(application.created_at).toLocaleDateString()}
                       </TableCell>
@@ -738,17 +752,65 @@ export default function AdminJobsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-slate-900">
-                          {selectedApplication.file.includes('/') 
-                            ? selectedApplication.file.split('/').pop() 
-                            : selectedApplication.file
+                          {selectedApplication.file.startsWith('data:') 
+                            ? 'Resume/CV File' 
+                            : selectedApplication.file.includes('/') 
+                              ? selectedApplication.file.split('/').pop() 
+                              : selectedApplication.file
                           }
                         </p>
                         <p className="text-sm text-slate-600">
-                          {selectedApplication.file.includes('resumes/') ? 'File uploaded' : 'File attached'}
+                          {selectedApplication.file.startsWith('data:') 
+                            ? 'File uploaded and ready to view' 
+                            : selectedApplication.file.includes('resumes/') 
+                              ? 'File uploaded' 
+                              : 'File attached'
+                          }
                         </p>
                       </div>
                       <div className="flex space-x-2">
-                        {selectedApplication.file.startsWith('http') || selectedApplication.file.startsWith('/') ? (
+                        {selectedApplication.file.startsWith('data:') ? (
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const link = document.createElement('a')
+                                link.href = selectedApplication.file
+                                link.download = 'resume.pdf'
+                                link.target = '_blank'
+                                link.click()
+                              }}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              Download
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const newWindow = window.open()
+                                if (newWindow) {
+                                  newWindow.document.write(`
+                                    <html>
+                                      <head><title>Resume - ${selectedApplication.name}</title></head>
+                                      <body style="margin:0; padding:20px;">
+                                        <h2>Resume for ${selectedApplication.name}</h2>
+                                        <p><strong>Position:</strong> ${selectedApplication.jobs.title}</p>
+                                        <p><strong>Applied:</strong> ${new Date(selectedApplication.created_at).toLocaleDateString()}</p>
+                                        <hr style="margin:20px 0;">
+                                        <iframe src="${selectedApplication.file}" width="100%" height="600px" style="border:none;"></iframe>
+                                      </body>
+                                    </html>
+                                  `)
+                                }
+                              }}
+                              className="text-green-600 hover:text-green-800"
+                            >
+                              View
+                            </Button>
+                          </div>
+                        ) : selectedApplication.file.startsWith('http') || selectedApplication.file.startsWith('/') ? (
                           <a 
                             href={selectedApplication.file} 
                             target="_blank" 

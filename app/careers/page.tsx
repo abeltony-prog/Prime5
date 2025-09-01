@@ -76,13 +76,32 @@ export default function CareersPage() {
     setIsSubmitting(true)
 
     try {
+      let fileUrl = null
+      
+      // Handle file upload
+      if (applicationForm.resume) {
+        const file = applicationForm.resume
+        const fileName = `${Date.now()}_${file.name}`
+        
+        // For now, we'll store the file as base64 in the database
+        // In production, you'd upload to a file storage service
+        const reader = new FileReader()
+        const fileData = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+        
+        fileUrl = `data:${file.type};base64,${fileData.split(',')[1]}`
+      }
+
       const applicationData = {
         name: applicationForm.fullName,
         email: applicationForm.email,
         phone: applicationForm.phone,
         years: applicationForm.experience,
         cover_letter: applicationForm.coverLetter,
-        file: applicationForm.resume ? applicationForm.resume.name : null,
+        file: fileUrl,
         job_id: selectedJob.id
       }
 
