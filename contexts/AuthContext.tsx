@@ -33,10 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (hoursDiff < 24) {
           setIsAuthenticated(true)
           setSessionTimeLeft(24 - hoursDiff)
-          // If already authenticated and on login page, redirect to admin
-          if (typeof window !== 'undefined' && window.location.pathname === '/admin/login') {
-            window.location.href = '/admin'
-          }
         } else {
           // Session expired
           localStorage.removeItem("adminAuthenticated")

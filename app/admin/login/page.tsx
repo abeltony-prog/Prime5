@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Shield, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
@@ -17,28 +18,14 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { isAuthenticated, login } = useAuth()
 
   // Check if already authenticated on component mount
   useEffect(() => {
-    const checkAuth = () => {
-      const authStatus = localStorage.getItem("adminAuthenticated")
-      const loginTime = localStorage.getItem("adminLoginTime")
-      
-      if (authStatus === "true" && loginTime) {
-        // Check if login is not older than 24 hours
-        const loginDate = new Date(loginTime)
-        const now = new Date()
-        const hoursDiff = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60)
-        
-        if (hoursDiff < 24) {
-          // Already authenticated, redirect to admin
-          router.push("/admin")
-        }
-      }
+    if (isAuthenticated) {
+      router.push("/admin")
     }
-
-    checkAuth()
-  }, [router])
+  }, [isAuthenticated, router])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -50,25 +37,19 @@ export default function AdminLoginPage() {
   const handleSubmit = async () => {
     setIsLoading(true)
 
-    // Check credentials
-    if (formData.username === "adminPrime5" && formData.password === "123Prime5ports!") {
-      try {
-        // Store authentication in localStorage
-        localStorage.setItem("adminAuthenticated", "true")
-        localStorage.setItem("adminLoginTime", new Date().toISOString())
-        
+    try {
+      // Use the AuthContext login method
+      const success = login(formData.username, formData.password)
+      
+      if (success) {
         toast.success("Login successful! Welcome to Admin Panel")
-        
-        // Add a small delay to ensure toast shows
-        setTimeout(() => {
-          router.push("/admin")
-        }, 1000)
-      } catch (error) {
-        toast.error("Login failed. Please try again.")
-        setIsLoading(false)
+        // The AuthContext will handle the redirect via useEffect
+      } else {
+        toast.error("Invalid username or password")
       }
-    } else {
-      toast.error("Invalid username or password")
+    } catch (error) {
+      toast.error("Login failed. Please try again.")
+    } finally {
       setIsLoading(false)
     }
   }
