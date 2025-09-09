@@ -23,7 +23,6 @@ export default function SponsorsPage() {
 
   const partnerSponsors = [
     { name: "Zaria Coart", logo: "https://cdn.prod.website-files.com/682a572382c4d682bcc2fcfa/682a572382c4d682bcc2fd45_Logo.svg" },
-    { name: "Minitry of  Sports", logo: "https://www.planetevents.rw/assets/pertners/MiniSports_Logo_Portrait.png" },
     { name: "Officeats", logo: "https://officeats.rw/images/OFFICEATS%20TYPO-13.png" },
     { name: "North Creators", logo: "https://res.cloudinary.com/dpk7o7zlw/image/upload/f_auto,q_auto/ah059yjosdgn8wq5go5o" },
     { name: "Isimbi Designs", logo: "/logo/isimb.png" },
