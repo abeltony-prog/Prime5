@@ -106,20 +106,23 @@ export default function SponsorsPage() {
           <h2 className="text-3xl font-bold text-white text-center mb-8 drop-shadow-2xl">Partner Network</h2>
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <CardContent className="p-8">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center">
                 {partnerSponsors.map((sponsor, index) => (
-                  <div key={index} className="text-center">
-                    <Image
-                      src={sponsor.logo || "/placeholder.svg"}
-                      alt={sponsor.name}
-                      width={160}
-                      height={80}
-                      className={`mx-auto transition-all duration-300 ${
-                        sponsor.name === "Isimbi Designs" || sponsor.name === "BM"
-                          ? "brightness-0 invert hover:brightness-100 hover:invert-0"
-                          : "grayscale hover:grayscale-0"
-                      }`}
-                    />
+                  <div key={index} className="text-center flex flex-col items-center justify-center">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border border-white/30 mb-2">
+                      <Image
+                        src={sponsor.logo || "/placeholder.svg"}
+                        alt={sponsor.name}
+                        width={120}
+                        height={60}
+                        className={`mx-auto transition-all duration-300 ${
+                          sponsor.name === "Isimbi Designs" || sponsor.name === "BM"
+                            ? "brightness-0 invert hover:brightness-100 hover:invert-0"
+                            : "grayscale hover:grayscale-0"
+                        }`}
+                      />
+                    </div>
+                    <span className="text-sm text-white/80 font-medium">{sponsor.name}</span>
                   </div>
                 ))}
               </div>
