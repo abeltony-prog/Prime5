@@ -21,7 +21,6 @@ export default function HomePage() {
     { name: "Plasera", logo: "/logo/plasera.png" },
     { name: "Zaria Coart", logo: "https://cdn.prod.website-files.com/682a572382c4d682bcc2fcfa/682a572382c4d682bcc2fd45_Logo.svg" },
     { name: "Planet Events", logo: "/logo/planetevents.png" },
-    { name: "Minitry of  Sports", logo: "https://www.planetevents.rw/assets/pertners/MiniSports_Logo_Portrait.png" },
   ]
 
   // Process completed matches from database
