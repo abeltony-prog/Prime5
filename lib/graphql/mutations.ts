@@ -399,3 +399,17 @@ export const DELETE_APPLICATION = gql`
     }
   }
 `
+
+// Mutation to update team approval status
+export const UPDATE_TEAM_APPROVAL = gql`
+  mutation UpdateTeamApproval($id: uuid!, $approved: Boolean!) {
+    update_Teams_by_pk(
+      pk_columns: { id: $id }
+      _set: { approved: $approved }
+    ) {
+      id
+      name
+      approved
+    }
+  }
+`

@@ -34,7 +34,7 @@ import {
   EyeOff,
 } from "lucide-react"
 import { useMutation } from "@apollo/client"
-import { UPDATE_MANAGER_PASSWORD } from "@/lib/graphql/mutations"
+import { UPDATE_MANAGER_PASSWORD, UPDATE_TEAM_APPROVAL } from "@/lib/graphql/mutations"
 import { GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
 import { generatePassword, hashPasswordForStorage } from "@/lib/utils/password"
 import { useToast } from "@/hooks/use-toast"
@@ -75,8 +75,9 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
   const [localManagers, setLocalManagers] = useState<Manager[]>(managers)
 
-  // GraphQL mutation for updating passwords
+  // GraphQL mutations
   const [updatePassword, { loading: passwordUpdating }] = useMutation(UPDATE_MANAGER_PASSWORD)
+  const [updateTeamApproval, { loading: approvalUpdating }] = useMutation(UPDATE_TEAM_APPROVAL)
   const { toast } = useToast()
 
   // Update local managers when prop changes
@@ -116,9 +117,47 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
     return approved ? <CheckCircle className="h-4 w-4" /> : <Clock className="h-4 w-4" />
   }
 
-  const handleTeamApproval = (teamId: string, approved: boolean) => {
-    // Here you would update the team approval status in the database
-    console.log(`Changing team ${teamId} approval to ${approved}`)
+  const handleTeamApproval = async (teamId: string, approved: boolean) => {
+    try {
+      const result = await updateTeamApproval({
+        variables: {
+          id: teamId,
+          approved: approved
+        },
+        refetchQueries: [
+          {
+            query: GET_ALL_MANAGERS_DETAILS
+          }
+        ]
+      })
+
+      if (result.data?.update_Teams_by_pk) {
+        // Update local state
+        setLocalManagers(prev => prev.map(manager => ({
+          ...manager,
+          Teams: manager.Teams.map(team => 
+            team.id === teamId 
+              ? { ...team, approved: approved }
+              : team
+          )
+        })))
+
+        toast({
+          title: "Team Status Updated",
+          description: `Team has been ${approved ? 'approved' : 'rejected'} successfully`,
+          duration: 3000,
+        })
+      } else {
+        throw new Error('Failed to update team approval status')
+      }
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+        duration: 5000,
+      })
+    }
   }
 
   const handleEditManager = (manager: Manager) => {
@@ -482,18 +521,27 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
                             {passwordUpdating ? 'Regenerating...' : 'Regenerate Password'}
                           </DropdownMenuItem>
                           {manager.Teams.map((team) => (
-                            <DropdownMenuItem key={team.id} onClick={() => handleTeamApproval(team.id, !team.approved)}>
-                              {team.approved ? (
+                            <DropdownMenuItem 
+                              key={team.id} 
+                              onClick={() => handleTeamApproval(team.id, !team.approved)}
+                              disabled={approvalUpdating}
+                            >
+                              {approvalUpdating ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                  Updating...
+                                </>
+                              ) : team.approved ? (
                                 <>
                                   <XCircle className="h-4 w-4 mr-2" />
                                   Revoke Approval
                                 </>
                               ) : (
                                 <>
-                                <CheckCircle className="h-4 w-4 mr-2" />
+                                  <CheckCircle className="h-4 w-4 mr-2" />
                                   Approve Team
-                            </>
-                          )}
+                                </>
+                              )}
                             </DropdownMenuItem>
                           ))}
                           <DropdownMenuItem>
