@@ -401,7 +401,7 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                 <div>
                   <Label>Invite Teams</Label>
                   <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">
-                    {teams?.map((team: any) => {
+                    {teams?.filter((team: any) => team.approved === true).map((team: any) => {
                       
                       // Try to find a valid identifier for the team
                       const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]

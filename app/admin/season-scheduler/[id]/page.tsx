@@ -112,14 +112,16 @@ export default function SeasonDetailsPage() {
   // Calculate total teams for overview card
   const totalTeams = seasonTeams.length
 
-  // Get teams that are NOT already in this season
+  // Get teams that are NOT already in this season and are approved
   const availableTeamsToInvite = React.useMemo(() => {
     if (!allTeams || !season?.teams) return allTeams || []
     
     const seasonTeamIds = Object.keys(season.teams)
     return allTeams.filter((team: any) => {
       const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return !seasonTeamIds.includes(teamIdentifier?.toString())
+      return teamIdentifier && 
+             !seasonTeamIds.includes(teamIdentifier?.toString()) && 
+             team.approved === true
     })
   }, [allTeams, season?.teams])
 

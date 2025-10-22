@@ -104,7 +104,7 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
   if (loading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -122,7 +122,7 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
   if (!team) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -131,8 +131,8 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
           </DialogHeader>
           <div className="flex items-center justify-center h-32">
             <div className="text-center">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Team information not available</p>
+              <Users className="h-12 w-12 text-white/60 mx-auto mb-4" />
+              <p className="text-white/80">Team information not available</p>
             </div>
           </div>
         </DialogContent>
@@ -145,10 +145,10 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-blue-600" />
+            <Shield className="h-5 w-5 text-blue-300" />
             {team.name} - Team Details
           </DialogTitle>
         </DialogHeader>
