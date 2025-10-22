@@ -2012,18 +2012,18 @@ export default function SeasonDetailsPage() {
             {isRandomized && randomizedGroups.length > 0 && (
               <div className="border-t pt-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Randomized Groups Preview</h3>
+                  <h3 className="font-semibold text-white">Randomized Groups Preview</h3>
                   <div className="flex gap-2">
                     <Button 
                       variant="outline" 
                       onClick={resetRandomization}
-                      className="text-orange-600 hover:text-orange-700"
+                      className="bg-orange-500/20 backdrop-blur-sm text-orange-200 border-orange-400/30 hover:bg-orange-500/30 hover:text-orange-100"
                     >
                       🔄 Reset
                     </Button>
                     <Button 
                       onClick={confirmRandomization}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white border-blue-400/30"
                     >
                       ✅ Confirm & Save
                     </Button>
@@ -2032,17 +2032,17 @@ export default function SeasonDetailsPage() {
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {randomizedGroups.map((group, index) => (
-                    <div key={group.id} className="border rounded-lg p-4 bg-blue-50">
+                    <div key={group.id} className="border border-white/20 rounded-lg p-4 bg-white/5 backdrop-blur-sm">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-blue-900">{group.name}</h4>
-                        <Badge variant="secondary">{group.teams.length} teams</Badge>
+                        <h4 className="font-medium text-white">{group.name}</h4>
+                        <Badge variant="secondary" className="bg-white/10 backdrop-blur-sm text-white border-white/20">{group.teams.length} teams</Badge>
                       </div>
                       
                       <div className="space-y-2">
                         {group.teams.map(teamId => {
                           const team = getTeamById(teamId)
                           return (
-                            <div key={teamId} className="bg-white p-2 rounded border text-sm">
+                            <div key={teamId} className="bg-white/10 backdrop-blur-sm p-2 rounded border border-white/20 text-sm text-white">
                               {team?.name || team?.team_name || `Team ${teamId}`}
                             </div>
                           )
@@ -2052,8 +2052,8 @@ export default function SeasonDetailsPage() {
                   ))}
                 </div>
                 
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800">
+                <div className="mt-4 p-3 bg-green-500/20 backdrop-blur-sm border border-green-400/30 rounded-lg">
+                  <p className="text-sm text-green-200">
                     <strong>Ready to save!</strong> Review the groups above. Click "Confirm & Save" to save to database, 
                     or "Reset" to randomize again.
                   </p>
@@ -2353,10 +2353,10 @@ export default function SeasonDetailsPage() {
             {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
               <>
                 {/* Location Setting */}
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="p-4 bg-blue-500/20 backdrop-blur-sm rounded-lg border border-blue-400/30">
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
-                      <Label htmlFor="default-venue" className="text-sm font-medium text-blue-900">
+                      <Label htmlFor="default-venue" className="text-sm font-medium text-blue-200">
                         Default Venue for All Games
                       </Label>
                       <Input
@@ -2364,9 +2364,9 @@ export default function SeasonDetailsPage() {
                         value={defaultVenue}
                         onChange={(e) => setDefaultVenue(e.target.value)}
                         placeholder="Enter venue name (e.g., Prime Arena, Stadium A)"
-                        className="mt-1"
+                        className="mt-1 bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
                       />
-                      <p className="text-xs text-blue-700 mt-1">
+                      <p className="text-xs text-blue-200/80 mt-1">
                         This venue will be applied to all scheduled matches. You can change individual match venues later.
                       </p>
                     </div>
@@ -2374,17 +2374,17 @@ export default function SeasonDetailsPage() {
                 </div>
 
                 {/* Scheduling Controls */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20">
                   <div>
-                    <h3 className="font-semibold text-gray-900">Randomized Group Weekend Scheduling</h3>
-                    <p className="text-sm text-gray-600">
+                    <h3 className="font-semibold text-white">Randomized Group Weekend Scheduling</h3>
+                    <p className="text-sm text-white/80">
                       Weekend 1 & 2: Groups are randomly assigned to Saturday vs Sunday for fairness. Each group gets equal opportunities.
                     </p>
                   </div>
                   <Button 
                     onClick={scheduleMatches}
                     disabled={isScheduling || seasonGroups.length === 0}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600/80 backdrop-blur-sm hover:bg-green-700/80 text-white border-green-400/30"
                   >
                     {isScheduling ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -2399,11 +2399,11 @@ export default function SeasonDetailsPage() {
 
             {/* Show performance matches interface when regular matches are already scheduled */}
             {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 && (
-              <div className="p-6 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="p-6 bg-purple-500/20 backdrop-blur-sm rounded-lg border border-purple-400/30">
                 <div className="text-center space-y-4">
-                  <Target className="h-16 w-16 mx-auto text-purple-600" />
-                  <h3 className="text-xl font-semibold text-purple-900">Performance Matches Ready to Schedule</h3>
-                  <p className="text-purple-700 max-w-2xl mx-auto">
+                  <Target className="h-16 w-16 mx-auto text-purple-300" />
+                  <h3 className="text-xl font-semibold text-purple-200">Performance Matches Ready to Schedule</h3>
+                  <p className="text-purple-200/80 max-w-2xl mx-auto">
                     Regular season matches have already been scheduled. You can now schedule performance matches 
                     based on team statistics for weekends 3-4 to determine final standings.
                   </p>
@@ -2412,7 +2412,7 @@ export default function SeasonDetailsPage() {
                       onClick={schedulePerformanceMatches}
                       disabled={isSchedulingPerformance}
                       size="lg"
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-purple-600/80 backdrop-blur-sm hover:bg-purple-700/80 text-white border-purple-400/30"
                     >
                       {isSchedulingPerformance ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -2430,10 +2430,10 @@ export default function SeasonDetailsPage() {
             {scheduledMatches.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold text-white">
                     Scheduled Matches ({scheduledMatches.length})
                   </h3>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white/20">
                     Weekend 1: {scheduledMatches.filter(m => m.weekend === 1).length} matches | 
                     Weekend 2: {scheduledMatches.filter(m => m.weekend === 2).length} matches
                   </Badge>
@@ -2449,16 +2449,16 @@ export default function SeasonDetailsPage() {
                   }, {})
 
                   return Object.entries(matchesByDate).map(([date, dayMatches]: [string, any]) => (
-                    <Card key={date}>
+                    <Card key={date} className="bg-white/5 backdrop-blur-sm border border-white/20">
                       <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
+                        <CardTitle className="flex items-center justify-between text-white">
                           <span>{new Date(date).toLocaleDateString('en-US', { 
                             weekday: 'long', 
                             year: 'numeric', 
                             month: 'long', 
                             day: 'numeric' 
                           })}</span>
-                          <Badge variant="secondary">{dayMatches.length} matches</Badge>
+                          <Badge variant="secondary" className="bg-white/10 backdrop-blur-sm text-white border-white/20">{dayMatches.length} matches</Badge>
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -2468,22 +2468,22 @@ export default function SeasonDetailsPage() {
                             const team2 = getTeamById(match.team2_id)
                             
                             return (
-                              <div key={match.id} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                              <div key={match.id} className="flex items-center justify-between p-3 border border-white/20 rounded-lg bg-white/5 backdrop-blur-sm">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3">
-                                    <span className="font-medium">
+                                    <span className="font-medium text-white">
                                       {team1?.name || team1?.team_name || `Team ${match.team1_id}`}
                                     </span>
-                                    <span className="text-gray-400">vs</span>
-                                    <span className="font-medium">
+                                    <span className="text-white/60">vs</span>
+                                    <span className="font-medium text-white">
                                       {team2?.name || team2?.team_name || `Team ${match.team2_id}`}
                                     </span>
                                   </div>
-                                  <div className="text-sm text-gray-500 mt-1">
+                                  <div className="text-sm text-white/70 mt-1">
                                                                          Group: {seasonGroups.find((g: any) => g.id === match.group_id)?.name || 'N/A'} | 
                                     Weekend {match.weekend} - {match.day}
                                     {match.type === 'performance' && (
-                                      <Badge variant="secondary" className="ml-2">Performance</Badge>
+                                      <Badge variant="secondary" className="ml-2 bg-white/10 backdrop-blur-sm text-white border-white/20">Performance</Badge>
                                     )}
                                   </div>
                                 </div>
@@ -2498,9 +2498,9 @@ export default function SeasonDetailsPage() {
                                       setScheduledMatches(updatedMatches)
                                     }}
                                     placeholder="Venue"
-                                    className="text-xs h-8"
+                                    className="text-xs h-8 bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
                                   />
-                                  <span className="text-xs text-gray-500">|</span>
+                                  <span className="text-xs text-white/60">|</span>
                                   <Input
                                     type="time"
                                     value={match.time}
@@ -2510,7 +2510,7 @@ export default function SeasonDetailsPage() {
                                       )
                                       setScheduledMatches(updatedMatches)
                                     }}
-                                    className="text-xs h-8 w-32"
+                                    className="text-xs h-8 w-32 bg-white/10 backdrop-blur-sm text-white border-white/20"
                                   />
                                 </div>
                               </div>
@@ -2523,39 +2523,39 @@ export default function SeasonDetailsPage() {
                 })()}
 
                 {/* Summary */}
-                <Card>
+                <Card className="bg-white/5 backdrop-blur-sm border border-white/20">
                   <CardHeader>
-                    <CardTitle>Match Summary</CardTitle>
+                    <CardTitle className="text-white">Match Summary</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{scheduledMatches.length}</div>
-                        <div className="text-sm text-gray-500">Total Matches</div>
+                        <div className="text-2xl font-bold text-blue-300">{scheduledMatches.length}</div>
+                        <div className="text-sm text-white/70">Total Matches</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">
+                        <div className="text-2xl font-bold text-green-300">
                           {scheduledMatches.filter(m => m.weekend === 1).length}
                         </div>
-                        <div className="text-sm text-gray-500">Weekend 1</div>
+                        <div className="text-sm text-white/70">Weekend 1</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">
+                        <div className="text-2xl font-bold text-purple-300">
                           {scheduledMatches.filter(m => m.weekend === 2).length}
                         </div>
-                        <div className="text-sm text-gray-500">Weekend 2</div>
+                        <div className="text-sm text-white/70">Weekend 2</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-600">
+                        <div className="text-2xl font-bold text-orange-300">
                           {scheduledMatches.filter(m => m.type === 'performance').length}
                         </div>
-                        <div className="text-sm text-gray-500">Performance</div>
+                        <div className="text-sm text-white/70">Performance</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-indigo-600">
+                        <div className="text-2xl font-bold text-indigo-300">
                           {new Set(scheduledMatches.map(m => m.date)).size}
                         </div>
-                        <div className="text-sm text-gray-500">Weekend Days</div>
+                        <div className="text-sm text-white/70">Weekend Days</div>
                       </div>
                     </div>
                   </CardContent>
@@ -2565,8 +2565,8 @@ export default function SeasonDetailsPage() {
 
             {/* No matches scheduled - only show when no regular matches exist */}
             {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && !isScheduling && (
-              <div className="text-center text-gray-500 py-8">
-                <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center text-white/70 py-8">
+                <Calendar className="h-12 w-12 mx-auto mb-4 text-white/50" />
                 <p>No matches scheduled yet</p>
                 <p className="text-sm">Click "Generate Matches" to create the season schedule</p>
               </div>
@@ -2574,13 +2574,13 @@ export default function SeasonDetailsPage() {
           </div>
           
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setIsScheduleMatchesModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsScheduleMatchesModalOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
               Close
             </Button>
             {scheduledMatches.length > 0 && (
               <Button 
                 onClick={updateAllVenues}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white border-blue-400/30"
               >
                 🏟️ Update All Venues
               </Button>
@@ -2589,7 +2589,7 @@ export default function SeasonDetailsPage() {
               <Button 
                 onClick={saveMatchesToDatabase}
                 disabled={addMatchLoading}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white border-blue-400/30"
               >
                 {addMatchLoading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
