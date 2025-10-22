@@ -12,6 +12,7 @@ export function Navigation() {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/statistics", label: "League Center" },
+    { href: "/tickets", label: "Tickets" },
     { href: "/store", label: "Store" },
     { href: "/rules", label: "Rules" },
     { href: "/sponsors", label: "Partners" },

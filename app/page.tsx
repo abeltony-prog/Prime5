@@ -1,9 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin } from "lucide-react"
+import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { CountdownTimer } from "@/components/countdown-timer"
@@ -122,8 +122,149 @@ export default function HomePage() {
             </p>
           </div>
           <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 border border-white/30 shadow-xl">
-            <CountdownTimer targetDate={new Date("2025-10-01T00:00:00")} />
+            <CountdownTimer targetDate={new Date("2025-11-01T00:00:00")} />
           </div>
+        </div>
+      </section>
+
+      {/* Tickets Section */}
+      <section className="py-16 relative">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <Badge className="bg-green-100/90 backdrop-blur-sm text-green-800 px-4 py-2 rounded-full font-semibold mb-4 border border-green-200/50">Get Your Tickets</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Secure Your Spot</h2>
+            <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-md">
+              Don't miss out on the most exciting futsal action. Get your tickets now and be part of the Prime5 experience.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {/* Single Match Ticket */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto mb-4 p-3 bg-green-600/20 rounded-full w-fit">
+                  <Ticket className="h-8 w-8 text-green-400" />
+                </div>
+                <CardTitle className="text-2xl text-white">Single Match</CardTitle>
+                <div className="text-4xl font-bold text-green-400 mt-2">RWF 2,000</div>
+                <p className="text-white/70 text-sm">per person</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    <span>Access to one match</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Shield className="h-4 w-4 text-blue-400" />
+                    <span>Secure seating</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Users className="h-4 w-4 text-purple-400" />
+                    <span>Prime Arena access</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  Buy Now
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Season Pass */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border-2 border-yellow-400/50 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-yellow-500 text-black px-4 py-1 font-bold">Most Popular</Badge>
+              </div>
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto mb-4 p-3 bg-yellow-600/20 rounded-full w-fit">
+                  <Trophy className="h-8 w-8 text-yellow-400" />
+                </div>
+                <CardTitle className="text-2xl text-white">Season Pass</CardTitle>
+                <div className="text-4xl font-bold text-yellow-400 mt-2">RWF 15,000</div>
+                <p className="text-white/70 text-sm">for entire season</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    <span>Access to all matches</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Shield className="h-4 w-4 text-blue-400" />
+                    <span>VIP seating priority</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Users className="h-4 w-4 text-purple-400" />
+                    <span>Exclusive merchandise</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Calendar className="h-4 w-4 text-green-400" />
+                    <span>Playoff access included</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-yellow-600/90 backdrop-blur-md hover:bg-yellow-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-black font-bold">
+                  Buy Season Pass
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Group Package */}
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto mb-4 p-3 bg-blue-600/20 rounded-full w-fit">
+                  <Users className="h-8 w-8 text-blue-400" />
+                </div>
+                <CardTitle className="text-2xl text-white">Group Package</CardTitle>
+                <div className="text-4xl font-bold text-blue-400 mt-2">RWF 8,000</div>
+                <p className="text-white/70 text-sm">per person (min 5 people)</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    <span>Access to all matches</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Shield className="h-4 w-4 text-blue-400" />
+                    <span>Group seating together</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Users className="h-4 w-4 text-purple-400" />
+                    <span>Special group discounts</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-white/90">
+                    <Calendar className="h-4 w-4 text-green-400" />
+                    <span>Flexible scheduling</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-blue-600/90 backdrop-blur-md hover:bg-blue-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  Buy Group Package
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Payment Methods */}
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-2xl font-bold text-white mb-6 drop-shadow-lg">Secure Payment Methods</h3>
+              <div className="flex justify-center items-center gap-8 flex-wrap">
+                <div className="flex items-center gap-2 text-white/90">
+                  <CreditCard className="h-6 w-6 text-green-400" />
+                  <span>Mobile Money</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/90">
+                  <CreditCard className="h-6 w-6 text-blue-400" />
+                  <span>Bank Transfer</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/90">
+                  <CreditCard className="h-6 w-6 text-purple-400" />
+                  <span>Cash on Arrival</span>
+                </div>
+              </div>
+              <p className="text-white/70 text-sm mt-4">All payments are secure and encrypted</p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
