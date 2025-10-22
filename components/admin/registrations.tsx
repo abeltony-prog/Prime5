@@ -68,7 +68,7 @@ interface RegistrationsProps {
 
 export function Registrations({ managers = [] }: RegistrationsProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("pending")
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedManager, setSelectedManager] = useState<Manager | null>(null)
@@ -90,20 +90,25 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
     setLocalManagers(managers)
   }, [managers])
 
-  // Handle case when managers is undefined or null
-  if (!localManagers || localManagers.length === 0) {
+  // Derive managers with only pending (unapproved) teams; drop managers with none pending
+  const managersWithPendingTeams = (localManagers || [])
+    .map((m) => ({ ...m, Teams: m.Teams.filter((t) => !t.approved) }))
+    .filter((m) => m.Teams.length > 0)
+
+  // Empty state when no pending teams exist
+  if (!managersWithPendingTeams || managersWithPendingTeams.length === 0) {
     return (
       <div className="space-y-6">
         <div className="text-center py-12">
-          <Users className="h-16 w-16 text-white/50 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">No Managers Found</h3>
-          <p className="text-white/70">There are no registered managers to display.</p>
+          <CheckCircle className="h-16 w-16 text-green-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">No Pending Team Applications</h3>
+          <p className="text-white/70">All submitted teams have been approved.</p>
         </div>
       </div>
     )
   }
 
-  const filteredManagers = localManagers.filter((manager) => {
+  const filteredManagers = managersWithPendingTeams.filter((manager) => {
     const matchesSearch = manager.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          manager.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          manager.Teams.some(team => team.name.toLowerCase().includes(searchTerm.toLowerCase()))
