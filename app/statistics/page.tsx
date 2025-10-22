@@ -335,17 +335,37 @@ export default function StatisticsPage() {
     return { upcomingMatches, pastResults }
   }
 
-  // Find active season
+  // Find active season (including scheduled seasons)
   const findActiveSeason = () => {
     const seasons = seasonsData?.seasons || []
     const now = new Date()
     
-    // Find season where current date is between startDate and EndDate
+    // Find season where current date is between startDate and EndDate, or season is scheduled (has teams)
     const activeSeason = seasons.find((season: any) => {
       const startDate = new Date(season.startDate)
       const endDate = new Date(season.EndDate)
-      return now >= startDate && now <= endDate
+      
+      // Check if season is currently running
+      const isCurrentlyRunning = now >= startDate && now <= endDate
+      
+      // Check if season is scheduled (has teams and hasn't ended yet)
+      const hasTeams = season.teams && Object.keys(season.teams).length > 0
+      const isScheduled = hasTeams && now <= endDate
+      
+      // Check if season is future scheduled (has teams and starts in the future)
+      const isFutureScheduled = hasTeams && now < startDate
+      
+      return isCurrentlyRunning || isScheduled || isFutureScheduled
     })
+    
+    // If no season found with the primary logic, try fallback
+    if (!activeSeason) {
+      const fallbackSeason = seasons.find((season: any) => {
+        const hasTeams = season.teams && Object.keys(season.teams).length > 0
+        return hasTeams
+      })
+      return fallbackSeason
+    }
     
     return activeSeason
   }
@@ -362,8 +382,8 @@ export default function StatisticsPage() {
     const allTeamStats = teamStatsData?.team_statistics || []
     
     // Filter teams that are part of the active season
-    const seasonTeamIds = activeSeason.teams || []
-    const teams = allTeams.filter((team: any) => seasonTeamIds.includes(team.id))
+    const seasonTeamIds = activeSeason.teams ? Object.keys(activeSeason.teams) : []
+    const teams = allTeams.filter((team: any) => seasonTeamIds.includes(team.id.toString()))
     
     // Filter team statistics for the active season
     const teamStats = allTeamStats.filter((stat: any) => stat.season_id === activeSeason.id)
@@ -500,11 +520,16 @@ export default function StatisticsPage() {
     const allMatches = matchesData?.matches || []
     
     // Filter teams and stats for active season
-    const seasonTeamIds = activeSeason.teams || []
-    const seasonTeams = allTeams.filter((team: any) => seasonTeamIds.includes(team.id))
+    const seasonTeamIds = activeSeason.teams ? Object.keys(activeSeason.teams) : []
+    const seasonTeams = allTeams.filter((team: any) => seasonTeamIds.includes(team.id.toString()))
     const seasonTeamStats = allTeamStats.filter((stat: any) => stat.season_id === activeSeason.id)
     
-    // Sort teams by points for group standings
+    // Get group data from season groups or create from team stats
+    let groupATeams = []
+    let groupBTeams = []
+    
+    // For now, we'll create groups by splitting teams in half
+    // This can be enhanced later to use actual group data from the database
     const sortedTeams = seasonTeams.map((team: any) => {
       const teamStat = seasonTeamStats.find((stat: any) => stat.team_id === team.id)
       return {
@@ -519,95 +544,114 @@ export default function StatisticsPage() {
       return b.goalsFor - a.goalsFor
     })
 
-    // Split into groups (top 4 teams from each group advance)
-    const groupATeams = sortedTeams.slice(0, 4)
-    const groupBTeams = sortedTeams.slice(4, 8)
+    // Split teams into two groups
+    const midPoint = Math.ceil(sortedTeams.length / 2)
+    groupATeams = sortedTeams.slice(0, midPoint)
+    groupBTeams = sortedTeams.slice(midPoint)
 
-    // Filter playoff matches
-    const playoffMatches = allMatches.filter((match: any) => {
-      return match.location && (
-        match.location.toLowerCase().includes('semifinal') ||
-        match.location.toLowerCase().includes('final') ||
-        match.location.toLowerCase().includes('playoff') ||
-        match.location.toLowerCase().includes('quarterfinal')
-      )
+    // Filter matches for the active season
+    const seasonMatches = allMatches.filter((match: any) => {
+      return match.season_id === activeSeason.id
     })
 
-    // If no playoff matches found, use dummy data for design preview
-    if (playoffMatches.length === 0) {
+    // Filter knockout matches based on type
+    const knockoutMatches = seasonMatches.filter((match: any) => {
+      return match.type === 'quarterfinal' || 
+             match.type === 'semifinal' || 
+             match.type === 'final' ||
+             match.type === 'knockout-qualifier'
+    })
+
+    // If no knockout matches found, return empty structure but still show groups
+    if (knockoutMatches.length === 0) {
       return {
         knockoutMatches: { 
-    quarterfinals: [
-            { team1: "Thunder FC", team2: "Electric FC", winner: "Thunder FC", team1Score: 3, team2Score: 1, date: "Dec 15" },
-            { team1: "Lightning United", team2: "Phoenix United", winner: "Lightning United", team1Score: 2, team2Score: 0, date: "Dec 15" },
-            { team1: "Rapid Fire", team2: "Dynamo FC", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 16" },
-            { team1: "Velocity FC", team2: "Storm Riders", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 16" }
-    ],
-    semifinals: [
-            { team1: "Thunder FC", team2: "Lightning United", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 22" },
-            { team1: "TBD", team2: "TBD", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 22" }
-          ], 
-          final: { team1: "TBD", team2: "TBD", winner: "TBD", team1Score: 0, team2Score: 0, date: "Dec 29" }
+          quarterfinals: [],
+          semifinals: [],
+          final: null
         },
-        groupATeams,
-        groupBTeams
+        groupATeams: groupATeams.map(team => ({
+          name: team.name,
+          points: team.points || 0,
+          goalDifference: team.goalDifference || 0,
+          goalsFor: team.goalsFor || 0
+        })),
+        groupBTeams: groupBTeams.map(team => ({
+          name: team.name,
+          points: team.points || 0,
+          goalDifference: team.goalDifference || 0,
+          goalsFor: team.goalsFor || 0
+        }))
       }
     }
 
     // Create knockout matches from real data
-    const quarterfinals = playoffMatches
-      .filter((match: any) => match.location.toLowerCase().includes('quarterfinal'))
+    const quarterfinals = knockoutMatches
+      .filter((match: any) => match.type === 'quarterfinal' || match.type === 'knockout-qualifier')
       .map((match: any) => {
-        const team1 = allTeams.find((t: any) => t.id === match.team1) || { name: match.team1 }
-        const team2 = allTeams.find((t: any) => t.id === match.team2) || { name: match.team2 }
-        const winner = match.team1Goals > match.team2Goals ? team1.name : 
-                      match.team2Goals > match.team1Goals ? team2.name : "TBD"
+        const team1 = allTeams.find((t: any) => t.id === match.team1_id) || { name: `Team ${match.team1_id}` }
+        const team2 = allTeams.find((t: any) => t.id === match.team2_id) || { name: `Team ${match.team2_id}` }
+        const winner = match.team1_goals > match.team2_goals ? team1.name : 
+                      match.team2_goals > match.team1_goals ? team2.name : "TBD"
         
         return {
           team1: team1.name,
           team2: team2.name,
           winner,
-          team1Score: match.team1Goals || 0,
-          team2Score: match.team2Goals || 0,
-          date: new Date(match.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          team1Score: match.team1_goals || 0,
+          team2Score: match.team2_goals || 0,
+          date: new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          venue: match.venue || 'Prime Arena'
         }
       })
 
-    const semifinals = playoffMatches
-      .filter((match: any) => match.location.toLowerCase().includes('semifinal'))
+    const semifinals = knockoutMatches
+      .filter((match: any) => match.type === 'semifinal')
       .map((match: any) => {
-        const team1 = allTeams.find((t: any) => t.id === match.team1) || { name: match.team1 }
-        const team2 = allTeams.find((t: any) => t.id === match.team2) || { name: match.team2 }
-        const winner = match.team1Goals > match.team2Goals ? team1.name : 
-                      match.team2Goals > match.team1Goals ? team2.name : "TBD"
+        const team1 = allTeams.find((t: any) => t.id === match.team1_id) || { name: `Team ${match.team1_id}` }
+        const team2 = allTeams.find((t: any) => t.id === match.team2_id) || { name: `Team ${match.team2_id}` }
+        const winner = match.team1_goals > match.team2_goals ? team1.name : 
+                      match.team2_goals > match.team1_goals ? team2.name : "TBD"
         
         return {
           team1: team1.name,
           team2: team2.name,
-    winner,
-          team1Score: match.team1Goals || 0,
-          team2Score: match.team2Goals || 0,
-          date: new Date(match.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          winner,
+          team1Score: match.team1_goals || 0,
+          team2Score: match.team2_goals || 0,
+          date: new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          venue: match.venue || 'Prime Arena'
         }
       })
 
-    const finalMatch = playoffMatches.find((match: any) => match.location.toLowerCase().includes('final'))
+    const finalMatch = knockoutMatches.find((match: any) => match.type === 'final')
     const final = finalMatch ? {
-      team1: allTeams.find((t: any) => t.id === finalMatch.team1)?.name || finalMatch.team1,
-      team2: allTeams.find((t: any) => t.id === finalMatch.team2)?.name || finalMatch.team2,
-      winner: finalMatch.team1Goals > finalMatch.team2Goals ? 
-              (allTeams.find((t: any) => t.id === finalMatch.team1)?.name || finalMatch.team1) :
-              finalMatch.team2Goals > finalMatch.team1Goals ? 
-              (allTeams.find((t: any) => t.id === finalMatch.team2)?.name || finalMatch.team2) : "TBD",
-      team1Score: finalMatch.team1Goals || 0,
-      team2Score: finalMatch.team2Goals || 0,
-      date: new Date(finalMatch.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      team1: allTeams.find((t: any) => t.id === finalMatch.team1_id)?.name || `Team ${finalMatch.team1_id}`,
+      team2: allTeams.find((t: any) => t.id === finalMatch.team2_id)?.name || `Team ${finalMatch.team2_id}`,
+      winner: finalMatch.team1_goals > finalMatch.team2_goals ? 
+              (allTeams.find((t: any) => t.id === finalMatch.team1_id)?.name || `Team ${finalMatch.team1_id}`) :
+              finalMatch.team2_goals > finalMatch.team1_goals ? 
+              (allTeams.find((t: any) => t.id === finalMatch.team2_id)?.name || `Team ${finalMatch.team2_id}`) : "TBD",
+      team1Score: finalMatch.team1_goals || 0,
+      team2Score: finalMatch.team2_goals || 0,
+      date: new Date(finalMatch.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      venue: finalMatch.venue || 'Prime Arena'
     } : null
 
     return {
       knockoutMatches: { quarterfinals, semifinals, final },
-      groupATeams,
-      groupBTeams
+      groupATeams: groupATeams.map(team => ({
+        name: team.name,
+        points: team.points || 0,
+        goalDifference: team.goalDifference || 0,
+        goalsFor: team.goalsFor || 0
+      })),
+      groupBTeams: groupBTeams.map(team => ({
+        name: team.name,
+        points: team.points || 0,
+        goalDifference: team.goalDifference || 0,
+        goalsFor: team.goalsFor || 0
+      }))
     }
   }
 
@@ -773,7 +817,7 @@ export default function StatisticsPage() {
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">League Leaderboard</h2>
               <p className="text-lg text-white/90 drop-shadow-xl">
-                {activeSeason ? `Complete team rankings and statistics - ${activeSeason.name}` : "No active season"}
+                {activeSeason ? `Complete team rankings and statistics - ${activeSeason.name}` : "No active or scheduled season"}
               </p>
             </div>
 
@@ -785,11 +829,12 @@ export default function StatisticsPage() {
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">No Active Season</h3>
                   <p className="text-white/80 text-lg mb-6">
-                    There is currently no active season. The leaderboard will be available once a season is active.
+                    There is currently no active or scheduled season. The leaderboard will be available once a season is created and teams are added.
                   </p>
                   <div className="text-white/60">
-                    <p>• Check back when the season starts</p>
-                    <p>• Teams will appear here once they're registered for the active season</p>
+                    <p>• Create a season in the admin panel</p>
+                    <p>• Add teams to the season</p>
+                    <p>• The leaderboard will appear here automatically</p>
                   </div>
                 </CardContent>
               </Card>

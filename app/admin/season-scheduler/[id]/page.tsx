@@ -789,7 +789,7 @@ export default function SeasonDetailsPage() {
         }
       }
       
-      // Weekend 4 - Saturday: Knockout Qualifier (4 matches - 2 from each group)
+      // Weekend 4 - Saturday: Quarterfinals (All 8 teams play - 4 matches)
       const weekend4SaturdayIndex = 6
       
       if (weekend4SaturdayIndex < weekendDates.length) {
@@ -798,51 +798,42 @@ export default function SeasonDetailsPage() {
         // Initialize day tracking
         if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
         
-        // Schedule remaining group matches (max 4 - 2 from each group)
+        // Create quarterfinal matchups - all 8 teams play (4 matches)
+        // We'll create cross-group matchups for quarterfinals
+        const allTeams = [...groupATeams, ...groupBTeams]
+        
+        // Shuffle all teams for random quarterfinal pairings
+        const shuffledAllTeams = [...allTeams].sort(() => Math.random() - 0.5)
+        
+        // Create 4 quarterfinal matches
         for (let game = 0; game < 4; game++) {
-          let validMatchup = null
-
-          if (game < 2 && groupAIndex < shuffledGroupA.length) {
-            const potentialMatchup = shuffledGroupA[groupAIndex]
-            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+          const team1Index = game * 2
+          const team2Index = game * 2 + 1
+          
+          if (team1Index < shuffledAllTeams.length && team2Index < shuffledAllTeams.length) {
+            const team1 = shuffledAllTeams[team1Index]
+            const team2 = shuffledAllTeams[team2Index]
             
-            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                !saturdayTeams.has(potentialMatchup.team2_id)) {
-              validMatchup = potentialMatchup
-              groupAIndex++
-            }
-          } else if (game >= 2 && groupBIndex < shuffledGroupB.length) {
-            const potentialMatchup = shuffledGroupB[groupBIndex]
-            const saturdayTeams = teamsPlayedPerDay.get(saturday)
-            
-            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                !saturdayTeams.has(potentialMatchup.team2_id)) {
-              validMatchup = potentialMatchup
-              groupBIndex++
-            }
-          }
-
-          if (validMatchup) {
             matches.push({
-              id: `match-${Date.now()}-w4-sat-${game}`,
-              team1_id: validMatchup.team1_id,
-              team2_id: validMatchup.team2_id,
+              id: `match-${Date.now()}-w4-sat-qf-${game + 1}`,
+              team1_id: team1.team_id,
+              team2_id: team2.team_id,
               date: saturday,
               time: '',
-              group_id: validMatchup.groupId,
+              group_id: null, // Cross-group match
               venue: defaultVenue,
               status: 'scheduled',
               weekend: 4,
               day: 'Saturday',
-              groupName: validMatchup.groupName,
-              type: 'knockout-qualifier'
+              groupName: 'Quarterfinals',
+              type: 'quarterfinal'
             })
             
             // Mark teams as played
-            teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
-            teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
-            teamsPlayedPerWeekend.get(4).add(validMatchup.team1_id)
-            teamsPlayedPerWeekend.get(4).add(validMatchup.team2_id)
+            teamsPlayedPerDay.get(saturday).add(team1.team_id)
+            teamsPlayedPerDay.get(saturday).add(team2.team_id)
+            teamsPlayedPerWeekend.get(4).add(team1.team_id)
+            teamsPlayedPerWeekend.get(4).add(team2.team_id)
           }
         }
       }
@@ -853,8 +844,8 @@ export default function SeasonDetailsPage() {
       setScheduledMatches(matches)
       
       toast({
-        title: "Group Stage Matches Scheduled!",
-        description: `${matches.length} group stage matches have been scheduled across weekends 1-3 and Saturday of weekend 4. Each group plays round-robin within their group. Sunday of weekend 4 is reserved for playoffs and will be scheduled separately.`,
+        title: "Matches Scheduled!",
+        description: `${matches.length} matches have been scheduled: Group stage matches across weekends 1-3, and quarterfinals (all 8 teams) on Saturday of weekend 4. Sunday of weekend 4 is reserved for semi-finals and finals.`,
       })
       
     } catch (error) {
@@ -2378,7 +2369,7 @@ export default function SeasonDetailsPage() {
                   <div>
                     <h3 className="font-semibold text-white">Randomized Group Weekend Scheduling</h3>
                     <p className="text-sm text-white/80">
-                      Weekend 1 & 2: Groups are randomly assigned to Saturday vs Sunday for fairness. Each group gets equal opportunities.
+                      Weekend 1-3: Group stage matches. Weekend 4 Saturday: Quarterfinals (all 8 teams play). Weekend 4 Sunday: Semi-finals and finals.
                     </p>
                   </div>
                   <Button 

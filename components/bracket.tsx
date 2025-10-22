@@ -46,6 +46,15 @@ function TeamCard({ team, isWinner = false }: { team: Team; isWinner?: boolean }
 
 // MatchCard Component
 function MatchCard({ match }: { match: Match }) {
+  // Safety check for undefined match
+  if (!match) {
+    return (
+      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 text-center">
+        <p className="text-white/70">Match TBD</p>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white/95 backdrop-blur-sm border border-emerald-200 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-200">
       <div className="space-y-3">
@@ -156,8 +165,8 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
     position: index + 1
   }))
 
-  // If no active season or no data, show empty state
-  if (!activeSeason || (quarterFinals.length === 0 && semiFinals.length === 0 && !final)) {
+  // If no active season, show empty state
+  if (!activeSeason) {
     return (
       <div className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-xl p-12 text-center">
         <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -215,7 +224,13 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
           <div className="space-y-24">
             <h3 className="text-center font-bold text-white text-lg mb-6 drop-shadow">Semi Finals</h3>
             <div className="relative">
-              <MatchCard match={semiFinals[0]} />
+              {semiFinals[0] ? (
+                <MatchCard match={semiFinals[0]} />
+              ) : (
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 text-center">
+                  <p className="text-white/70">Semi Final 1 - TBD</p>
+                </div>
+              )}
               {/* Connection line to final */}
               <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-white/30 transform -translate-y-1/2"></div>
             </div>
@@ -242,7 +257,13 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
           <div className="space-y-24">
             <h3 className="text-center font-bold text-white text-lg mb-6 drop-shadow">Semi Finals</h3>
             <div className="relative">
-              <MatchCard match={semiFinals[1]} />
+              {semiFinals[1] ? (
+                <MatchCard match={semiFinals[1]} />
+              ) : (
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 text-center">
+                  <p className="text-white/70">Semi Final 2 - TBD</p>
+                </div>
+              )}
               {/* Connection line to final */}
               <div className="hidden lg:block absolute top-1/2 -left-3 w-6 h-0.5 bg-white/30 transform -translate-y-1/2"></div>
             </div>
@@ -284,6 +305,19 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
           </div>
         </div>
       </div>
+      
+      {/* Show message if no knockout matches are scheduled yet */}
+      {quarterFinals.length === 0 && semiFinals.length === 0 && !final && (
+        <div className="mt-8 text-center">
+          <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-blue-200 mb-2">Knockout Matches Not Yet Scheduled</h4>
+            <p className="text-blue-200/80">
+              The knockout stage matches will be scheduled after the group stage is completed. 
+              Check back once the season begins and group matches are played.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
