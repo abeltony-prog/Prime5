@@ -118,9 +118,10 @@ export default function SeasonDetailsPage() {
     
     const seasonTeamIds = Object.keys(season.teams)
     return allTeams.filter((team: any) => {
-      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return teamIdentifier && 
-             !seasonTeamIds.includes(teamIdentifier?.toString()) && 
+      // Only use the actual id field from GraphQL response
+      const teamId = team.id
+      return teamId && 
+             !seasonTeamIds.includes(teamId.toString()) && 
              team.approved === true
     })
   }, [allTeams, season?.teams])
@@ -298,16 +299,18 @@ export default function SeasonDetailsPage() {
 
   const getTeamById = (teamId: string | number) => {
     return seasonTeams.find((team: any) => {
-      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return teamIdentifier && teamIdentifier.toString() === teamId.toString()
+      // Only use the actual id field from GraphQL response
+      const teamIdFromTeam = team.id
+      return teamIdFromTeam && teamIdFromTeam.toString() === teamId.toString()
     })
   }
 
   const getUnassignedTeams = () => {
     const assignedTeamIds = groups.flatMap(g => g.teams)
     return seasonTeams.filter((team: any) => {
-      const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-      return !assignedTeamIds.includes(teamIdentifier)
+      // Only use the actual id field from GraphQL response
+      const teamId = team.id
+      return teamId && !assignedTeamIds.includes(teamId)
     })
   }
 
@@ -343,9 +346,9 @@ export default function SeasonDetailsPage() {
       const startIndex = groupIndex * teamsPerGroup
       const endIndex = Math.min(startIndex + teamsPerGroup, shuffledTeams.length)
       const groupTeams = shuffledTeams.slice(startIndex, endIndex).map((team: any) => {
-        const teamIdentifier = team.id || team.team_id || team._id || Object.keys(team)[0]
-        return teamIdentifier
-      })
+        // Only use the actual id field from GraphQL response
+        return team.id
+      }).filter(Boolean) // Remove any undefined/null values
       
       return {
         ...group,
@@ -1469,7 +1472,9 @@ export default function SeasonDetailsPage() {
                   </TableHeader>
                   <TableBody>
                     {seasonTeams.map((team: any) => {
-                      const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
+                      // Only use the actual id field from GraphQL response
+                      const teamId = team.id
+                      if (!teamId) return null
                       const invitationToken = season?.teams?.[teamId] || 'N/A'
                       
                       return (
@@ -1565,7 +1570,7 @@ export default function SeasonDetailsPage() {
                 <Target className="h-12 w-12 mx-auto mb-4 text-white/30" />
                 <p>No matches have been scheduled for this season yet.</p>
                 <Button 
-                  className="mt-4" 
+                  className="mt-4 bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white" 
                   variant="outline"
                   onClick={() => setIsScheduleMatchesModalOpen(true)}
                 >
@@ -1874,7 +1879,10 @@ export default function SeasonDetailsPage() {
               ) : (
                 <div className="space-y-3 max-h-60 overflow-y-auto border border-white/20 rounded-md p-3 bg-white/5">
                   {availableTeamsToInvite.map((team: any) => {
-                    const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
+                    // Only use the actual id field from GraphQL response
+                    const teamId = team.id
+                    
+                    if (!teamId) return null
                     
                     return (
                       <div key={teamId} className="flex items-center space-x-3">
@@ -1975,7 +1983,7 @@ export default function SeasonDetailsPage() {
                 <div>
                   <Label htmlFor="numberOfGroups">Number of Groups</Label>
                   <Select value={numberOfGroups.toString()} onValueChange={(value) => setNumberOfGroups(parseInt(value))}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-32 bg-white/10 backdrop-blur-sm text-white border-white/20">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2114,7 +2122,10 @@ export default function SeasonDetailsPage() {
                 <h3 className="font-semibold text-white">Available Teams ({getUnassignedTeams().length})</h3>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {getUnassignedTeams().map((team: any) => {
-                    const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
+                    // Only use the actual id field from GraphQL response
+                    const teamId = team.id
+                    
+                    if (!teamId) return null
                     
                     return (
                       <div
@@ -2592,7 +2603,127 @@ export default function SeasonDetailsPage() {
         </DialogContent>
       </Dialog>
 
-      
+      {/* Edit Season Modal */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit Season
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="editSeasonName" className="text-white">Season Name *</Label>
+              <Input
+                id="editSeasonName"
+                placeholder="e.g., Prime5 League 2024"
+                value={season?.name || ''}
+                onChange={(e) => {
+                  // Update season name in local state if needed
+                }}
+                className="bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="editStartDate" className="text-white">Start Date *</Label>
+                <Input
+                  id="editStartDate"
+                  type="date"
+                  value={season?.startDate || ''}
+                  onChange={(e) => {
+                    // Update start date in local state if needed
+                  }}
+                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                />
+              </div>
+              <div>
+                <Label htmlFor="editEndDate" className="text-white">End Date *</Label>
+                <Input
+                  id="editEndDate"
+                  type="date"
+                  value={season?.EndDate || ''}
+                  onChange={(e) => {
+                    // Update end date in local state if needed
+                  }}
+                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label className="text-white">Add Teams</Label>
+              <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border border-white/20 rounded-md p-3 bg-white/5">
+                {allTeams?.filter((team: any) => team.approved === true).map((team: any) => {
+                  const teamId = team.id
+                  if (!teamId) return null
+                  
+                  const isAlreadyInSeason = season?.teams?.[teamId]
+                  
+                  return (
+                    <div key={teamId} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`edit-season-team-${teamId}`}
+                        checked={!!isAlreadyInSeason}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            // Add team to season
+                            const token = `e${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+                            const newTeamsObject = { ...season?.teams, [teamId]: token }
+                            
+                            updateSeason({
+                              variables: {
+                                id: seasonId,
+                                name: season?.name,
+                                startDate: season?.startDate,
+                                EndDate: season?.EndDate,
+                                teams: newTeamsObject
+                              }
+                            }).then(() => {
+                              refetch()
+                            })
+                          } else {
+                            // Remove team from season
+                            const newTeamsObject = { ...season?.teams }
+                            delete newTeamsObject[teamId]
+                            
+                            updateSeason({
+                              variables: {
+                                id: seasonId,
+                                name: season?.name,
+                                startDate: season?.startDate,
+                                EndDate: season?.EndDate,
+                                teams: newTeamsObject
+                              }
+                            }).then(() => {
+                              refetch()
+                            })
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`edit-season-team-${teamId}`} className="text-sm text-white">
+                        {team.name} ({team.shortname})
+                      </Label>
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-white/70 mt-1">
+                {Object.keys(season?.teams || {}).length} team(s) in season
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Season Matches Section */}
 

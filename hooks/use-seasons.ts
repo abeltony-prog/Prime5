@@ -32,11 +32,12 @@ export function useCreateSeason() {
     update: (cache, { data }) => {
       // Update the cache after creating a season
       const existingSeasons = cache.readQuery({ query: GET_SEASONS })
-      if (existingSeasons && data?.insert_seasons_one) {
+      if (existingSeasons && data?.insert_seasons?.returning?.[0]) {
+        const newSeason = data.insert_seasons.returning[0]
         cache.writeQuery({
           query: GET_SEASONS,
           data: {
-            seasons: [data.insert_seasons_one, ...(existingSeasons as any).seasons]
+            seasons: [newSeason, ...(existingSeasons as any).seasons]
           }
         })
       }
