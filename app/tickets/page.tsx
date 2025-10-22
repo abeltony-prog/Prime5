@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield, CheckCircle, X, Gift, User, Phone, Mail, MessageCircle } from "lucide-react"
+import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield, CheckCircle, X, Gift, User, Phone, Mail, MessageCircle, QrCode } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Navigation } from "@/components/navigation"
@@ -317,9 +317,17 @@ export default function TicketsPage() {
       <div className="relative z-10 container mx-auto px-4 py-16">
         {/* Header */}
         <div className="text-center mb-16">
-          <Badge className="bg-green-100/90 backdrop-blur-sm text-green-800 px-4 py-2 rounded-full font-semibold mb-6 border border-green-200/50">
-            Get Your Tickets
-          </Badge>
+          <div className="flex justify-center gap-4 mb-6">
+            <Badge className="bg-green-100/90 backdrop-blur-sm text-green-800 px-4 py-2 rounded-full font-semibold border border-green-200/50">
+              Get Your Tickets
+            </Badge>
+            <Link href="/tickets/scan">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                <QrCode className="h-4 w-4 mr-2" />
+                Scan QR Code
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
             Prime5 League Tickets
           </h1>
