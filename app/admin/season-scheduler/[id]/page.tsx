@@ -1741,7 +1741,7 @@ export default function SeasonDetailsPage() {
 
       {/* Team Details Modal */}
       <Dialog open={isTeamModalOpen} onOpenChange={setIsTeamModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -1754,37 +1754,37 @@ export default function SeasonDetailsPage() {
               {/* Team Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Basic Information</h3>
+                  <h3 className="font-semibold text-white mb-3">Basic Information</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Team Name:</span>
-                      <span className="font-medium">{selectedTeam.name || selectedTeam.team_name || 'N/A'}</span>
+                      <span className="text-white/70">Team Name:</span>
+                      <span className="font-medium text-white">{selectedTeam.name || selectedTeam.team_name || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Short Name:</span>
-                      <span className="font-medium">{selectedTeam.shortname || selectedTeam.short_name || 'N/A'}</span>
+                      <span className="text-white/70">Short Name:</span>
+                      <span className="font-medium text-white">{selectedTeam.shortname || selectedTeam.short_name || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Team ID:</span>
-                      <span className="font-medium">{selectedTeam.id || selectedTeam.team_id || 'N/A'}</span>
+                      <span className="text-white/70">Team ID:</span>
+                      <span className="font-medium text-white">{selectedTeam.id || selectedTeam.team_id || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Manager Information</h3>
+                  <h3 className="font-semibold text-white mb-3">Manager Information</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Name:</span>
-                      <span className="font-medium">{selectedTeam.manager?.name || 'N/A'}</span>
+                      <span className="text-white/70">Name:</span>
+                      <span className="font-medium text-white">{selectedTeam.manager?.name || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Email:</span>
-                      <span className="font-medium">{selectedTeam.manager?.email || 'N/A'}</span>
+                      <span className="text-white/70">Email:</span>
+                      <span className="font-medium text-white">{selectedTeam.manager?.email || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Phone:</span>
-                      <span className="font-medium">{selectedTeam.manager?.phone || 'N/A'}</span>
+                      <span className="text-white/70">Phone:</span>
+                      <span className="font-medium text-white">{selectedTeam.manager?.phone || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -1792,37 +1792,37 @@ export default function SeasonDetailsPage() {
 
               {/* Players Section */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Players ({selectedTeam.players?.length || 0})</h3>
+                <h3 className="font-semibold text-white mb-3">Players ({selectedTeam.players?.length || 0})</h3>
                 {selectedTeam.players && selectedTeam.players.length > 0 ? (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead>Gender</TableHead>
-                          <TableHead>Date of Birth</TableHead>
+                          <TableHead className="text-white">Name</TableHead>
+                          <TableHead className="text-white">Email</TableHead>
+                          <TableHead className="text-white">Phone</TableHead>
+                          <TableHead className="text-white">Gender</TableHead>
+                          <TableHead className="text-white">Date of Birth</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {selectedTeam.players.map((player: any) => (
                           <TableRow key={player.id}>
-                            <TableCell className="font-medium">{player.name}</TableCell>
-                            <TableCell>{player.email}</TableCell>
-                            <TableCell>{player.phone}</TableCell>
+                            <TableCell className="font-medium text-white">{player.name}</TableCell>
+                            <TableCell className="text-white/80">{player.email}</TableCell>
+                            <TableCell className="text-white/80">{player.phone}</TableCell>
                             <TableCell>
-                              <Badge variant="outline">{player.gender}</Badge>
+                              <Badge variant="outline" className="text-white border-white/30">{player.gender}</Badge>
                             </TableCell>
-                            <TableCell>{player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}</TableCell>
+                            <TableCell className="text-white/80">{player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
                   </div>
                 ) : (
-                  <div className="text-center text-gray-500 py-4">
-                    <Users className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <div className="text-center text-white/70 py-4">
+                    <Users className="h-8 w-8 mx-auto mb-2 text-white/50" />
                     <p>No players found for this team</p>
                   </div>
                 )}
@@ -1830,10 +1830,10 @@ export default function SeasonDetailsPage() {
 
               {/* Season Invitation */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Season Invitation</h3>
-                <div className="bg-gray-50 p-3 rounded-md">
-                  <div className="text-sm text-gray-600 mb-2">Invitation Token:</div>
-                  <div className="font-mono text-xs bg-white p-2 rounded border">
+                <h3 className="font-semibold text-white mb-3">Season Invitation</h3>
+                <div className="bg-white/5 backdrop-blur-sm border border-white/20 p-3 rounded-md">
+                  <div className="text-sm text-white/80 mb-2">Invitation Token:</div>
+                  <div className="font-mono text-xs bg-white/10 backdrop-blur-sm text-white p-2 rounded border border-white/20">
                     {season?.teams?.[selectedTeam.id || selectedTeam.team_id] || 'N/A'}
                   </div>
                 </div>
@@ -1842,7 +1842,7 @@ export default function SeasonDetailsPage() {
           )}
           
           <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setIsTeamModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsTeamModalOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
               Close
             </Button>
           </div>
@@ -1851,7 +1851,7 @@ export default function SeasonDetailsPage() {
 
       {/* Invite Teams Modal */}
       <Dialog open={isInviteTeamsModalOpen} onOpenChange={setIsInviteTeamsModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
@@ -1861,18 +1861,18 @@ export default function SeasonDetailsPage() {
           
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-white/80 mb-3">
                 Select teams to invite to "{season?.name}". Teams that are already in this season are not shown.
               </p>
               
               {availableTeamsToInvite.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center text-white/70 py-8">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-white/50" />
                   <p>No teams available to invite</p>
                   <p className="text-sm">All teams are already part of this season</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-60 overflow-y-auto border rounded-md p-3">
+                <div className="space-y-3 max-h-60 overflow-y-auto border border-white/20 rounded-md p-3 bg-white/5">
                   {availableTeamsToInvite.map((team: any) => {
                     const teamId = team.id || team.team_id || team._id || Object.keys(team)[0]
                     
@@ -1893,7 +1893,7 @@ export default function SeasonDetailsPage() {
                           <Label htmlFor={`invite-team-${teamId}`} className="text-sm font-medium">
                             {team.name || team.team_name || `Team ${teamId}`}
                           </Label>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-white/60">
                             {team.shortname || team.short_name || 'N/A'} • Manager: {team.manager?.name || 'N/A'}
                           </div>
                         </div>
@@ -1904,8 +1904,8 @@ export default function SeasonDetailsPage() {
               )}
               
               {selectedTeamsToInvite.length > 0 && (
-                <div className="bg-blue-50 p-3 rounded-md">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 p-3 rounded-md">
+                  <p className="text-sm text-blue-200">
                     <strong>{selectedTeamsToInvite.length}</strong> team(s) selected for invitation
                   </p>
                 </div>
@@ -1938,7 +1938,7 @@ export default function SeasonDetailsPage() {
 
       {/* Create Group Modal */}
       <Dialog open={isCreateGroupModalOpen} onOpenChange={setIsCreateGroupModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -1970,7 +1970,7 @@ export default function SeasonDetailsPage() {
 
             {/* Randomization Section */}
             <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Quick Randomization</h3>
+              <h3 className="font-semibold text-white mb-4">Quick Randomization</h3>
               <div className="flex gap-4 items-end">
                 <div>
                   <Label htmlFor="numberOfGroups">Number of Groups</Label>
@@ -2057,18 +2057,18 @@ export default function SeasonDetailsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Existing Groups */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Groups ({groups.length})</h3>
+                <h3 className="font-semibold text-white">Groups ({groups.length})</h3>
                 {groups.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                    <Users className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <div className="text-center text-white/70 py-8 border-2 border-dashed border-white/30 rounded-lg">
+                    <Users className="h-8 w-8 mx-auto mb-2 text-white/50" />
                     <p>No groups created yet</p>
                     <p className="text-sm">Create a group to start organizing teams</p>
                   </div>
                 ) : (
                   groups.map(group => (
-                    <div key={group.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div key={group.id} className="border border-white/20 rounded-lg p-4 bg-white/5 backdrop-blur-sm">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-900">{group.name}</h4>
+                        <h4 className="font-medium text-white">{group.name}</h4>
                         <div className="flex gap-2">
                           <Button
                             variant="ghost"
@@ -2177,7 +2177,7 @@ export default function SeasonDetailsPage() {
 
       {/* View Groups Modal */}
       <Dialog open={isViewGroupsModalOpen} onOpenChange={setIsViewGroupsModalOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -2191,8 +2191,8 @@ export default function SeasonDetailsPage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : seasonGroups.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center text-white/70 py-8">
+                <Users className="h-12 w-12 mx-auto mb-4 text-white/50" />
                 <p>No groups found for this season</p>
               </div>
             ) : (
@@ -2211,9 +2211,9 @@ export default function SeasonDetailsPage() {
                     })
                     
                     return (
-                      <Card key={group.id}>
+                      <Card key={group.id} className="bg-white/5 backdrop-blur-sm border border-white/20">
                         <CardHeader>
-                          <CardTitle className="flex items-center justify-between">
+                          <CardTitle className="flex items-center justify-between text-white">
                             <span>{group.name}</span>
                             <Badge variant="secondary">{teamsInGroup.length} teams</Badge>
                           </CardTitle>
@@ -2322,7 +2322,7 @@ export default function SeasonDetailsPage() {
 
       {/* Schedule Matches Modal */}
       <Dialog open={isScheduleMatchesModalOpen} onOpenChange={setIsScheduleMatchesModalOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 ? (
