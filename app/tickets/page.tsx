@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield, CheckCircle, X, Gift, User, Phone, Mail } from "lucide-react"
+import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield, CheckCircle, X, Gift, User, Phone, Mail, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { useState } from "react"
 import { useQuery } from '@apollo/client'
 import { GET_MATCH_SCHEDULES } from "@/lib/graphql/queries"
+import { generateTicketPDF, generateTicketId, getValidUntilDate, TicketData } from "@/lib/utils/ticket-generator"
 
 export default function TicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null)
@@ -20,6 +21,75 @@ export default function TicketsPage() {
     phone: '',
     email: ''
   })
+  const [isGeneratingTicket, setIsGeneratingTicket] = useState(false)
+  const [ticketGenerated, setTicketGenerated] = useState(false)
+  const [generatedTicketData, setGeneratedTicketData] = useState<TicketData | null>(null)
+  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null)
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null)
+
+  // Function to generate QR code for modal display
+  const generateQRCode = async (ticketData: TicketData): Promise<string> => {
+    try {
+      const QRCode = await import('qrcode')
+      const qrCodeData = JSON.stringify({
+        ticketId: ticketData.id,
+        name: ticketData.name,
+        phone: ticketData.phone,
+        type: ticketData.ticketType,
+        validUntil: ticketData.validUntil
+      })
+      
+      const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#1f2937',
+          light: '#FFFFFF'
+        }
+      })
+      
+      return qrCodeDataURL
+    } catch (error) {
+      console.error('Error generating QR code for modal:', error)
+      return ''
+    }
+  }
+
+  // Test function to verify PDF generation
+  const testPDFGeneration = async () => {
+    try {
+      console.log('Testing PDF generation...')
+      const testTicketData: TicketData = {
+        id: 'TEST-123',
+        name: 'Test User',
+        phone: '+250788123456',
+        email: 'test@example.com',
+        ticketType: 'free',
+        matches: [
+          {
+            id: '1',
+            team1: 'Team A',
+            team2: 'Team B',
+            date: 'Nov 15, 2025',
+            time: '7:00 PM',
+            venue: 'Prime Arena'
+          }
+        ],
+        generatedAt: new Date().toLocaleString(),
+        validUntil: getValidUntilDate('free')
+      }
+      
+      const pdfUrl = await generateTicketPDF(testTicketData)
+      const qrUrl = await generateQRCode(testTicketData)
+      setGeneratedTicketData(testTicketData)
+      setPdfDataUrl(pdfUrl)
+      setQrCodeDataUrl(qrUrl)
+      setTicketGenerated(true)
+      console.log('Test PDF generated successfully')
+    } catch (error) {
+      console.error('Test PDF generation failed:', error)
+    }
+  }
 
   // Fetch real match data from database
   const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
@@ -139,6 +209,71 @@ export default function TicketsPage() {
   ]
 
 
+  const handleFreeRegistration = async () => {
+    if (!freeFormData.name || !freeFormData.phone || !freeFormData.email) {
+      return
+    }
+
+    console.log('Starting ticket generation...')
+    setIsGeneratingTicket(true)
+    
+    try {
+      // Generate ticket data
+      const ticketId = generateTicketId()
+      console.log('Generated ticket ID:', ticketId)
+      
+      const ticketData: TicketData = {
+        id: ticketId,
+        name: freeFormData.name,
+        phone: freeFormData.phone,
+        email: freeFormData.email,
+        ticketType: 'free',
+        matches: upcomingMatches.map((match: any) => ({
+          id: match.id,
+          team1: match.team1,
+          team2: match.team2,
+          date: match.date,
+          time: match.time,
+          venue: match.venue
+        })),
+        generatedAt: new Date().toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        validUntil: getValidUntilDate('free')
+      }
+
+      console.log('Ticket data:', ticketData)
+      console.log('Upcoming matches:', upcomingMatches)
+
+      // Generate PDF data URL
+      console.log('Generating PDF...')
+      const pdfUrl = await generateTicketPDF(ticketData)
+      console.log('PDF generation completed')
+      
+      // Generate QR code for modal display
+      console.log('Generating QR code for modal...')
+      const qrUrl = await generateQRCode(ticketData)
+      console.log('QR code generated')
+      
+      // Store the generated data
+      setGeneratedTicketData(ticketData)
+      setPdfDataUrl(pdfUrl)
+      setQrCodeDataUrl(qrUrl)
+      setTicketGenerated(true)
+      setShowFreeForm(false)
+      setFreeFormData({name: '', phone: '', email: ''})
+      
+    } catch (error) {
+      console.error('Error generating ticket:', error)
+    } finally {
+      setIsGeneratingTicket(false)
+    }
+  }
+
   const getColorClasses = (color: string) => {
     const colors = {
       green: {
@@ -191,6 +326,7 @@ export default function TicketsPage() {
           <p className="text-xl text-white/90 max-w-3xl mx-auto drop-shadow-xl">
             Experience the most exciting futsal action in Rwanda. Choose your ticket package and secure your spot for an unforgettable season.
           </p>
+          
         </div>
 
         {/* Ticket Packages */}
@@ -368,14 +504,119 @@ export default function TicketsPage() {
                     </Button>
                     <Button
                       className="flex-1 bg-green-800/90 backdrop-blur-md hover:bg-green-900/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                      onClick={handleFreeRegistration}
+                      disabled={isGeneratingTicket}
+                    >
+                      {isGeneratingTicket ? 'Generating Ticket...' : 'Register for Free'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Ticket Generated Success Message */}
+          {ticketGenerated && generatedTicketData && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <Card className="bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl max-w-2xl w-full">
+                <CardHeader className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-green-600/20 rounded-full w-fit">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-2xl text-gray-800">Ticket Generated Successfully!</CardTitle>
+                  <p className="text-gray-600">Your free pass is ready. Download the PDF below.</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Ticket Card Preview */}
+                  <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden shadow-lg">
+                    {/* Ticket Header */}
+                    <div className="bg-gray-800 text-white p-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-bold">Prime5 League</h3>
+                        <span className="text-sm">ID: {generatedTicketData.id}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Ticket Body */}
+                    <div className="p-4">
+                      <div className="flex justify-between items-start">
+                        {/* Left side - Details */}
+                        <div className="flex-1 pr-4">
+                          <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold mb-3 inline-block">
+                            {generatedTicketData.ticketType.toUpperCase()}
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div>
+                              <span className="font-semibold text-gray-600">Name:</span>
+                              <p className="text-gray-800">{generatedTicketData.name}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-600">Phone:</span>
+                              <p className="text-gray-800">{generatedTicketData.phone}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-600">Valid Until:</span>
+                              <p className="text-gray-800">{generatedTicketData.validUntil}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Right side - QR Code */}
+                        <div className="bg-gray-50 p-3 rounded-lg text-center">
+                          {qrCodeDataUrl ? (
+                            <div className="mb-2">
+                              <img 
+                                src={qrCodeDataUrl} 
+                                alt="QR Code" 
+                                className="w-20 h-20 mx-auto rounded"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center mb-2">
+                              <div className="text-xs text-gray-500 text-center">
+                                QR<br/>CODE
+                              </div>
+                            </div>
+                          )}
+                          <p className="text-xs text-gray-600 font-semibold">SCAN FOR</p>
+                          <p className="text-xs text-gray-600 font-semibold">VERIFICATION</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Ticket Footer */}
+                    <div className="bg-gray-800 text-white p-2 text-center">
+                      <p className="text-xs">Present this ticket at entrance • Non-transferable</p>
+                    </div>
+                  </div>
+                  
+                  {/* Download Button */}
+                  <div className="flex gap-3">
+                    <Button
+                      className="flex-1 bg-green-600 hover:bg-green-700"
                       onClick={() => {
-                        // Here you would typically send the data to your backend
-                        alert('Registration successful! You will receive your free pass via email.')
-                        setShowFreeForm(false)
-                        setFreeFormData({name: '', phone: '', email: ''})
+                        const link = document.createElement('a')
+                        link.href = pdfDataUrl || ''
+                        link.download = `prime5-ticket-${generatedTicketData.id}.pdf`
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
                       }}
                     >
-                      Register for Free
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Download PDF Ticket
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setTicketGenerated(false)
+                        setGeneratedTicketData(null)
+                        setPdfDataUrl(null)
+                      }}
+                    >
+                      Close
                     </Button>
                   </div>
                 </CardContent>
@@ -420,7 +661,7 @@ export default function TicketsPage() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingMatches.map((match) => (
+              {upcomingMatches.map((match: any) => (
                 <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -503,16 +744,24 @@ export default function TicketsPage() {
               Contact our support team for assistance with ticket purchases
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="bg-yellow-500/90 backdrop-blur-md hover:bg-yellow-600/90 text-black shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <Link href="/contact">Contact Support</Link>
-              </Button>
+        
               <Button
                 asChild
                 variant="outline"
                 size="lg"
                 className="border-white/50 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
-                <Link href="tel:+250788123456">Call Now</Link>
+                <Link href="tel:+250788829084">Call Now</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                className="bg-green-500/90 backdrop-blur-md hover:bg-green-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <Link href="https://chat.whatsapp.com/BI9CD8copL59aQnpCTrRtz?text=Hi%20Prime5%20support%2C%20I%20need%20help%20with%20tickets" target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  WhatsApp Support
+                </Link>
               </Button>
             </div>
           </CardContent>
