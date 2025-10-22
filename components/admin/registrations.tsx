@@ -32,9 +32,10 @@ import {
   Key,
   Copy,
   EyeOff,
+  Trash2,
 } from "lucide-react"
 import { useMutation } from "@apollo/client"
-import { UPDATE_MANAGER_PASSWORD, UPDATE_TEAM_APPROVAL } from "@/lib/graphql/mutations"
+import { UPDATE_MANAGER_PASSWORD, UPDATE_TEAM_APPROVAL, DELETE_MANAGER, DELETE_MANAGER_BY_EMAIL } from "@/lib/graphql/mutations"
 import { GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
 import { generatePassword, hashPasswordForStorage } from "@/lib/utils/password"
 import { useToast } from "@/hooks/use-toast"
@@ -69,8 +70,10 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedManager, setSelectedManager] = useState<Manager | null>(null)
   const [editingManager, setEditingManager] = useState<Manager | null>(null)
+  const [managerToDelete, setManagerToDelete] = useState<Manager | null>(null)
   const [generatedPasswords, setGeneratedPasswords] = useState<Record<string, string>>({})
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
   const [localManagers, setLocalManagers] = useState<Manager[]>(managers)
@@ -78,6 +81,8 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
   // GraphQL mutations
   const [updatePassword, { loading: passwordUpdating }] = useMutation(UPDATE_MANAGER_PASSWORD)
   const [updateTeamApproval, { loading: approvalUpdating }] = useMutation(UPDATE_TEAM_APPROVAL)
+  const [deleteManager, { loading: deleteManagerLoading }] = useMutation(DELETE_MANAGER)
+  const [deleteManagerByEmail, { loading: deleteByEmailLoading }] = useMutation(DELETE_MANAGER_BY_EMAIL)
   const { toast } = useToast()
 
   // Update local managers when prop changes
@@ -170,6 +175,67 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
     console.log('Saving manager:', editingManager)
     setIsEditModalOpen(false)
     setEditingManager(null)
+  }
+
+  const handleDeleteManager = (manager: Manager) => {
+    setManagerToDelete(manager)
+    setIsDeleteModalOpen(true)
+  }
+
+  const confirmDeleteManager = async () => {
+    if (!managerToDelete) return
+
+    try {
+      // Try deleting by ID first, then by email as fallback
+      let result
+      try {
+        result = await deleteManager({
+          variables: {
+            id: managerToDelete.id
+          },
+          refetchQueries: [
+            {
+              query: GET_ALL_MANAGERS_DETAILS
+            }
+          ]
+        })
+      } catch (idError) {
+        // If ID deletion fails, try by email
+        result = await deleteManagerByEmail({
+          variables: {
+            email: managerToDelete.email
+          },
+          refetchQueries: [
+            {
+              query: GET_ALL_MANAGERS_DETAILS
+            }
+          ]
+        })
+      }
+
+      if (result.data?.delete_managers_by_pk || result.data?.delete_managers?.affected_rows > 0) {
+        // Update local state
+        setLocalManagers(prev => prev.filter(manager => manager.id !== managerToDelete.id))
+
+        toast({
+          title: "Manager Deleted",
+          description: `Manager "${managerToDelete.name}" has been deleted successfully`,
+          duration: 3000,
+        })
+      } else {
+        throw new Error('Failed to delete manager')
+      }
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+        duration: 5000,
+      })
+    } finally {
+      setIsDeleteModalOpen(false)
+      setManagerToDelete(null)
+    }
   }
 
     const handleRegeneratePassword = async (managerId: string) => {
@@ -548,6 +614,23 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
                             <Mail className="h-4 w-4 mr-2" />
                             Send Email
                           </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleDeleteManager(manager)}
+                            disabled={deleteManagerLoading || deleteByEmailLoading}
+                          >
+                            {(deleteManagerLoading || deleteByEmailLoading) ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Manager
+                              </>
+                            )}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -649,6 +732,70 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Manager Confirmation Modal */}
+      {isDeleteModalOpen && managerToDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white drop-shadow-lg">Delete Manager</h2>
+                  <p className="text-white/70">This action cannot be undone</p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-white/90 mb-2">
+                  Are you sure you want to delete the manager <strong>"{managerToDelete.name}"</strong>?
+                </p>
+                <p className="text-sm text-white/60 mb-3">
+                  This will permanently remove the manager and all associated teams from the system.
+                </p>
+                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3">
+                  <p className="text-yellow-200 text-sm">
+                    <strong>Warning:</strong> This will also delete all teams associated with this manager.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={confirmDeleteManager}
+                  disabled={deleteManagerLoading || deleteByEmailLoading}
+                  className="flex-1 bg-red-600/90 backdrop-blur-md hover:bg-red-700/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {(deleteManagerLoading || deleteByEmailLoading) ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Manager
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false)
+                    setManagerToDelete(null)
+                  }}
+                  disabled={deleteManagerLoading || deleteByEmailLoading}
+                  className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
         </div>

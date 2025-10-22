@@ -21,18 +21,18 @@ import {
 } from "lucide-react"
 
 interface Player {
-  id: number
+  id: string
   name: string
   create_at: string
   dob: string
   email: string
   gender: string
   phone: string
-  team_id: number
+  team_id: string
 }
 
 interface Manager {
-  id: number
+  id: string
   name: string
   email: string
   phone: string
@@ -51,7 +51,7 @@ interface Match {
 }
 
 interface Team {
-  id?: number
+  id?: string
   name: string
   shortname: string
   team_manager: string
@@ -59,6 +59,7 @@ interface Team {
   matche1: Match[]
   matche2: Match[]
   players: Player[]
+  approved: boolean
 }
 
 interface TeamDetailsProps {
@@ -212,9 +213,12 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                   <div className="text-lg font-bold text-blue-300">{team.name || 'N/A'}</div>
                   <div className="text-sm text-white/70">Short: {team.shortname || 'N/A'}</div>
                   <div className="text-sm text-white/60">Manager: {team.team_manager || 'N/A'}</div>
-                  <div className="mt-2">
+                  <div className="mt-2 flex gap-2">
                     <Badge variant="outline" className="bg-blue-50 text-blue-700">
                       Active Team
+                    </Badge>
+                    <Badge className={team.approved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                      {team.approved ? 'Approved' : 'Pending Approval'}
                     </Badge>
                   </div>
                 </div>

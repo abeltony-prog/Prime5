@@ -241,9 +241,19 @@ export const UPDATE_TEAM_STANDINGS = gql`
   }
 `
 
-// Mutation to delete a team (admin only)
+// Mutation to delete a team (admin only) - for uuid IDs
 export const DELETE_TEAM = gql`
-  mutation DeleteTeam($id: Int!) {
+  mutation DeleteTeam($id: uuid!) {
+    delete_Teams_by_pk(id: $id) {
+      id
+      name
+    }
+  }
+`
+
+// Mutation to delete a team (admin only) - for Int IDs (legacy)
+export const DELETE_TEAM_INT = gql`
+  mutation DeleteTeamInt($id: Int!) {
     delete_teams_by_pk(id: $id) {
       id
       name
@@ -410,6 +420,31 @@ export const UPDATE_TEAM_APPROVAL = gql`
       id
       name
       approved
+    }
+  }
+`
+
+// Mutation to delete a manager (admin only)
+export const DELETE_MANAGER = gql`
+  mutation DeleteManager($id: uuid!) {
+    delete_managers_by_pk(id: $id) {
+      id
+      name
+      email
+    }
+  }
+`
+
+// Mutation to delete a manager by email (admin only)
+export const DELETE_MANAGER_BY_EMAIL = gql`
+  mutation DeleteManagerByEmail($email: String!) {
+    delete_managers(where: {email: {_eq: $email}}) {
+      affected_rows
+      returning {
+        id
+        name
+        email
+      }
     }
   }
 `

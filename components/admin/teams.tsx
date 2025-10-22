@@ -30,26 +30,31 @@ import {
   User,
   Calendar,
   Upload,
+  CheckCircle,
+  Clock,
 } from "lucide-react"
 import { useTeams } from "@/hooks/use-teams"
 import { useCreateTeam } from "@/hooks/use-teams"
+import { useMutation } from "@apollo/client"
+import { DELETE_TEAM } from "@/lib/graphql/mutations"
+import { useToast } from "@/hooks/use-toast"
 import { TeamDetails } from "./team-details"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
 interface Player {
-  id: number
+  id: string
   name: string
   create_at: string
   dob: string
   email: string
   gender: string
   phone: string
-  team_id: number
+  team_id: string
 }
 
 interface Manager {
-  id: number
+  id: string
   name: string
   email: string
   phone: string
@@ -68,7 +73,7 @@ interface Match {
 }
 
 interface Team {
-  id: number
+  id: string
   name: string
   shortname: string
   team_manager: string
@@ -76,6 +81,7 @@ interface Team {
   matche1: Match[]
   matche2: Match[]
   players: Player[]
+  approved: boolean
 }
 
 interface TeamsProps {
@@ -85,12 +91,13 @@ interface TeamsProps {
 // Sample fallback data for when database is not connected
 const fallbackTeams: Team[] = [
   {
-    id: 1,
+    id: "1",
     name: "Manchester United",
     shortname: "MUFC",
     team_manager: "Erik ten Hag",
+    approved: true,
     manager: {
-      id: 1,
+      id: "1",
       name: "Erik ten Hag",
       email: "erik.tenhag@manutd.com",
       phone: "+44 161 123 4567",
@@ -118,34 +125,35 @@ const fallbackTeams: Team[] = [
     ],
     players: [
       {
-        id: 1,
+        id: "1",
         name: "Marcus Rashford",
         create_at: "2023-01-01T00:00:00Z",
         dob: "1997-10-31T00:00:00Z",
         email: "m.rashford@manutd.com",
         gender: "male",
         phone: "+44 161 123 4568",
-        team_id: 1
+        team_id: "1"
       },
       {
-        id: 2,
+        id: "2",
         name: "Bruno Fernandes",
         create_at: "2023-01-01T00:00:00Z",
         dob: "1994-09-08T00:00:00Z",
         email: "b.fernandes@manutd.com",
         gender: "male",
         phone: "+44 161 123 4569",
-        team_id: 1
+        team_id: "1"
       }
     ]
   },
   {
-    id: 2,
+    id: "2",
     name: "Arsenal FC",
     shortname: "ARS",
     team_manager: "Mikel Arteta",
+    approved: true,
     manager: {
-      id: 2,
+      id: "2",
       name: "Mikel Arteta",
       email: "m.arteta@arsenal.com",
       phone: "+44 20 123 4567",
@@ -165,24 +173,25 @@ const fallbackTeams: Team[] = [
     matche2: [],
     players: [
       {
-        id: 3,
+        id: "3",
         name: "Bukayo Saka",
         create_at: "2023-01-01T00:00:00Z",
         dob: "2001-09-05T00:00:00Z",
         email: "b.saka@arsenal.com",
         gender: "male",
         phone: "+44 20 123 4568",
-        team_id: 2
+        team_id: "2"
       }
     ]
   },
   {
-    id: 3,
+    id: "3",
     name: "Chelsea FC",
     shortname: "CHE",
     team_manager: "Mauricio Pochettino",
+    approved: false,
     manager: {
-      id: 3,
+      id: "3",
       name: "Mauricio Pochettino",
       email: "m.pochettino@chelsea.com",
       phone: "+44 20 123 4569",
@@ -194,14 +203,14 @@ const fallbackTeams: Team[] = [
     matche2: [],
     players: [
       {
-        id: 4,
+        id: "4",
         name: "Cole Palmer",
         create_at: "2023-01-01T00:00:00Z",
         dob: "2002-05-06T00:00:00Z",
         email: "c.palmer@chelsea.com",
         gender: "male",
         phone: "+44 20 123 4570",
-        team_id: 3
+        team_id: "3"
       }
     ]
   }
@@ -213,6 +222,8 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
   const [newTeam, setNewTeam] = useState({
     teamName: "",
     shortname: "",
@@ -230,6 +241,10 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   
   // Create team mutation
   const { createTeam, loading: createLoading } = useCreateTeam()
+  
+  // Delete team mutation
+  const [deleteTeam, { loading: deleteLoading }] = useMutation(DELETE_TEAM)
+  const { toast } = useToast()
   
   // Use database teams if available, otherwise fall back to fallback teams
   const teams = dbTeams && dbTeams.length > 0 ? dbTeams : fallbackTeams
@@ -263,8 +278,9 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
     const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          team.team_manager.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesGroup = groupFilter === "all" || team.shortname.includes(groupFilter)
+    const isApproved = team.approved === true
     
-    return matchesSearch && matchesGroup
+    return matchesSearch && matchesGroup && isApproved
   })
 
   const getStatusColor = (status: string) => {
@@ -287,6 +303,46 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   const handleViewDetails = (team: Team) => {
     setSelectedTeam(team)
     setIsDetailsOpen(true)
+  }
+
+  const handleDeleteTeam = (team: Team) => {
+    setTeamToDelete(team)
+    setIsDeleteModalOpen(true)
+  }
+
+  const confirmDeleteTeam = async () => {
+    if (!teamToDelete) return
+
+    try {
+      const result = await deleteTeam({
+        variables: {
+          id: teamToDelete.id
+        }
+      })
+
+      if (result.data?.delete_Teams_by_pk) {
+        toast({
+          title: "Team Deleted",
+          description: `Team "${teamToDelete.name}" has been deleted successfully`,
+          duration: 3000,
+        })
+        
+        // Refresh the teams list
+        refetch()
+      } else {
+        throw new Error('Failed to delete team')
+      }
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+        duration: 5000,
+      })
+    } finally {
+      setIsDeleteModalOpen(false)
+      setTeamToDelete(null)
+    }
   }
 
   const getGenderIcon = (gender: string) => {
@@ -360,10 +416,13 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white drop-shadow-lg">Team Management</h2>
-          <p className="text-white/80">Manage all registered teams and their information</p>
+          <p className="text-white/80">Manage approved teams and their information</p>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant={isUsingFallbackData ? "destructive" : "outline"} className="text-xs">
               {dataSource}
+            </Badge>
+            <Badge variant="outline" className="text-xs bg-green-500/20 text-green-300 border-green-500/30">
+              ✓ Approved Teams Only
             </Badge>
             {!isUsingFallbackData && (
               <span className="text-xs text-green-300">✓ Live Database</span>
@@ -416,11 +475,20 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
       {/* Filters */}
       <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
         <CardContent className="p-6">
+          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <div className="flex items-center gap-2 text-green-300 text-sm">
+              <CheckCircle className="h-4 w-4" />
+              <span className="font-medium">Showing approved teams only</span>
+            </div>
+            <p className="text-green-200/80 text-xs mt-1">
+              To manage pending teams, go to the Registrations tab
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search teams..."
+                placeholder="Search approved teams..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -449,7 +517,7 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
             <Users className="h-5 w-5" />
-            Teams ({filteredTeams.length})
+            Approved Teams ({filteredTeams.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -460,6 +528,7 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                   <TableHead className="text-white/90">Team</TableHead>
                   <TableHead className="text-white/90">Manager</TableHead>
                   <TableHead className="text-white/90">Group</TableHead>
+                  <TableHead className="text-white/90">Status</TableHead>
                   <TableHead className="text-white/90">Players</TableHead>
                   <TableHead className="text-white/90">Matches</TableHead>
                   <TableHead className="text-white/90">Created</TableHead>
@@ -491,6 +560,23 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                         {team.shortname}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      <Badge className={team.approved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                        <div className="flex items-center gap-1">
+                          {team.approved ? (
+                            <>
+                              <CheckCircle className="h-3 w-3" />
+                              Approved
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="h-3 w-3" />
+                              Pending
+                            </>
+                          )}
+                        </div>
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline" className="font-medium">
                         {team.players?.length || 0} players
@@ -520,9 +606,22 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                             <Edit className="h-4 w-4 mr-2" />
                             Edit Team
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Team
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleDeleteTeam(team)}
+                            disabled={deleteLoading}
+                          >
+                            {deleteLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Team
+                              </>
+                            )}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -537,7 +636,7 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
 
       {/* Team Details Dialog */}
       <TeamDetails
-        team={selectedTeam}
+        team={selectedTeam as any}
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         loading={false}
@@ -710,6 +809,65 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && teamToDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white drop-shadow-lg">Delete Team</h2>
+                  <p className="text-white/70">This action cannot be undone</p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-white/90 mb-2">
+                  Are you sure you want to delete the team <strong>"{teamToDelete.name}"</strong>?
+                </p>
+                <p className="text-sm text-white/60">
+                  This will permanently remove the team and all associated data from the system.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={confirmDeleteTeam}
+                  disabled={deleteLoading}
+                  className="flex-1 bg-red-600/90 backdrop-blur-md hover:bg-red-700/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {deleteLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Team
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false)
+                    setTeamToDelete(null)
+                  }}
+                  disabled={deleteLoading}
+                  className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
         </div>

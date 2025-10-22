@@ -100,6 +100,7 @@ export const GET_TEAMS = gql`
       name
       shortname
       team_manager
+      approved
       created_at
       matche1 {
         created_at
@@ -185,6 +186,7 @@ export const GET_TEAMS_BY_IDS = gql`
       name
       shortname
       team_manager
+      approved
       matche1 {
         created_at
         dateAndtime
