@@ -130,6 +130,16 @@ export const GET_TEAMS = gql`
         phone
         photo
       }
+      players {
+        id
+        name
+        email
+        phone
+        gender
+        dob
+        create_at
+        team_id
+      }
     }
   }
 `
@@ -171,6 +181,16 @@ export const GET_TEAM = gql`
         password
         phone
         photo
+      }
+      players {
+        id
+        name
+        email
+        phone
+        gender
+        dob
+        create_at
+        team_id
       }
     }
   }
@@ -214,6 +234,16 @@ export const GET_TEAMS_BY_IDS = gql`
         password
         phone
         photo
+      }
+      players {
+        id
+        name
+        email
+        phone
+        gender
+        dob
+        create_at
+        team_id
       }
     }
   }

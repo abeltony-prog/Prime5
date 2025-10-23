@@ -35,10 +35,11 @@ import {
   Trash2,
 } from "lucide-react"
 import { useMutation } from "@apollo/client"
-import { UPDATE_MANAGER_PASSWORD, UPDATE_TEAM_APPROVAL, DELETE_MANAGER, DELETE_MANAGER_BY_EMAIL } from "@/lib/graphql/mutations"
+import { UPDATE_MANAGER_PASSWORD, UPDATE_TEAM_APPROVAL, DELETE_MANAGER, DELETE_MANAGER_BY_EMAIL, CREATE_MANAGER, CREATE_TEAM } from "@/lib/graphql/mutations"
 import { GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
 import { generatePassword, hashPasswordForStorage } from "@/lib/utils/password"
 import { useToast } from "@/hooks/use-toast"
+import { EditManagerModal, DeleteManagerModal, AddTeamModal } from "./modals"
 
 interface Manager {
   id: string
@@ -71,18 +72,26 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
   const [statusFilter, setStatusFilter] = useState("pending")
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false)
   const [selectedManager, setSelectedManager] = useState<Manager | null>(null)
   const [editingManager, setEditingManager] = useState<Manager | null>(null)
   const [managerToDelete, setManagerToDelete] = useState<Manager | null>(null)
   const [generatedPasswords, setGeneratedPasswords] = useState<Record<string, string>>({})
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
   const [localManagers, setLocalManagers] = useState<Manager[]>(managers)
+  
+  // New team creation state
+  const [generatedPassword, setGeneratedPassword] = useState("")
+  const [showGeneratedPassword, setShowGeneratedPassword] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   // GraphQL mutations
   const [updatePassword, { loading: passwordUpdating }] = useMutation(UPDATE_MANAGER_PASSWORD)
   const [updateTeamApproval, { loading: approvalUpdating }] = useMutation(UPDATE_TEAM_APPROVAL)
   const [deleteManager, { loading: deleteManagerLoading }] = useMutation(DELETE_MANAGER)
   const [deleteManagerByEmail, { loading: deleteByEmailLoading }] = useMutation(DELETE_MANAGER_BY_EMAIL)
+  const [createManager, { loading: createManagerLoading }] = useMutation(CREATE_MANAGER)
+  const [createTeam, { loading: createTeamLoading }] = useMutation(CREATE_TEAM)
   const { toast } = useToast()
 
   // Update local managers when prop changes
@@ -355,6 +364,87 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
   const approvedCount = localManagers.filter(m => m.Teams.some(t => t.approved)).length
   const totalManagers = localManagers.length
 
+  // Handle team creation
+  const handleCreateTeam = async (managerData: any, teamData: any) => {
+    if (!managerData.name || !managerData.email || !managerData.phone || !teamData.name || !teamData.shortname || !teamData.location) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      // Generate random password
+      const password = generatePassword()
+      const hashedPassword = hashPasswordForStorage(password)
+      
+      // Create manager first
+      const managerResult = await createManager({
+        variables: {
+          manager: {
+            name: managerData.name,
+            email: managerData.email,
+            phone: managerData.phone,
+            gender: managerData.gender,
+            photo: managerData.photo,
+            password: hashedPassword
+          }
+        },
+        refetchQueries: [{ query: GET_ALL_MANAGERS_DETAILS }]
+      })
+
+      if (managerResult.data?.insert_managers?.returning?.[0]) {
+        const createdManager = managerResult.data.insert_managers.returning[0]
+        
+        // Create team with approved status
+        const teamResult = await createTeam({
+          variables: {
+            team: {
+              name: teamData.name,
+              shortname: teamData.shortname,
+              location: teamData.location,
+              logo: teamData.logo,
+              team_manager: createdManager.id,
+              approved: true // Team is automatically approved
+            }
+          },
+          refetchQueries: [{ query: GET_ALL_MANAGERS_DETAILS }]
+        })
+
+        if (teamResult.data?.insert_Teams?.returning?.[0]) {
+          // Store generated password for display
+          setGeneratedPassword(password)
+          setShowGeneratedPassword(true)
+          
+          toast({
+            title: "Team Created Successfully",
+            description: `Team "${teamData.name}" and manager "${managerData.name}" have been created. The team is automatically approved.`,
+            duration: 5000,
+          })
+          
+          // Don't auto-close modal - let user manually close after copying password
+        } else {
+          throw new Error('Failed to create team')
+        }
+      } else {
+        throw new Error('Failed to create manager')
+      }
+    } catch (error) {
+      toast({
+        title: "Creation Failed",
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+        duration: 5000,
+      })
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header Actions */}
@@ -368,9 +458,12 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            onClick={() => setIsAddTeamModalOpen(true)}
+            className="bg-green-600 hover:bg-green-700"
+          >
             <Users className="h-4 w-4 mr-2" />
-            View All Applications
+            Add New Team
           </Button>
         </div>
       </div>
@@ -648,163 +741,43 @@ export function Registrations({ managers = [] }: RegistrationsProps) {
       </Card>
 
       {/* Edit Manager Modal */}
-      {isEditModalOpen && editingManager && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white drop-shadow-lg">Edit Manager Details</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="text-white hover:bg-white/20"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              <form onSubmit={(e) => {
-                e.preventDefault()
-                handleSaveManager()
-              }} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="editName" className="text-white drop-shadow-md">Manager Name *</Label>
-                    <Input
-                      id="editName"
-                      required
-                      value={editingManager.name}
-                      onChange={(e) => setEditingManager({...editingManager, name: e.target.value})}
-                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="editEmail" className="text-white drop-shadow-md">Email *</Label>
-                    <Input
-                      type="email"
-                      id="editEmail"
-                      required
-                      value={editingManager.email}
-                      onChange={(e) => setEditingManager({...editingManager, email: e.target.value})}
-                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="editPhone" className="text-white drop-shadow-md">Phone *</Label>
-                    <Input
-                      id="editPhone"
-                      type="tel"
-                      required
-                      value={editingManager.phone}
-                      onChange={(e) => setEditingManager({...editingManager, phone: e.target.value})}
-                      className="mt-2 bg-white/20 backdrop-blur-sm border-white/30 text-white placeholder-white/70"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="editGender" className="text-white drop-shadow-md">Gender</Label>
-                    <select 
-                      id="editGender" 
-                      value={editingManager.gender}
-                      onChange={(e) => setEditingManager({...editingManager, gender: e.target.value})}
-                      className="mt-2 w-full px-3 py-2 border border-white/30 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500/50 bg-white/20 backdrop-blur-sm text-white"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  >
-                    Save Changes
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsEditModalOpen(false)}
-                    className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditManagerModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        manager={editingManager}
+        onSave={handleSaveManager}
+      />
 
       {/* Delete Manager Confirmation Modal */}
-      {isDeleteModalOpen && managerToDelete && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                  <Trash2 className="h-6 w-6 text-red-400" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white drop-shadow-lg">Delete Manager</h2>
-                  <p className="text-white/70">This action cannot be undone</p>
-                </div>
-              </div>
-              
-              <div className="mb-6">
-                <p className="text-white/90 mb-2">
-                  Are you sure you want to delete the manager <strong>"{managerToDelete.name}"</strong>?
-                </p>
-                <p className="text-sm text-white/60 mb-3">
-                  This will permanently remove the manager and all associated teams from the system.
-                </p>
-                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3">
-                  <p className="text-yellow-200 text-sm">
-                    <strong>Warning:</strong> This will also delete all teams associated with this manager.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={confirmDeleteManager}
-                  disabled={deleteManagerLoading || deleteByEmailLoading}
-                  className="flex-1 bg-red-600/90 backdrop-blur-md hover:bg-red-700/90 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  {(deleteManagerLoading || deleteByEmailLoading) ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Deleting...
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Manager
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
+      <DeleteManagerModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
                     setIsDeleteModalOpen(false)
                     setManagerToDelete(null)
                   }}
-                  disabled={deleteManagerLoading || deleteByEmailLoading}
-                  className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        manager={managerToDelete}
+        onConfirm={confirmDeleteManager}
+        isLoading={deleteManagerLoading || deleteByEmailLoading}
+      />
+
+      {/* Add New Team Modal */}
+      <AddTeamModal
+        isOpen={isAddTeamModalOpen}
+        onClose={() => {
+          setIsAddTeamModalOpen(false)
+          setGeneratedPassword("")
+          setShowGeneratedPassword(false)
+          setIsCreating(false)
+        }}
+        onCreateTeam={handleCreateTeam}
+        isCreating={isCreating}
+        generatedPassword={generatedPassword}
+        showGeneratedPassword={showGeneratedPassword}
+        onTogglePasswordVisibility={() => setShowGeneratedPassword(!showGeneratedPassword)}
+        onCopyPassword={handleCopyPassword}
+        onCopyEmail={(email) => navigator.clipboard.writeText(email)}
+        managerEmail=""
+      />
     </div>
   )
 } 
