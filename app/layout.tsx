@@ -11,9 +11,15 @@ export const metadata: Metadata = {
   description: 'The premier futsal competition featuring the region\'s top teams competing for ultimate glory.',
   generator: 'Next.js',
   icons: {
-    icon: '/logo/Prime5IconGreen.png',
-    shortcut: '/logo/Prime5IconGreen.png',
-    apple: '/logo/Prime5IconGreen.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo/Prime5IconGreen.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo/Prime5IconGreen.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/logo/Prime5IconGreen.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 }
 
@@ -25,6 +31,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/logo/Prime5IconGreen.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo/Prime5IconGreen.png" />
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};
