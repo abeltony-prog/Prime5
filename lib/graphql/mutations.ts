@@ -32,9 +32,26 @@ export const UPDATE_SEASON = gql`
   }
 `
 
-// Mutation to delete season
+// Mutation to delete season and all related data
 export const DELETE_SEASON = gql`
   mutation deleteSeason($id: uuid!) {
+    # Delete player statistics first
+    delete_player_statistics(where: {season_id: {_eq: $id}}) {
+      affected_rows
+    }
+    # Delete team statistics (these reference groups, so delete before groups)
+    delete_team_statistics(where: {season_id: {_eq: $id}}) {
+      affected_rows
+    }
+    # Delete groups (after team statistics are deleted)
+    delete_groups(where: {season_id: {_eq: $id}}) {
+      affected_rows
+    }
+    # Delete match schedules
+    delete_matches(where: {season_id: {_eq: $id}}) {
+      affected_rows
+    }
+    # Finally delete the season
     delete_seasons_by_pk(id: $id) {
       id
       name
