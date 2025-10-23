@@ -10,6 +10,7 @@ interface Manager {
     id: string
     name: string
     shortName: string
+    logo?: string | null
   } | null
 }
 

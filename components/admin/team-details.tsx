@@ -148,7 +148,17 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-blue-300" />
+            {team.logo ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+                <img 
+                  src={team.logo} 
+                  alt={`${team.name} Logo`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <Shield className="h-5 w-5 text-blue-300" />
+            )}
             {team.name} - Team Details
           </DialogTitle>
         </DialogHeader>
@@ -207,7 +217,17 @@ export function TeamDetails({ team, isOpen, onClose, loading = false }: TeamDeta
                 </div>
                 <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-4 w-4 text-blue-300" />
+                    {team.logo ? (
+                      <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
+                        <img 
+                          src={team.logo} 
+                          alt={`${team.name} Logo`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <Shield className="h-4 w-4 text-blue-300" />
+                    )}
                     <span className="font-medium text-white">Team Info</span>
                   </div>
                   <div className="text-lg font-bold text-blue-300">{team.name || 'N/A'}</div>

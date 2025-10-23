@@ -5,9 +5,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
+import { useAuth } from "@/contexts/auth-context"
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const { manager, isAuthenticated } = useAuth()
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -25,16 +27,29 @@ export function Navigation() {
       <div className="container mx-auto px-6">
         <div className="flex justify-between items-center py-4">
           <Link href="/" className="flex items-center space-x-3">
-            <Image
-              src="/logo/PrimeALLWhite.png"
-              alt="Prime5 League"
-              width={100}
-              height={100}
-              className="drop-shadow-lg"
-            />
-            <div>
-        
-            </div>
+            {isAuthenticated && manager?.team?.logo ? (
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+                  <img 
+                    src={manager.team.logo} 
+                    alt={`${manager.team.name} Logo`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-white">
+                  <div className="text-sm font-medium">{manager.team.name}</div>
+                  <div className="text-xs opacity-80">Team Dashboard</div>
+                </div>
+              </div>
+            ) : (
+              <Image
+                src="/logo/PrimeALLWhite.png"
+                alt="Prime5 League"
+                width={100}
+                height={100}
+                className="drop-shadow-lg"
+              />
+            )}
           </Link>
 
           {/* Desktop Navigation */}

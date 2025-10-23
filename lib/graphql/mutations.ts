@@ -337,6 +337,23 @@ export const UPDATE_MATCH_RESULT = gql`
   }
 `
 
+// Mutation to update team information (for UUID-based Teams table)
+export const UPDATE_TEAM_INFO = gql`
+  mutation updateTeamInfo($teamId: uuid = "", $name: String = "", $shortname: String = "", $location: String = "", $logo: String = "") {
+    update_Teams(where: {id: {_eq: $teamId}}, _set: {name: $name, shortname: $shortname, location: $location, logo: $logo}) {
+      affected_rows
+      returning {
+        id
+        name
+        shortname
+        location
+        logo
+        team_manager
+      }
+    }
+  }
+`
+
 // Mutation to create a new job
 export const CREATE_JOB = gql`
   mutation CreateJob($title: String!, $description: String!, $location: String!, $experience: String!, $amount: String!, $requirements: String!, $benefits: String!) {

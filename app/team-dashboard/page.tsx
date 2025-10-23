@@ -47,7 +47,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { useMutation, useQuery } from "@apollo/client"
 import { GET_ALL_PLAYERS_WHERE_TEAM_ID, GET_TEAM_COMPLETE_DATA, GET_TEAM_MATCHES, GET_CURRENT_SEASON_WITH_GROUPS, GET_TEAM_PLAYER_STATISTICS, GET_TEAM_STATISTICS_BY_TEAM_ID } from "@/lib/graphql/queries"
-import { ADD_TEAM_PLAYER_DETAILS } from "@/lib/graphql/mutations"
+import { ADD_TEAM_PLAYER_DETAILS, UPDATE_TEAM_INFO } from "@/lib/graphql/mutations"
 import { OverviewTab, PlayersTab, MatchesTab, AnalyticsTab, SettingsTab } from "@/components/team-dashboard"
 
 function TeamDashboardContent() {
@@ -66,6 +66,10 @@ function TeamDashboardContent() {
   // GraphQL hooks
   const [addPlayer] = useMutation(ADD_TEAM_PLAYER_DETAILS, {
     refetchQueries: [{ query: GET_ALL_PLAYERS_WHERE_TEAM_ID, variables: { teamId: manager?.team?.id } }]
+  })
+
+  const [updateTeamInfo] = useMutation(UPDATE_TEAM_INFO, {
+    refetchQueries: [{ query: GET_TEAM_COMPLETE_DATA, variables: { teamId: manager?.team?.id } }]
   })
 
   const { data: playersData, loading: playersLoading } = useQuery(GET_ALL_PLAYERS_WHERE_TEAM_ID, {
@@ -353,10 +357,10 @@ function TeamDashboardContent() {
       return {
         name: manager?.team?.name || "Team Name",
         shortName: manager?.team?.shortName || "TFC",
-        location: manager?.team?.location || "Location",
+        location: "Location",
         founded: "2020",
         description: "A competitive football team focused on excellence and sportsmanship.",
-        website: "",
+        logo: null,
         socialMedia: {
           facebook: "",
           twitter: "",
@@ -368,10 +372,10 @@ function TeamDashboardContent() {
     return {
       name: currentTeam.name || manager?.team?.name || "Team Name",
       shortName: currentTeam.shortname || manager?.team?.shortName || "TFC",
-      location: currentTeam.location || manager?.team?.location || "Location",
+      location: currentTeam.location || "Location",
       founded: "2020", // Not available in current database
       description: "A competitive football team focused on excellence and sportsmanship.",
-      website: "", // Not available in current database
+      logo: currentTeam.logo || null,
       socialMedia: {
         facebook: "", // Not available in current database
         twitter: "", // Not available in current database
@@ -429,7 +433,7 @@ function TeamDashboardContent() {
     name: manager?.name || null,
     email: manager?.email || null,
     phone: null, // Phone not available in current Manager type
-    photo: manager?.photo || null,
+    photo: null, // Photo not available in current Manager type
     notifications: {
       email: true,
       sms: false,
@@ -446,6 +450,28 @@ function TeamDashboardContent() {
     logout()
   }
 
+  const handleSaveTeamSettings = async (settings: any) => {
+    if (!manager?.team?.id) {
+      console.error("No team ID found")
+      return
+    }
+
+    try {
+      await updateTeamInfo({
+        variables: {
+          teamId: manager.team.id,
+          name: settings.name,
+          shortname: settings.shortName,
+          location: settings.location,
+          logo: settings.logo
+        }
+      })
+      console.log('Team settings saved successfully')
+    } catch (error) {
+      console.error("Error saving team settings:", error)
+    }
+  }
+
 
 
   return (
@@ -455,9 +481,19 @@ function TeamDashboardContent() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-600/90 to-green-700/90 backdrop-blur-md rounded-xl flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
+              {currentTeam?.logo ? (
+                <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-white/20 shadow-lg">
+                  <img 
+                    src={currentTeam.logo} 
+                    alt={`${realTeamData?.name} Logo`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 bg-gradient-to-br from-green-600/90 to-green-700/90 backdrop-blur-md rounded-xl flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+              )}
               <div>
                 <h1 className="text-2xl font-bold text-white drop-shadow-2xl">{realTeamData?.name || "Team Dashboard"}</h1>
                 <p className="text-sm text-white/90 drop-shadow-xl">Team Manager Dashboard</p>
@@ -523,6 +559,7 @@ function TeamDashboardContent() {
               performanceData={realPerformanceData || []}
               isEditing={isEditing}
               setIsEditing={setIsEditing}
+              teamLogo={currentTeam?.logo}
             />
           </TabsContent>
 
@@ -733,7 +770,7 @@ function TeamDashboardContent() {
             <SettingsTab 
               teamSettings={realTeamSettings || {}}
               managerSettings={managerSettings}
-              onSaveTeamSettings={(settings) => console.log('Save team settings:', settings)}
+              onSaveTeamSettings={handleSaveTeamSettings}
               onSaveManagerSettings={(settings) => console.log('Save manager settings:', settings)}
               onLogout={handleLogout}
             />

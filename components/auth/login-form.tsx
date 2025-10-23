@@ -49,7 +49,8 @@ export function LoginForm() {
             team: manager.Teams && manager.Teams.length > 0 ? {
               id: manager.Teams[0].id,
               name: manager.Teams[0].name,
-              shortName: manager.Teams[0].shortname
+              shortName: manager.Teams[0].shortname,
+              logo: manager.Teams[0].logo
             } : null
           }
           

@@ -55,9 +55,10 @@ interface OverviewTabProps {
   }>
   isEditing: boolean
   setIsEditing: (editing: boolean) => void
+  teamLogo?: string | null
 }
 
-export function OverviewTab({ teamData, performanceData, isEditing, setIsEditing }: OverviewTabProps) {
+export function OverviewTab({ teamData, performanceData, isEditing, setIsEditing, teamLogo }: OverviewTabProps) {
   return (
     <div className="space-y-6">
       {/* Team Header Card */}
@@ -65,9 +66,19 @@ export function OverviewTab({ teamData, performanceData, isEditing, setIsEditing
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                <Shield className="w-10 h-10 text-white" />
-              </div>
+              {teamLogo ? (
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+                  <img 
+                    src={teamLogo} 
+                    alt={`${teamData.name} Logo`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Shield className="w-10 h-10 text-white" />
+                </div>
+              )}
               <div>
                 <CardTitle className="text-3xl font-bold text-black drop-shadow-lg">
                   {teamData.name}

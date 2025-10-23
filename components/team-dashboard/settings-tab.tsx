@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,8 @@ import {
   Trash2,
   Edit,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react"
 
 interface TeamSettings {
@@ -33,7 +34,7 @@ interface TeamSettings {
   location: string | null
   founded: string | null
   description: string | null
-  website: string | null
+  logo: string | null
   socialMedia: {
     facebook: string | null
     twitter: string | null
@@ -45,7 +46,7 @@ interface ManagerSettings {
   name: string | null
   email: string | null
   phone: string | null
-  photo: string | null
+  photo?: string | null
   notifications: {
     email: boolean
     sms: boolean
@@ -75,9 +76,12 @@ export function SettingsTab({
 }: SettingsTabProps) {
   const [editingTeam, setEditingTeam] = useState(false)
   const [editingManager, setEditingManager] = useState(false)
+  const [logoPreview, setLogoPreview] = useState<string | null>(teamSettings.logo)
+  const [isUploading, setIsUploading] = useState(false)
 
   const [teamForm, setTeamForm] = useState(teamSettings)
   const [managerForm, setManagerForm] = useState(managerSettings)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSaveTeamSettings = () => {
     onSaveTeamSettings(teamForm)
@@ -87,6 +91,46 @@ export function SettingsTab({
   const handleSaveManagerSettings = () => {
     onSaveManagerSettings(managerForm)
     setEditingManager(false)
+  }
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    setIsUploading(true)
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file)
+    setLogoPreview(previewUrl)
+
+    // Convert to base64 for storage
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string
+      setTeamForm({...teamForm, logo: base64String})
+      setIsUploading(false)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoPreview(null)
+    setTeamForm({...teamForm, logo: null})
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   return (
@@ -182,17 +226,66 @@ export function SettingsTab({
                 )}
               </div>
               <div>
-                <Label htmlFor="team-website" className="text-white/80">Website</Label>
-                {editingTeam ? (
-                  <Input
-                    id="team-website"
-                    value={teamForm.website || ""}
-                    onChange={(e) => setTeamForm({...teamForm, website: e.target.value})}
-                    className="mt-1 bg-white/10 border-white/20 text-white"
-                  />
-                ) : (
-                  <p className="text-white font-medium mt-1">{teamSettings.website || "Website not set"}</p>
-                )}
+                <Label htmlFor="team-logo" className="text-white/80">Team Logo</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  {logoPreview ? (
+                    <div className="relative">
+                      <img 
+                        src={logoPreview} 
+                        alt="Team Logo" 
+                        className="w-20 h-20 rounded-lg object-cover border-2 border-white/20"
+                      />
+                      {editingTeam && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
+                          onClick={handleRemoveLogo}
+                        >
+                          ×
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-lg flex items-center justify-center border-2 border-white/20">
+                      <Upload className="w-8 h-8 text-white/60" />
+                    </div>
+                  )}
+                  
+                  {editingTeam && (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="border-white/20 text-white hover:bg-white/10"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {logoPreview ? 'Change Logo' : 'Upload Logo'}
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-white/60">Max 5MB, JPG/PNG</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
