@@ -34,7 +34,7 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react"
-import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_ALL_MANAGERS_DETAILS } from "@/lib/graphql/queries"
+import { GET_TEAMS, GET_MATCH_SCHEDULES, GET_ALL_MANAGERS_DETAILS, GET_PLAYER_STATISTICS_WITH_NAMES } from "@/lib/graphql/queries"
 
 export function Analytics() {
   const [timeRange, setTimeRange] = useState("6months")
@@ -44,9 +44,10 @@ export function Analytics() {
   const { data: teamsData, loading: teamsLoading, error: teamsError } = useQuery(GET_TEAMS)
   const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
   const { data: managersData, loading: managersLoading, error: managersError } = useQuery(GET_ALL_MANAGERS_DETAILS)
+  const { data: playerStatsData, loading: playerStatsLoading, error: playerStatsError } = useQuery(GET_PLAYER_STATISTICS_WITH_NAMES)
 
   // Loading state
-  if (teamsLoading || matchesLoading || managersLoading) {
+  if (teamsLoading || matchesLoading || managersLoading || playerStatsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -58,7 +59,7 @@ export function Analytics() {
   }
 
   // Error state
-  if (teamsError || matchesError || managersError) {
+  if (teamsError || matchesError || managersError || playerStatsError) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -175,23 +176,83 @@ export function Analytics() {
   const teamPerformanceData = calculateTeamPerformanceData()
   const registrationStatusData = calculateRegistrationStatusData()
 
-  // Additional analytics data (keeping some mock data for now as these might not be in the database)
-  const attendanceData = [
-    { month: "Jan", attendance: 1200, revenue: 24000 },
-    { month: "Feb", attendance: 1800, revenue: 36000 },
-    { month: "Mar", attendance: 1600, revenue: 32000 },
-    { month: "Apr", attendance: 2200, revenue: 44000 },
-    { month: "May", attendance: 2500, revenue: 50000 },
-    { month: "Jun", attendance: 2000, revenue: 40000 },
-  ]
+  // Calculate attendance and revenue data based on approved teams
+  const calculateAttendanceRevenueData = () => {
+    const approvedTeams = teamsData?.Teams?.filter((team: any) => team.approved) || []
+    const approvedTeamsCount = approvedTeams.length
+    const revenuePerTeam = 250000 // 250,000 FRWs per approved team
+    
+    // Generate monthly data for the last 6 months
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+    const currentMonth = new Date().getMonth()
+    
+    return months.map((month, index) => {
+      // Calculate attendance based on approved teams (assuming each team brings ~200-300 fans)
+      const baseAttendance = approvedTeamsCount * 250
+      const attendanceVariation = Math.floor(Math.random() * 100) - 50 // ±50 variation
+      const attendance = Math.max(0, baseAttendance + attendanceVariation)
+      
+      // Revenue is fixed at 250,000 FRWs per approved team
+      const totalRevenue = approvedTeamsCount * revenuePerTeam
+      
+      return {
+        month,
+        attendance,
+        revenue: totalRevenue
+      }
+    })
+  }
 
-  const playerStats = [
-    { name: "Marcus Silva", team: "Lightning United", goals: 12, assists: 8, rating: 9.2 },
-    { name: "Diego Rodriguez", team: "Thunder FC", goals: 10, assists: 6, rating: 8.8 },
-    { name: "Alex Johnson", team: "Velocity FC", goals: 9, assists: 7, rating: 8.5 },
-    { name: "Carlos Santos", team: "Rapid Fire", goals: 8, assists: 9, rating: 8.7 },
-    { name: "Ahmed Hassan", team: "Dynamo FC", goals: 7, assists: 5, rating: 8.1 },
-  ]
+  const attendanceData = calculateAttendanceRevenueData()
+
+  // Calculate top players from real database data
+  const calculateTopPlayers = () => {
+    const playerStats = playerStatsData?.player_statistics || []
+    
+    // Group statistics by player
+    const playerStatsMap: {[key: string]: {name: string, team: string, goals: number, assists: number, matches: number, rating: number}} = {}
+    
+    playerStats.forEach((stat: any) => {
+      if (!stat.players) return // Skip if no player data
+      
+      const playerId = stat.player_id
+      const playerName = stat.players.name
+      const teamName = stat.players.teams?.name || 'Unknown Team'
+      
+      if (!playerStatsMap[playerId]) {
+        playerStatsMap[playerId] = {
+          name: playerName,
+          team: teamName,
+          goals: 0,
+          assists: 0,
+          matches: 0,
+          rating: 0
+        }
+      }
+      
+      playerStatsMap[playerId].goals += stat.goals || 0
+      playerStatsMap[playerId].assists += stat.assists || 0
+      playerStatsMap[playerId].matches += 1
+    })
+    
+    // Calculate rating for each player
+    Object.keys(playerStatsMap).forEach((playerId: string) => {
+      const player = playerStatsMap[playerId]
+      const totalGoals = player.goals || 0
+      const totalAssists = player.assists || 0
+      const totalMatches = player.matches || 1
+      
+      // Calculate rating: (goals * 2 + assists) / matches
+      player.rating = totalMatches > 0 ? (totalGoals * 2 + totalAssists) / totalMatches : 0
+    })
+    
+    // Sort by rating and return top 5
+    return Object.values(playerStatsMap)
+      .sort((a: any, b: any) => b.rating - a.rating)
+      .slice(0, 5)
+  }
+
+  const playerStats = calculateTopPlayers()
 
   const financialData = [
     { category: "Ticket Sales", amount: 125000, percentage: 45 },
@@ -322,31 +383,23 @@ export function Analytics() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/80">Avg Goals/Match</p>
+                <p className="text-sm font-medium text-white/80">Total Revenue</p>
                 <p className="text-2xl font-bold text-white mt-1">
                   {(() => {
-                    const completedMatches = matchesData?.matches?.filter((m: any) => {
-                      const matchDate = new Date(m.dateAndtime)
-                      const now = new Date()
-                      const isPastMatch = matchDate < now
-                      const hasGoals = m.team1Goals !== null && m.team2Goals !== null
-                      
-                      return isPastMatch && hasGoals
-                    }) || []
-                    const totalGoals = completedMatches.reduce((sum: number, match: any) => {
-                      return sum + (match.team1Goals || 0) + (match.team2Goals || 0)
-                    }, 0)
-                    const safeTotalGoals = totalGoals > 10000 ? 0 : totalGoals
-                    return completedMatches.length > 0 ? (safeTotalGoals / completedMatches.length).toFixed(2) : "0.00"
-                  })()}
+                    const approvedTeams = teamsData?.Teams?.filter((team: any) => team.approved) || []
+                    const totalRevenue = approvedTeams.length * 250000
+                    return totalRevenue.toLocaleString('en-US')
+                  })()} FRWs
                 </p>
                 <div className="flex items-center mt-2">
-                  <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                  <span className="text-sm font-medium text-red-300">-0.1 this month</span>
+                  <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                  <span className="text-sm font-medium text-green-300">
+                    {teamsData?.Teams?.filter((team: any) => team.approved).length || 0} approved teams
+                  </span>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
-                <Target className="h-6 w-6 text-orange-600" />
+              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                <Target className="h-6 w-6 text-green-600" />
               </div>
             </div>
           </CardContent>
@@ -445,6 +498,9 @@ export function Analytics() {
               <Calendar className="h-5 w-5" />
               Attendance & Revenue
             </CardTitle>
+            <p className="text-white/60 text-sm mt-2">
+              Revenue: 250,000 FRWs per approved team
+            </p>
           </CardHeader>
           <CardContent>
             <div className="w-full h-[300px]">
@@ -453,7 +509,14 @@ export function Analytics() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis dataKey="month" stroke="rgba(255,255,255,0.7)" />
                   <YAxis stroke="rgba(255,255,255,0.7)" />
-                  <ChartTooltip />
+                  <ChartTooltip 
+                    formatter={(value, name) => {
+                      if (name === 'revenue') {
+                        return [`${Number(value).toLocaleString('en-US')} FRWs`, 'Revenue']
+                      }
+                      return [value, name === 'attendance' ? 'Attendance' : name]
+                    }}
+                  />
                   <Area type="monotone" dataKey="attendance" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
                   <Area type="monotone" dataKey="revenue" stackId="2" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
                 </AreaChart>
@@ -472,32 +535,48 @@ export function Analytics() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {playerStats.map((player, index) => (
-              <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-white">{player.name}</h4>
-                  <Badge variant="outline" className="text-xs">
-                    {player.team}
-                  </Badge>
+            {playerStats.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {playerStats.map((player, index) => (
+                  <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-white">{player.name}</h4>
+                      <Badge variant="outline" className="text-xs">
+                        {player.team}
+                      </Badge>
                     </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/70">Goals:</span>
-                    <span className="text-white font-medium">{player.goals}</span>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/70">Goals:</span>
+                        <span className="text-white font-medium">{player.goals}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/70">Assists:</span>
+                        <span className="text-white font-medium">{player.assists}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/70">Matches:</span>
+                        <span className="text-white font-medium">{player.matches}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white/70">Rating:</span>
+                        <span className="text-white font-medium">
+                          {isNaN(player.rating) ? '0.0' : player.rating.toFixed(1)}
+                        </span>
+                      </div>
                     </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/70">Assists:</span>
-                    <span className="text-white font-medium">{player.assists}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/70">Rating:</span>
-                    <span className="text-white font-medium">{player.rating}</span>
-                    </div>
-                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-white/60" />
                 </div>
-              ))}
-            </div>
+                <p className="text-white/60 text-lg">No player statistics available</p>
+                <p className="text-white/40 text-sm">Player data will appear here once matches are played</p>
+              </div>
+            )}
           </CardContent>
         </Card>
     </div>

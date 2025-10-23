@@ -608,6 +608,33 @@ export const GET_TEAM_PLAYER_STATISTICS = gql`
   }
 `
 
+// Query to get player statistics with player names for analytics
+export const GET_PLAYER_STATISTICS_WITH_NAMES = gql`
+  query getPlayerStatisticsWithNames {
+    player_statistics {
+      id
+      player_id
+      match_id
+      season_id
+      goals
+      assists
+      minutes_played
+      yellow_cards
+      red_cards
+      updated_at
+      players {
+        id
+        name
+        team_id
+        teams {
+          id
+          name
+        }
+      }
+    }
+  }
+`
+
 // Query to get team statistics
 export const GET_TEAM_STATISTICS = gql`
   query getTeamStatistics {
