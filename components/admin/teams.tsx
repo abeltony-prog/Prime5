@@ -32,11 +32,16 @@ import {
   Upload,
   CheckCircle,
   Clock,
+  RefreshCw,
+  Key,
+  Copy,
+  Check,
 } from "lucide-react"
 import { useTeams } from "@/hooks/use-teams"
 import { useMutation } from "@apollo/client"
-import { DELETE_TEAM } from "@/lib/graphql/mutations"
+import { DELETE_TEAM, UPDATE_MANAGER_PASSWORD } from "@/lib/graphql/mutations"
 import { useToast } from "@/hooks/use-toast"
+import { generatePassword, hashPasswordForStorage } from "@/lib/utils/password"
 import { TeamDetails } from "./team-details"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -96,6 +101,10 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [teamForPassword, setTeamForPassword] = useState<Team | null>(null)
+  const [generatedPassword, setGeneratedPassword] = useState("")
+  const [isPasswordCopied, setIsPasswordCopied] = useState(false)
   const [newTeam, setNewTeam] = useState({
     teamName: "",
     shortname: "",
@@ -113,6 +122,8 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   
   // Delete team mutation
   const [deleteTeam, { loading: deleteLoading }] = useMutation(DELETE_TEAM)
+  // Password regeneration mutation
+  const [updateManagerPassword, { loading: passwordLoading }] = useMutation(UPDATE_MANAGER_PASSWORD)
   const { toast } = useToast()
   
   // Use database teams
@@ -153,6 +164,67 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
   const handleDeleteTeam = (team: Team) => {
     setTeamToDelete(team)
     setIsDeleteModalOpen(true)
+  }
+
+  const handleRegeneratePassword = (team: Team) => {
+    setTeamForPassword(team)
+    setIsPasswordModalOpen(true)
+  }
+
+  const regeneratePassword = async () => {
+    if (!teamForPassword) return
+
+    try {
+      // Generate new password
+      const newPassword = generatePassword()
+      setGeneratedPassword(newPassword)
+
+      // Hash the password for storage
+      const hashedPassword = hashPasswordForStorage(newPassword)
+
+      // Update manager password in database
+      await updateManagerPassword({
+        variables: {
+          id: teamForPassword.manager.id,
+          password: hashedPassword
+        }
+      })
+
+      toast({
+        title: "Password Regenerated",
+        description: `New password generated for ${teamForPassword.manager.name}`,
+        duration: 3000,
+      })
+    } catch (error) {
+      toast({
+        title: "Password Update Failed",
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive",
+        duration: 5000,
+      })
+    }
+  }
+
+  const copyPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedPassword)
+      setIsPasswordCopied(true)
+      toast({
+        title: "Password Copied",
+        description: "Password has been copied to clipboard",
+        duration: 2000,
+      })
+      
+      // Reset copied state after 2 seconds
+      setTimeout(() => setIsPasswordCopied(false), 2000)
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy password to clipboard",
+        variant: "destructive",
+        duration: 3000,
+      })
+    }
   }
 
   const confirmDeleteTeam = async () => {
@@ -268,7 +340,7 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
             ) : (
-            <Download className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             )}
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
@@ -419,6 +491,23 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                           <DropdownMenuItem>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit Team
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleRegeneratePassword(team)}
+                            disabled={passwordLoading}
+                            className="text-blue-600"
+                          >
+                            {passwordLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Key className="h-4 w-4 mr-2" />
+                                Regenerate Password
+                              </>
+                            )}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
@@ -680,6 +769,95 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                   className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
                 >
                   Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Regeneration Modal */}
+      {isPasswordModalOpen && teamForPassword && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <Key className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white drop-shadow-lg">Regenerate Password</h2>
+                  <p className="text-white/70">Generate new login credentials</p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-white/90 mb-2">
+                  Generate a new password for <strong>"{teamForPassword.manager.name}"</strong>?
+                </p>
+                <p className="text-sm text-white/60">
+                  This will create a new password that you can share with the team manager for login.
+                </p>
+              </div>
+
+              {generatedPassword && (
+                <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-4 w-4 text-green-400" />
+                    <span className="text-green-200 font-medium">New Password Generated</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-black/20 text-white p-2 rounded text-sm font-mono">
+                      {generatedPassword}
+                    </code>
+                    <Button
+                      size="sm"
+                      onClick={copyPassword}
+                      className="bg-green-600/80 hover:bg-green-700/80 text-white"
+                    >
+                      {isPasswordCopied ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-green-200/80 mt-2">
+                    Click the copy button to copy the password to your clipboard
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={regeneratePassword}
+                  disabled={passwordLoading}
+                  className="flex-1 bg-blue-600/90 backdrop-blur-md hover:bg-blue-700/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {passwordLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Key className="h-4 w-4 mr-2" />
+                      Generate Password
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsPasswordModalOpen(false)
+                    setTeamForPassword(null)
+                    setGeneratedPassword("")
+                    setIsPasswordCopied(false)
+                  }}
+                  disabled={passwordLoading}
+                  className="flex-1 border-white/30 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md"
+                >
+                  Close
                 </Button>
               </div>
             </div>

@@ -314,14 +314,14 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
           <Button variant="outline" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
             <Download className="h-4 w-4 mr-2" />
             Export
-          </Button>
-          <Button 
+                </Button>
+                <Button 
             onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create Season
-          </Button>
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                    <Plus className="h-4 w-4 mr-2" />
+                  Create Season
+                </Button>
         </div>
       </div>
 
