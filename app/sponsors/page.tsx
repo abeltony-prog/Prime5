@@ -27,6 +27,7 @@ export default function SponsorsPage() {
     { name: "North Creators", logo: "https://res.cloudinary.com/dpk7o7zlw/image/upload/f_auto,q_auto/ah059yjosdgn8wq5go5o" },
     { name: "Isimbi Designs", logo: "/logo/isimb.png" },
     { name: "BM", logo: "/logo/BM.png" },
+    // { name: "miniistry of sports", logo: "https://pbs.twimg.com/profile_images/1117314341441810438/yg-1_rnN_400x400.png" },
   ]
 
   const sponsorshipTiers = [
