@@ -33,8 +33,8 @@ export default function HomePage() {
         id: match.id,
         team1: match.Team1?.name || match.team1 || "Unknown Team",
         team2: match.Team2?.name || match.team2 || "Unknown Team",
-        team1Logo: match.Team1?.logo || "/placeholder.svg",
-        team2Logo: match.Team2?.logo || "/placeholder.svg",
+        team1Logo: match.Team1?.logo || null,
+        team2Logo: match.Team2?.logo || null,
         team1Score: match.team1Goals || 0,
         team2Score: match.team2Goals || 0,
         date: matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -346,13 +346,21 @@ export default function HomePage() {
                       {/* Team 1 */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Image
-                            src={match.team1Logo || "/placeholder.svg"}
-                            alt={match.team1}
-                            width={40}
-                            height={40}
-                            className="rounded-full"
-                          />
+                          {match.team1Logo ? (
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                              <img 
+                                src={match.team1Logo} 
+                                alt={`${match.team1} Logo`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                              <span className="text-sm font-bold text-white">
+                                {match.team1.substring(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                           <span className="font-semibold text-white drop-shadow-md">{match.team1}</span>
                         </div>
                         <span className="text-2xl font-bold text-white drop-shadow-lg">{match.team1Score}</span>
@@ -363,13 +371,21 @@ export default function HomePage() {
                       {/* Team 2 */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Image
-                            src={match.team2Logo || "/placeholder.svg"}
-                            alt={match.team2}
-                            width={40}
-                            height={40}
-                            className="rounded-full"
-                          />
+                          {match.team2Logo ? (
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                              <img 
+                                src={match.team2Logo} 
+                                alt={`${match.team2} Logo`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                              <span className="text-sm font-bold text-white">
+                                {match.team2.substring(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                           <span className="font-semibold text-white drop-shadow-md">{match.team2}</span>
                         </div>
                         <span className="text-2xl font-bold text-white drop-shadow-lg">{match.team2Score}</span>

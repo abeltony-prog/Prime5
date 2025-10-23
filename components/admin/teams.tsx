@@ -426,9 +426,19 @@ export function Teams({ teams: initialTeams }: TeamsProps) {
                   <TableRow key={team.name} className="hover:bg-white/10">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <span className="text-sm font-bold text-blue-600">{team.shortname || team.name.substring(0, 2)}</span>
-                        </div>
+                        {team.logo ? (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/20">
+                            <img 
+                              src={team.logo} 
+                              alt={`${team.name} Logo`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span className="text-sm font-bold text-blue-600">{team.shortname || team.name.substring(0, 2)}</span>
+                          </div>
+                        )}
                         <div>
                           <div className="font-medium text-white">{team.name}</div>
                           <div className="text-sm text-white/70">Short: {team.shortname}</div>

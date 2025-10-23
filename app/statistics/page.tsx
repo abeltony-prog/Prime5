@@ -257,6 +257,7 @@ export default function StatisticsPage() {
           return {
             pos: 0, // Will be set after sorting
             team: team?.name || "Unknown Team",
+            teamLogo: team?.logo || null,
             played: parseInt(stat.played) || 0,
             wins: parseInt(stat.wins) || 0,
             draws: parseInt(stat.draws) || 0,
@@ -303,7 +304,9 @@ export default function StatisticsPage() {
           date: match.dateAndtime.split('T')[0],
           time: new Date(match.dateAndtime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           team1: team1?.name || "Unknown Team",
+          team1Logo: team1?.logo || null,
           team2: team2?.name || "Unknown Team",
+          team2Logo: team2?.logo || null,
           group: "A", // Simplified - would need proper group logic
           venue: match.location || "Prime Arena",
         }
@@ -325,7 +328,9 @@ export default function StatisticsPage() {
           id: match.id,
           date: match.dateAndtime.split('T')[0],
           team1: team1?.name || "Unknown Team",
+          team1Logo: team1?.logo || null,
           team2: team2?.name || "Unknown Team",
+          team2Logo: team2?.logo || null,
           score1: parseInt(match.team1Goals) || 0,
           score2: parseInt(match.team2Goals) || 0,
           group: "A", // Simplified - would need proper group logic
@@ -731,6 +736,21 @@ export default function StatisticsPage() {
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
+                      {team.teamLogo ? (
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+                          <img 
+                            src={team.teamLogo} 
+                            alt={`${team.team} Logo`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                          <span className="text-xs font-bold text-white">
+                            {team.team.substring(0, 2).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
                       <span className="font-medium text-white drop-shadow-md">{team.team}</span>
                       {index === 0 && <Badge className="bg-yellow-500/90 backdrop-blur-md text-black">Leader</Badge>}
                     </div>
@@ -1264,10 +1284,44 @@ export default function StatisticsPage() {
                       </div>
                       <div className="space-y-4">
                         <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            {match.team1Logo ? (
+                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+                                <img 
+                                  src={match.team1Logo} 
+                                  alt={`${match.team1} Logo`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                                <span className="text-xs font-bold text-white">
+                                  {match.team1.substring(0, 2).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
                         </div>
                         <div className="text-center text-sm text-white/80 font-medium">VS</div>
                         <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            {match.team2Logo ? (
+                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+                                <img 
+                                  src={match.team2Logo} 
+                                  alt={`${match.team2} Logo`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                                <span className="text-xs font-bold text-white">
+                                  {match.team2.substring(0, 2).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>
                         </div>
                       </div>
@@ -1297,12 +1351,46 @@ export default function StatisticsPage() {
                         <Badge className="mt-2 bg-blue-600/90 backdrop-blur-md text-white">Group {match.group}</Badge>
                       </div>
                       <div className="space-y-4">
-                      <div className="text-center">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            {match.team1Logo ? (
+                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+                                <img 
+                                  src={match.team1Logo} 
+                                  alt={`${match.team1} Logo`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                                <span className="text-xs font-bold text-white">
+                                  {match.team1.substring(0, 2).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
                           <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score1}</p>
-                          </div>
+                        </div>
                         <div className="text-center text-sm text-white/80 font-medium">VS</div>
                         <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            {match.team2Logo ? (
+                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+                                <img 
+                                  src={match.team2Logo} 
+                                  alt={`${match.team2} Logo`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
+                                <span className="text-xs font-bold text-white">
+                                  {match.team2.substring(0, 2).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>
                           <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score2}</p>
                         </div>
