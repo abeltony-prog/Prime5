@@ -32,6 +32,12 @@ export function useAuth() {
   return context
 }
 
+// Safe version of useAuth that doesn't throw during SSR
+export function useAuthSafe() {
+  const context = useContext(AuthContext)
+  return context || { manager: null, isAuthenticated: false, isLoading: true, login: () => {}, logout: () => {} }
+}
+
 interface AuthProviderProps {
   children: ReactNode
 }
@@ -42,14 +48,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     // Check if user is already logged in (e.g., from localStorage)
-    const savedManager = localStorage.getItem("teamManager")
-    if (savedManager) {
-      try {
-        const managerData = JSON.parse(savedManager)
-        setManager(managerData)
-      } catch (error) {
-        console.error("Error parsing saved manager data:", error)
-        localStorage.removeItem("teamManager")
+    // Only run this on client side
+    if (typeof window !== 'undefined') {
+      const savedManager = localStorage.getItem("teamManager")
+      if (savedManager) {
+        try {
+          const managerData = JSON.parse(savedManager)
+          setManager(managerData)
+        } catch (error) {
+          console.error("Error parsing saved manager data:", error)
+          localStorage.removeItem("teamManager")
+        }
       }
     }
     setIsLoading(false)
@@ -57,12 +66,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = (managerData: Manager) => {
     setManager(managerData)
-    localStorage.setItem("teamManager", JSON.stringify(managerData))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("teamManager", JSON.stringify(managerData))
+    }
   }
 
   const logout = () => {
     setManager(null)
-    localStorage.removeItem("teamManager")
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("teamManager")
+    }
   }
 
   const value: AuthContextType = {
