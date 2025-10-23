@@ -1,3 +1,5 @@
 export { EditManagerModal } from './edit-manager-modal'
 export { DeleteManagerModal } from './delete-manager-modal'
 export { AddTeamModal } from './add-team-modal'
+export { CreateSeasonModal } from './create-season-modal'
+export { EditSeasonModal } from './edit-season-modal'
