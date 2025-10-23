@@ -208,16 +208,33 @@ export function Analytics() {
   // Calculate top players from real database data
   const calculateTopPlayers = () => {
     const playerStats = playerStatsData?.player_statistics || []
+    const players = playerStatsData?.players || []
+    const teams = playerStatsData?.Teams || []
+    
+    // Create lookup maps for players and teams
+    const playersMap: {[key: string]: any} = {}
+    const teamsMap: {[key: string]: any} = {}
+    
+    players.forEach((player: any) => {
+      playersMap[player.id] = player
+    })
+    
+    teams.forEach((team: any) => {
+      teamsMap[team.id] = team
+    })
     
     // Group statistics by player
     const playerStatsMap: {[key: string]: {name: string, team: string, goals: number, assists: number, matches: number, rating: number}} = {}
     
     playerStats.forEach((stat: any) => {
-      if (!stat.players) return // Skip if no player data
-      
       const playerId = stat.player_id
-      const playerName = stat.players.name
-      const teamName = stat.players.teams?.name || 'Unknown Team'
+      const player = playersMap[playerId]
+      
+      if (!player) return // Skip if no player data
+      
+      const playerName = player.name
+      const team = teamsMap[player.team_id]
+      const teamName = team?.name || 'Unknown Team'
       
       if (!playerStatsMap[playerId]) {
         playerStatsMap[playerId] = {
@@ -536,30 +553,30 @@ export function Analytics() {
           </CardHeader>
           <CardContent>
             {playerStats.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {playerStats.map((player, index) => (
-                  <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-white">{player.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {player.team}
-                      </Badge>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {playerStats.map((player, index) => (
+              <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-white">{player.name}</h4>
+                  <Badge variant="outline" className="text-xs">
+                    {player.team}
+                  </Badge>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/70">Goals:</span>
-                        <span className="text-white font-medium">{player.goals}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/70">Assists:</span>
-                        <span className="text-white font-medium">{player.assists}</span>
-                      </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Goals:</span>
+                    <span className="text-white font-medium">{player.goals}</span>
+                    </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Assists:</span>
+                    <span className="text-white font-medium">{player.assists}</span>
+                  </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-white/70">Matches:</span>
                         <span className="text-white font-medium">{player.matches}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/70">Rating:</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Rating:</span>
                         <span className="text-white font-medium">
                           {isNaN(player.rating) ? '0.0' : player.rating.toFixed(1)}
                         </span>
@@ -575,7 +592,7 @@ export function Analytics() {
                 </div>
                 <p className="text-white/60 text-lg">No player statistics available</p>
                 <p className="text-white/40 text-sm">Player data will appear here once matches are played</p>
-              </div>
+            </div>
             )}
           </CardContent>
         </Card>

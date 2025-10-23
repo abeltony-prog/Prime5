@@ -622,15 +622,15 @@ export const GET_PLAYER_STATISTICS_WITH_NAMES = gql`
       yellow_cards
       red_cards
       updated_at
-      players {
-        id
-        name
-        team_id
-        teams {
-          id
-          name
-        }
-      }
+    }
+    players {
+      id
+      name
+      team_id
+    }
+    Teams {
+      id
+      name
     }
   }
 `
