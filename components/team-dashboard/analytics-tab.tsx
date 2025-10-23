@@ -211,81 +211,81 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Key Performance Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-green-400" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Win Rate</p>
-                <p className="text-2xl font-bold text-white">{analyticsData.teamStats.winPercentage}%</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/60 text-xs sm:text-sm">Win Rate</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analyticsData.teamStats.winPercentage}%</p>
               </div>
             </div>
-            <Progress value={analyticsData.teamStats.winPercentage} className="mt-3" />
+            <Progress value={analyticsData.teamStats.winPercentage} className="mt-2 sm:mt-3" />
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <Target className="w-6 h-6 text-blue-400" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Goals Per Match</p>
-                <p className="text-2xl font-bold text-white">{analyticsData.teamStats.avgGoalsPerMatch}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/60 text-xs sm:text-sm">Goals Per Match</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analyticsData.teamStats.avgGoalsPerMatch}</p>
               </div>
             </div>
-            <Progress value={analyticsData.teamStats.avgGoalsPerMatch * 10} className="mt-3" />
+            <Progress value={analyticsData.teamStats.avgGoalsPerMatch * 10} className="mt-2 sm:mt-3" />
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                <Shield className="w-6 h-6 text-yellow-400" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Clean Sheets</p>
-                <p className="text-2xl font-bold text-white">{analyticsData.teamStats.cleanSheets}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/60 text-xs sm:text-sm">Clean Sheets</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analyticsData.teamStats.cleanSheets}</p>
               </div>
             </div>
-            <Progress value={analyticsData.teamStats.totalMatches > 0 ? (analyticsData.teamStats.cleanSheets / analyticsData.teamStats.totalMatches) * 100 : 0} className="mt-3" />
+            <Progress value={analyticsData.teamStats.totalMatches > 0 ? (analyticsData.teamStats.cleanSheets / analyticsData.teamStats.totalMatches) * 100 : 0} className="mt-2 sm:mt-3" />
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-purple-400" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Possession</p>
-                <p className="text-2xl font-bold text-white">{analyticsData.teamStats.possession}%</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/60 text-xs sm:text-sm">Possession</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analyticsData.teamStats.possession}%</p>
               </div>
             </div>
-            <Progress value={analyticsData.teamStats.possession} className="mt-3" />
+            <Progress value={analyticsData.teamStats.possession} className="mt-2 sm:mt-3" />
           </CardContent>
         </Card>
       </div>
 
       {/* Performance Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Activity className="h-5 w-5" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg text-base sm:text-lg">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
               Season Performance
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="pt-0">
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={analyticsData.seasonPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="period" stroke="rgba(255,255,255,0.7)" />
@@ -310,14 +310,14 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <BarChart3 className="h-5 w-5" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg text-base sm:text-lg">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
               Match Results Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="pt-0">
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={analyticsData.seasonPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="period" stroke="rgba(255,255,255,0.7)" />
@@ -332,29 +332,29 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
       </div>
 
       {/* Team Form and Player Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg text-base sm:text-lg">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
               Recent Form
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 justify-center">
+          <CardContent className="pt-0">
+            <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
               {(analyticsData.formData || []).map((match, index) => (
                 <div
                   key={index}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${getFormColor(match.result)}`}
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg ${getFormColor(match.result)}`}
                   title={`${match.match}: ${match.result} (${match.goalsFor}-${match.goalsAgainst})`}
                 >
                   {match.result}
                 </div>
               ))}
             </div>
-            <div className="mt-4 text-center text-white/60 text-sm">
+            <div className="mt-3 sm:mt-4 text-center text-white/60 text-xs sm:text-sm">
               <p>Last {(analyticsData.formData || []).length} matches</p>
-              <p className="mt-2">
+              <p className="mt-1 sm:mt-2">
                 <span className="text-green-400">W</span> = Win, 
                 <span className="text-yellow-400"> D</span> = Draw, 
                 <span className="text-red-400"> L</span> = Loss
@@ -364,28 +364,28 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Users className="h-5 w-5" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg text-base sm:text-lg">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5" />
               Top Performers
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent className="pt-0">
+            <div className="space-y-2 sm:space-y-3">
               {(analyticsData.playerStats || []).slice(0, 5).map((player: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">{index + 1}</span>
+                <div key={index} className="flex items-center justify-between p-2 sm:p-3 bg-white/5 rounded-lg">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-xs sm:text-sm">{index + 1}</span>
                     </div>
-                    <div>
-                      <p className="text-white font-medium">{player.name}</p>
-                      <p className="text-white/60 text-sm">{player.goals} goals, {player.assists} assists</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-medium text-sm sm:text-base truncate">{player.name}</p>
+                      <p className="text-white/60 text-xs sm:text-sm">{player.goals || 0} goals, {player.assists || 0} assists</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-400" />
-                    <span className="text-white font-medium">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                    <span className="text-white font-medium text-sm sm:text-base">
                       {isNaN(player.rating) ? '0.0' : (Math.round(player.rating * 10) / 10).toFixed(1)}
                     </span>
                   </div>
@@ -398,64 +398,64 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
 
       {/* Advanced Statistics */}
       <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Zap className="h-5 w-5" />
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg text-base sm:text-lg">
+            <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
             Advanced Statistics
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-4">
-              <h4 className="text-white font-semibold text-lg">Attacking</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-white/70">Shots on Target</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.shotsOnTarget}</span>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="text-white font-semibold text-base sm:text-lg">Attacking</h4>
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Shots on Target</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.shotsOnTarget}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Pass Accuracy</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.passAccuracy}%</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Pass Accuracy</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.passAccuracy}%</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Goals Scored</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.goalsScored}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-white font-semibold text-lg">Defending</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-white/70">Clean Sheets</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.cleanSheets}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Goals Conceded</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.goalsConceded}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Possession</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.possession}%</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Goals Scored</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.goalsScored}</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h4 className="text-white font-semibold text-lg">Discipline</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-white/70">Yellow Cards</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.yellowCards}</span>
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="text-white font-semibold text-base sm:text-lg">Defending</h4>
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Clean Sheets</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.cleanSheets}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Red Cards</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.redCards}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Goals Conceded</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.goalsConceded}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Fouls</span>
-                  <span className="text-white font-medium">{analyticsData.teamStats.fouls}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Possession</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.possession}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="text-white font-semibold text-base sm:text-lg">Discipline</h4>
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Yellow Cards</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.yellowCards}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Red Cards</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.redCards}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/70 text-sm sm:text-base">Fouls</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{analyticsData.teamStats.fouls}</span>
                 </div>
               </div>
             </div>
