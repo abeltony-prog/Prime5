@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { GET_SEASONS, GET_SEASON, GET_SEASON_GROUPS, GET_SEASON_TEAM_STATISTICS, GET_MATCH_SCHEDULES, GET_TEAMS_BY_IDS } from '@/lib/graphql/queries'
-import { ADD_SEASON, UPDATE_SEASON, DELETE_SEASON, CREATE_GROUPS_AND_TEAM_STATISTICS, CREATE_GROUP, CREATE_TEAM_STATISTICS, ADD_MATCH_SCHEDULER } from '@/lib/graphql/mutations'
+import { ADD_SEASON, UPDATE_SEASON, DELETE_SEASON, CREATE_GROUPS_AND_TEAM_STATISTICS, CREATE_GROUP, CREATE_TEAM_STATISTICS, ADD_MATCH_SCHEDULER, DELETE_TEAM_STATISTICS_FOR_SEASON, DELETE_GROUPS_FOR_SEASON } from '@/lib/graphql/mutations'
 
 export function useSeasons() {
   const { data, loading, error, refetch } = useQuery(GET_SEASONS)
@@ -170,4 +170,14 @@ export function useSeasonTeamStatistics(seasonId: string) {
     error,
     refetch
   }
-} 
+}
+
+export function useDeleteTeamStatisticsForSeason() {
+  const [deleteTeamStatistics, { loading, error }] = useMutation(DELETE_TEAM_STATISTICS_FOR_SEASON)
+  return { deleteTeamStatistics, loading, error }
+}
+
+export function useDeleteGroupsForSeason() {
+  const [deleteGroups, { loading, error }] = useMutation(DELETE_GROUPS_FOR_SEASON)
+  return { deleteGroups, loading, error }
+}

@@ -127,6 +127,24 @@ export const CREATE_TEAM_STATISTICS = gql`
   }
 `
 
+// Mutation to delete team statistics for a season (for re-randomization)
+export const DELETE_TEAM_STATISTICS_FOR_SEASON = gql`
+  mutation deleteTeamStatisticsForSeason($season_id: uuid!) {
+    delete_team_statistics(where: {season_id: {_eq: $season_id}}) {
+      affected_rows
+    }
+  }
+`
+
+// Mutation to delete groups for a season (for re-randomization)
+export const DELETE_GROUPS_FOR_SEASON = gql`
+  mutation deleteGroupsForSeason($season_id: uuid!) {
+    delete_groups(where: {season_id: {_eq: $season_id}}) {
+      affected_rows
+    }
+  }
+`
+
 export const ADD_MATCH_SCHEDULER = gql`
   mutation addMatchSchedylar($team2: uuid!, $team1: uuid!, $location: String!, $dateAndtime: String!, $season_id: uuid!) {
     insert_matches(objects: {team2: $team2, team1: $team1, location: $location, dateAndtime: $dateAndtime, season_id: $season_id}) {
