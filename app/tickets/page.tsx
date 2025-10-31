@@ -131,17 +131,18 @@ export default function TicketsPage() {
   const ticketTypes = [
     {
       id: "free",
-      name: "Free Pass",
+      name: "Kigal Universe Pass",
       price: 0,
       originalPrice: null,
       icon: Gift,
       color: "green-dark",
       features: [
+        "Kigal Universe Specific",
+        "Registration to enter universe",
         "Access to all matches",
         "General seating",
         "Prime Arena access",
-        "Match program included",
-        "Registration required"
+        "Match program included"
       ],
       popular: false,
       isFree: true,
@@ -338,7 +339,7 @@ export default function TicketsPage() {
           </h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {ticketTypes.map((ticket) => {
+            {ticketTypes.filter((ticket) => !ticket.soldOut).map((ticket) => {
               const colors = getColorClasses(ticket.color)
               const IconComponent = ticket.icon
               
