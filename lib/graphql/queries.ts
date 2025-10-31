@@ -773,4 +773,18 @@ export const GET_APPLICATION_BY_ID = gql`
   }
 `
 
+// Query to get all fans
+export const GET_ALL_FANS = gql`
+  query getAllFans {
+    fans {
+      TicketNumber
+      create_at
+      email
+      fullname
+      id
+      phone
+    }
+  }
+`
+
  

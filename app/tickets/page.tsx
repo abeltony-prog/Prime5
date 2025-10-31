@@ -8,8 +8,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { useState } from "react"
-import { useQuery } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client'
 import { GET_MATCH_SCHEDULES } from "@/lib/graphql/queries"
+import { ADD_FAN_DETAILS } from "@/lib/graphql/mutations"
 import { generateTicketPDF, generateTicketId, getValidUntilDate, TicketData } from "@/lib/utils/ticket-generator"
 
 export default function TicketsPage() {
@@ -26,6 +27,9 @@ export default function TicketsPage() {
   const [generatedTicketData, setGeneratedTicketData] = useState<TicketData | null>(null)
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null)
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null)
+  
+  // Mutation to add fan to database
+  const [addFan, { loading: isAddingFan }] = useMutation(ADD_FAN_DETAILS)
 
   // Function to generate QR code for modal display
   const generateQRCode = async (ticketData: TicketData): Promise<string> => {
@@ -58,7 +62,6 @@ export default function TicketsPage() {
   // Test function to verify PDF generation
   const testPDFGeneration = async () => {
     try {
-      console.log('Testing PDF generation...')
       const testTicketData: TicketData = {
         id: 'TEST-123',
         name: 'Test User',
@@ -85,7 +88,6 @@ export default function TicketsPage() {
       setPdfDataUrl(pdfUrl)
       setQrCodeDataUrl(qrUrl)
       setTicketGenerated(true)
-      console.log('Test PDF generated successfully')
     } catch (error) {
       console.error('Test PDF generation failed:', error)
     }
@@ -94,26 +96,13 @@ export default function TicketsPage() {
   // Fetch real match data from database
   const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
 
-  // Function to get the start and end of current week
-  const getCurrentWeekRange = () => {
-    const now = new Date()
-    const startOfWeek = new Date(now)
-    startOfWeek.setDate(now.getDate() - now.getDay()) // Start from Sunday
-    startOfWeek.setHours(0, 0, 0, 0)
-    
-    const endOfWeek = new Date(startOfWeek)
-    endOfWeek.setDate(startOfWeek.getDate() + 6) // End on Saturday
-    endOfWeek.setHours(23, 59, 59, 999)
-    
-    return { startOfWeek, endOfWeek }
-  }
-
-  // Process upcoming matches for current week
+  // Process all upcoming matches (not just current week)
   const upcomingMatches = matchesData?.matches
     ?.filter((match: any) => {
       const matchDate = new Date(match.dateAndtime)
-      const { startOfWeek, endOfWeek } = getCurrentWeekRange()
-      return match.status === 'scheduled' && matchDate >= startOfWeek && matchDate <= endOfWeek
+      const now = new Date()
+      // Include matches with status 'scheduled' or 'Pending' that are in the future
+      return (match.status === 'scheduled' || match.status === 'Pending') && matchDate > now
     })
     ?.sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
     ?.map((match: any) => {
@@ -155,7 +144,8 @@ export default function TicketsPage() {
         "Registration required"
       ],
       popular: false,
-      isFree: true
+      isFree: true,
+      soldOut: false
     },
     {
       id: "single",
@@ -170,7 +160,8 @@ export default function TicketsPage() {
         "Prime Arena access",
         "Match program included"
       ],
-      popular: false
+      popular: false,
+      soldOut: true
     },
     {
       id: "season",
@@ -187,7 +178,8 @@ export default function TicketsPage() {
         "Free parking",
         "Meet & greet opportunities"
       ],
-      popular: true
+      popular: true,
+      soldOut: true
     },
     {
       id: "group",
@@ -204,7 +196,8 @@ export default function TicketsPage() {
         "Group photo opportunity"
       ],
       popular: false,
-      minPeople: 5
+      minPeople: 5,
+      soldOut: true
     }
   ]
 
@@ -214,13 +207,11 @@ export default function TicketsPage() {
       return
     }
 
-    console.log('Starting ticket generation...')
     setIsGeneratingTicket(true)
     
     try {
       // Generate ticket data
       const ticketId = generateTicketId()
-      console.log('Generated ticket ID:', ticketId)
       
       const ticketData: TicketData = {
         id: ticketId,
@@ -246,18 +237,21 @@ export default function TicketsPage() {
         validUntil: getValidUntilDate('free')
       }
 
-      console.log('Ticket data:', ticketData)
-      console.log('Upcoming matches:', upcomingMatches)
+      // Add fan to database first
+      await addFan({
+        variables: {
+          fullname: freeFormData.name,
+          phone: freeFormData.phone,
+          email: freeFormData.email,
+          TicketNumber: ticketId
+        }
+      })
 
       // Generate PDF data URL
-      console.log('Generating PDF...')
       const pdfUrl = await generateTicketPDF(ticketData)
-      console.log('PDF generation completed')
       
       // Generate QR code for modal display
-      console.log('Generating QR code for modal...')
       const qrUrl = await generateQRCode(ticketData)
-      console.log('QR code generated')
       
       // Store the generated data
       setGeneratedTicketData(ticketData)
@@ -322,7 +316,7 @@ export default function TicketsPage() {
               Get Your Tickets
             </Badge>
             <Link href="/tickets/scan">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20 bg-white/10 backdrop-blur-md">
                 <QrCode className="h-4 w-4 mr-2" />
                 Scan QR Code
               </Button>
@@ -353,12 +347,17 @@ export default function TicketsPage() {
                   key={ticket.id}
                   className={`bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 ${
                     ticket.popular ? `border-2 ${colors.border} relative` : ''
-                  } ${selectedTicket === ticket.id ? 'ring-2 ring-white/50' : ''}`}
-                  onClick={() => setSelectedTicket(ticket.id)}
+                  } ${selectedTicket === ticket.id ? 'ring-2 ring-white/50' : ''} ${ticket.soldOut ? 'opacity-60' : ''}`}
+                  onClick={() => !ticket.soldOut && setSelectedTicket(ticket.id)}
                 >
                   {ticket.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-yellow-500 text-black px-4 py-1 font-bold">Most Popular</Badge>
+                    </div>
+                  )}
+                  {ticket.soldOut && (
+                    <div className="absolute -top-3 right-3">
+                      <Badge className="bg-red-600 text-white px-4 py-1 font-bold">Sold Out</Badge>
                     </div>
                   )}
                   
@@ -404,8 +403,9 @@ export default function TicketsPage() {
                           setSelectedTicket(ticket.id)
                         }
                       }}
+                      disabled={ticket.soldOut}
                     >
-                      {ticket.isFree ? 'Register for Free' : (selectedTicket === ticket.id ? 'Selected' : 'Select Package')}
+                      {ticket.soldOut ? 'Sold Out' : (ticket.isFree ? 'Register for Free' : (selectedTicket === ticket.id ? 'Selected' : 'Select Package'))}
                     </Button>
                   </CardContent>
                 </Card>
@@ -642,79 +642,6 @@ export default function TicketsPage() {
                 <CreditCard className="h-5 w-5 mr-2" />
                 Proceed to Payment
               </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Upcoming Matches */}
-        <div className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12 drop-shadow-lg">
-            This Week's Matches
-          </h2>
-          
-          {matchesLoading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              <p className="text-white/70 mt-4">Loading upcoming matches...</p>
-            </div>
-          ) : matchesError ? (
-            <div className="text-center py-12">
-              <p className="text-red-400">Error loading matches. Please try again later.</p>
-            </div>
-          ) : upcomingMatches.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="h-16 w-16 text-white/30 mx-auto mb-4" />
-              <p className="text-white/70 text-lg">No matches scheduled for this week</p>
-              <p className="text-white/50 text-sm mt-2">Check back later for upcoming matches</p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingMatches.map((match: any) => (
-                <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-white/70" />
-                        <span className="text-white/70 text-sm">{match.date}</span>
-                      </div>
-                      <Badge className="bg-green-600/90 text-white">RWF {match.price}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center mb-4">
-                      <div className="flex items-center justify-center gap-4 mb-2">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-white">{match.team1}</div>
-                        </div>
-                        <div className="text-white/50">VS</div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-white">{match.team2}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-center gap-4 text-white/70 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {match.time}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {match.venue}
-                        </div>
-                      </div>
-                    </div>
-                    <Button 
-                      className="w-full bg-blue-600/90 backdrop-blur-md hover:bg-blue-700/90"
-                      onClick={() => {
-                        // Set single match as selected and show quantity selector
-                        setSelectedTicket('single')
-                        setQuantity(1)
-                      }}
-                    >
-                      Get Tickets
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           )}
         </div>

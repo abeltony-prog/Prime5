@@ -500,3 +500,12 @@ export const DELETE_MANAGER_BY_EMAIL = gql`
     }
   }
 `
+
+// Mutation to add fan details (free ticket registration)
+export const ADD_FAN_DETAILS = gql`
+  mutation addFanDetals($phone: String = "", $fullname: String = "", $email: String = "", $TicketNumber: String = "") {
+    insert_fans(objects: {phone: $phone, fullname: $fullname, email: $email, TicketNumber: $TicketNumber}) {
+      affected_rows
+    }
+  }
+`
