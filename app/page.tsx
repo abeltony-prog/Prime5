@@ -9,13 +9,14 @@ import Image from "next/image"
 import { CountdownTimer } from "@/components/countdown-timer"
 import { Navigation } from "@/components/navigation"
 import { useQuery } from '@apollo/client'
-import { GET_MATCH_SCHEDULES } from "@/lib/graphql/queries"
+import { GET_MATCH_SCHEDULES, GET_TEAMS } from "@/lib/graphql/queries"
 
 export default function HomePage() {
   const nextMatchDate = new Date("2024-02-15T19:00:00")
 
   // Fetch real match data from database
   const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
+  const { data: teamsData, loading: teamsLoading, error: teamsError } = useQuery(GET_TEAMS)
 
   const sponsors = [
     { name: "Plasera", logo: "/logo/plasera.png" },
@@ -69,12 +70,38 @@ export default function HomePage() {
       }
     }) || []
 
-  const leagueStats = [
-    { label: "Teams", value: "16", icon: Users },
-    { label: "Matches", value: "48", icon: Calendar },
-    { label: "Goals", value: "156", icon: Trophy },
-    { label: "Fans", value: "10K+", icon: Star },
-  ]
+  // Calculate real league statistics
+  const calculateLeagueStats = () => {
+    // Count all teams regardless of status
+    const teams = teamsData?.Teams || []
+    const totalTeams = teams.length
+
+    // Count all matches that have happened (completed matches)
+    const allMatches = matchesData?.matches || []
+    const completedMatches = allMatches.filter((match: any) => match.status === 'completed')
+    const totalMatches = completedMatches.length
+
+    // Calculate total goals from completed matches
+    const totalGoals = completedMatches.reduce((sum: number, match: any) => {
+      const team1Goals = parseInt(match.team1Goals) || 0
+      const team2Goals = parseInt(match.team2Goals) || 0
+      return sum + team1Goals + team2Goals
+    }, 0)
+
+    // Estimate fans based on matches (assume average attendance)
+    const fansPerMatch = 250 // Estimated average attendance
+    const estimatedFans = totalMatches * fansPerMatch
+    const fansDisplay = estimatedFans >= 1000 ? `${(estimatedFans / 1000).toFixed(1)}K+` : `${estimatedFans}+`
+
+    return [
+      { label: "Teams", value: totalTeams.toString(), icon: Users },
+      { label: "Matches", value: totalMatches.toString(), icon: Calendar },
+      { label: "Goals", value: totalGoals.toString(), icon: Trophy },
+      { label: "Fans", value: fansDisplay, icon: Star },
+    ]
+  }
+
+  const leagueStats = calculateLeagueStats()
 
   return (
     <div className="min-h-screen relative">
