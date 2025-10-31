@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield } from "lucide-react"
+import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { CountdownTimer } from "@/components/countdown-timer"
@@ -38,6 +38,30 @@ export default function HomePage() {
         team2Logo: match.Team2?.logo || null,
         team1Score: match.team1Goals || 0,
         team2Score: match.team2Goals || 0,
+        date: matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        time: matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        venue: match.location || "Prime Arena",
+        fullDate: matchDate
+      }
+    }) || []
+
+  // Process upcoming matches from database
+  const upcomingMatches = matchesData?.matches
+    ?.filter((match: any) => {
+      const matchDate = new Date(match.dateAndtime)
+      const now = new Date()
+      return matchDate > now
+    })
+    ?.sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
+    ?.slice(0, 4) // Show only the next 4 upcoming matches
+    ?.map((match: any) => {
+      const matchDate = new Date(match.dateAndtime)
+      return {
+        id: match.id,
+        team1: match.Team1?.name || match.team1 || "Unknown Team",
+        team2: match.Team2?.name || match.team2 || "Unknown Team",
+        team1Logo: match.Team1?.logo || null,
+        team2Logo: match.Team2?.logo || null,
         date: matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         time: matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         venue: match.location || "Prime Arena",
@@ -128,161 +152,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Tickets Section */}
-      <section className="py-16 relative">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <Badge className="bg-green-100/90 backdrop-blur-sm text-green-800 px-4 py-2 rounded-full font-semibold mb-4 border border-green-200/50">Get Your Tickets</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Secure Your Spot</h2>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-md">
-              Don't miss out on the most exciting futsal action. Get your tickets now and be part of the Prime5 experience.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {/* Single Match Ticket */}
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-              <CardHeader className="text-center pb-4">
-                <div className="mx-auto mb-4 p-3 bg-green-600/20 rounded-full w-fit">
-                  <Ticket className="h-8 w-8 text-green-400" />
-                </div>
-                <CardTitle className="text-2xl text-white">Single Match</CardTitle>
-                <div className="text-4xl font-bold text-green-400 mt-2">RWF 2,000</div>
-                <p className="text-white/70 text-sm">per person</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span>Access to one match</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Shield className="h-4 w-4 text-blue-400" />
-                    <span>Secure seating</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Users className="h-4 w-4 text-purple-400" />
-                    <span>Prime Arena access</span>
-                  </li>
-                </ul>
-                <Button className="w-full bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                  Buy Now
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Season Pass */}
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border-2 border-yellow-400/50 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-yellow-500 text-black px-4 py-1 font-bold">Most Popular</Badge>
-              </div>
-              <CardHeader className="text-center pb-4">
-                <div className="mx-auto mb-4 p-3 bg-yellow-600/20 rounded-full w-fit">
-                  <Trophy className="h-8 w-8 text-yellow-400" />
-                </div>
-                <CardTitle className="text-2xl text-white">Season Pass</CardTitle>
-                <div className="text-4xl font-bold text-yellow-400 mt-2">RWF 15,000</div>
-                <p className="text-white/70 text-sm">for entire season</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span>Access to all matches</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Shield className="h-4 w-4 text-blue-400" />
-                    <span>VIP seating priority</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Users className="h-4 w-4 text-purple-400" />
-                    <span>Exclusive merchandise</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Calendar className="h-4 w-4 text-green-400" />
-                    <span>Playoff access included</span>
-                  </li>
-                </ul>
-                <Button className="w-full bg-yellow-600/90 backdrop-blur-md hover:bg-yellow-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-black font-bold">
-                  Buy Season Pass
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Group Package */}
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-              <CardHeader className="text-center pb-4">
-                <div className="mx-auto mb-4 p-3 bg-blue-600/20 rounded-full w-fit">
-                  <Users className="h-8 w-8 text-blue-400" />
-                </div>
-                <CardTitle className="text-2xl text-white">Group Package</CardTitle>
-                <div className="text-4xl font-bold text-blue-400 mt-2">RWF 8,000</div>
-                <p className="text-white/70 text-sm">per person (min 5 people)</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span>Access to all matches</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Shield className="h-4 w-4 text-blue-400" />
-                    <span>Group seating together</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Users className="h-4 w-4 text-purple-400" />
-                    <span>Special group discounts</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-white/90">
-                    <Calendar className="h-4 w-4 text-green-400" />
-                    <span>Flexible scheduling</span>
-                  </li>
-                </ul>
-                <Button className="w-full bg-blue-600/90 backdrop-blur-md hover:bg-blue-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                  Buy Group Package
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Payment Methods */}
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-2xl font-bold text-white mb-6 drop-shadow-lg">Secure Payment Methods</h3>
-              <div className="flex justify-center items-center gap-8 flex-wrap">
-                <div className="flex items-center gap-2 text-white/90">
-                  <CreditCard className="h-6 w-6 text-green-400" />
-                  <span>Mobile Money</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/90">
-                  <CreditCard className="h-6 w-6 text-blue-400" />
-                  <span>Bank Transfer</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/90">
-                  <CreditCard className="h-6 w-6 text-purple-400" />
-                  <span>Cash on Arrival</span>
-                </div>
-              </div>
-              <p className="text-white/70 text-sm mt-4">All payments are secure and encrypted</p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       {/* Upcoming Matches */}
       <section className="py-16 relative">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Happened Matches</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Coming up Games</h2>
               <p className="text-lg text-white/90 drop-shadow-md">Last season fixtures</p>
             </div>
             <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
-              <Link href="/fixtures">View All Fixtures</Link>
+              <Link href="/statistics">View All Fixtures</Link>
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {matchesLoading ? (
               // Loading state
               Array.from({ length: 3 }).map((_, index) => (
@@ -322,98 +205,88 @@ export default function HomePage() {
                   Try Again
                 </Button>
               </div>
-            ) : completedMatches.length === 0 ? (
-              // No completed matches
+            ) : upcomingMatches.length === 0 ? (
+              // No upcoming matches
               <div className="col-span-full text-center py-12">
-                <div className="text-white/70 mb-4">No completed matches yet</div>
-                <p className="text-white/50">Check back after the season starts!</p>
+                <div className="text-white/70 mb-4">No upcoming matches scheduled</div>
+                <p className="text-white/50">Check back for upcoming fixtures!</p>
               </div>
             ) : (
-              // Real match data
-              completedMatches.map((match: any, index: number) => (
-                <Card key={match.id || index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+              // Real match data - upcoming matches
+              upcomingMatches.map((match: any, index: number) => (
+                <Card key={match.id || index} className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-[1.02] group overflow-hidden">
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <Badge variant="outline" className="text-xs bg-white/20 backdrop-blur-sm border-white/30 text-white">
-                        {match.date}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-sm text-white/90">
-                        <Clock className="w-4 h-4" />
-                        {match.time}
+                    {/* Header with Date, Time, Location */}
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white/20">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/20 rounded-lg">
+                          <Calendar className="w-4 h-4 text-blue-300" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-white">{match.date}</div>
+                          <div className="text-xs text-white/70 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {match.time}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 rounded-lg border border-green-400/30">
+                        <MapPin className="w-4 h-4 text-green-300" />
+                        <span className="text-xs font-medium text-green-300">{match.venue}</span>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    {/* Teams Matchup */}
+                    <div className="flex items-center justify-between gap-4">
                       {/* Team 1 */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {match.team1Logo ? (
-                            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                              <img 
-                                src={match.team1Logo} 
-                                alt={`${match.team1} Logo`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                              <span className="text-sm font-bold text-white">
-                                {match.team1.substring(0, 2).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <span className="font-semibold text-white drop-shadow-md">{match.team1}</span>
-                        </div>
-                        <span className="text-2xl font-bold text-white drop-shadow-lg">{match.team1Score}</span>
+                      <div className="flex items-center gap-3 flex-1 justify-end">
+                        {/* <div className="text-right"> */}
+                          {/* <div className="font-bold text-white text-lg drop-shadow-md mb-1">{match.team1}</div> */}
+                          {/* <div className="text-xs text-white/60">Home</div>
+                        </div> */}
+                        {match.team1Logo ? (
+                          <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg group-hover:shadow-xl transition-all">
+                            <img 
+                              src={match.team1Logo} 
+                              alt={`${match.team1} Logo`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500/30 to-green-500/30 rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg">
+                            <span className="text-xl font-bold text-white">
+                              {match.team1.substring(0, 2).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="text-center text-sm text-white/80 font-medium">FINAL</div>
+                      {/* VS Badge */}
+                      <div className="px-4 py-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full border-2 border-yellow-400/30 shadow-lg">
+                        <span className="text-xs font-bold text-yellow-300 drop-shadow-lg">VS</span>
+                      </div>
 
                       {/* Team 2 */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {match.team2Logo ? (
-                            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                              <img 
-                                src={match.team2Logo} 
-                                alt={`${match.team2} Logo`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                              <span className="text-sm font-bold text-white">
-                                {match.team2.substring(0, 2).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <span className="font-semibold text-white drop-shadow-md">{match.team2}</span>
-                        </div>
-                        <span className="text-2xl font-bold text-white drop-shadow-lg">{match.team2Score}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 pt-4 border-t border-white/20">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm text-white/80">
-                          <MapPin className="w-4 h-4" />
-                          {match.venue}
-                        </div>
-                        <Badge 
-                          className={`${
-                            match.team1Score > match.team2Score 
-                              ? "bg-green-600/90 text-white" 
-                              : match.team1Score < match.team2Score 
-                              ? "bg-red-600/90 text-white" 
-                              : "bg-yellow-600/90 text-white"
-                          } backdrop-blur-md border-0 shadow-lg`}
-                        >
-                          {match.team1Score > match.team2Score 
-                            ? `${match.team1} Won` 
-                            : match.team1Score < match.team2Score 
-                            ? `${match.team2} Won` 
-                            : "Draw"}
-                        </Badge>
+                      <div className="flex items-center gap-3 flex-1 justify-start">
+                        {match.team2Logo ? (
+                          <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg group-hover:shadow-xl transition-all">
+                            <img 
+                              src={match.team2Logo} 
+                              alt={`${match.team2} Logo`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500/30 to-green-500/30 rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg">
+                            <span className="text-xl font-bold text-white">
+                              {match.team2.substring(0, 2).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                        {/* <div className="text-left">
+                          <div className="font-bold text-white text-lg drop-shadow-md mb-1">{match.team2}</div>
+                          <div className="text-xs text-white/60">Away</div>
+                        </div> */}
                       </div>
                     </div>
                   </CardContent>
