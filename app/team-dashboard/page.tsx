@@ -475,10 +475,10 @@ function TeamDashboardContent() {
 
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-x-hidden">
       {/* Professional Header */}
       <div className="relative z-10 bg-white/10 backdrop-blur-xl shadow-2xl border-b border-white/20">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {currentTeam?.logo ? (
@@ -529,9 +529,9 @@ function TeamDashboardContent() {
         </div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 py-8">
+      <div className="relative z-10 container mx-auto px-4 md:px-6 py-8 overflow-x-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6 bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
+          <TabsList className="grid w-full grid-cols-5 md:grid-cols-6 lg:w-fit lg:grid-cols-6 bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl overflow-x-auto">
             <TabsTrigger
               value="overview"
               className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
