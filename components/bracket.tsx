@@ -6,6 +6,7 @@ interface Team {
   name: string
   flag: string
   code: string
+  logo?: string | null
   points?: number
 }
 
@@ -33,7 +34,17 @@ function TeamCard({ team, isWinner = false }: { team: Team; isWinner?: boolean }
           : "bg-white/90 hover:bg-white text-slate-700 border-slate-200 hover:shadow-sm"
       }`}
     >
-      <span className="text-xl">{team.flag}</span>
+      {team.logo ? (
+        <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-slate-300 shadow-md flex-shrink-0">
+          <img
+            src={team.logo}
+            alt={`${team.name} Logo`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <span className="text-xl">{team.flag}</span>
+      )}
       <span className="text-sm font-medium">{team.name}</span>
       {team.points && (
         <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full ml-auto">
@@ -152,6 +163,7 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
   const groupATeamsFormatted = groupATeams.map((team, index) => ({
     name: team.name,
     flag: "⚽",
+    logo: (team as any).logo || null,
     code: team.name.substring(0, 3).toUpperCase(),
     points: team.points,
     position: index + 1
@@ -159,7 +171,8 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
 
   const groupBTeamsFormatted = groupBTeams.map((team, index) => ({
     name: team.name,
-    flag: "⚽", 
+    flag: "⚽",
+    logo: (team as any).logo || null,
     code: team.name.substring(0, 3).toUpperCase(),
     points: team.points,
     position: index + 1
@@ -195,7 +208,17 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
                     <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
                       <span className="text-green-700 font-bold text-sm">{index + 1}</span>
                     </div>
-                    <span className="text-xl">{team.flag}</span>
+                    {team.logo ? (
+                      <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-slate-300 shadow-md flex-shrink-0">
+                        <img
+                          src={team.logo}
+                          alt={`${team.name} Logo`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xl">{team.flag}</span>
+                    )}
                     <span className="text-sm font-medium text-slate-700">{team.name}</span>
                     <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full ml-auto">
                       {team.points} pts
@@ -291,7 +314,17 @@ export const Bracket = ({ knockoutMatches, groupATeams, groupBTeams, activeSeaso
                     <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
                       <span className="text-blue-700 font-bold text-sm">{index + 1}</span>
                     </div>
-                    <span className="text-xl">{team.flag}</span>
+                    {team.logo ? (
+                      <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-slate-300 shadow-md flex-shrink-0">
+                        <img
+                          src={team.logo}
+                          alt={`${team.name} Logo`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xl">{team.flag}</span>
+                    )}
                     <span className="text-sm font-medium text-slate-700">{team.name}</span>
                     <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full ml-auto">
                       {team.points} pts

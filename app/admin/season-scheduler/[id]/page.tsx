@@ -22,7 +22,8 @@ import {
   MoreHorizontal,
   X,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  ArrowRightLeft as Swap
 } from "lucide-react"
 import { useSeasons, useSeason, useUpdateSeason, useSeasonGroups, useSeasonTeamStatistics, useCreateGroup, useCreateTeamStatistics, useAddMatchScheduler, useMatchSchedules, useTeamsByIds, useDeleteTeamStatisticsForSeason, useDeleteGroupsForSeason } from '@/hooks/use-seasons'
 import { useTeams } from "@/hooks/use-teams"
@@ -573,7 +574,7 @@ export default function SeasonDetailsPage() {
 
       const defaultVenue = "Prime Arena"
       const matches = []
-      
+
       // Calculate available weekends for scheduling
       const numWeekends = Math.ceil(totalWeekends / 2) // Each weekend has Sat + Sun
       const weekendsToSchedule = Math.min(4, numWeekends)
@@ -581,7 +582,7 @@ export default function SeasonDetailsPage() {
       // Generate matches ensuring all teams play equal number of games
       const groupAMatchups = []
       const groupBMatchups = []
-      
+
       // Determine target games based on group sizes to ensure ALL teams play equal games
       const maxGroupSize = Math.max(groupATeams.length, groupBTeams.length)
       const minGroupSize = Math.min(groupATeams.length, groupBTeams.length)
@@ -637,7 +638,7 @@ export default function SeasonDetailsPage() {
           })
         }
       }
-      
+
       // Calculate rounds needed for Group A
       const roundsNeededA = targetGamesPerTeam / gamesPerRoundA
       
@@ -667,7 +668,7 @@ export default function SeasonDetailsPage() {
           })
         }
       }
-      
+
       // Calculate rounds needed for Group B
       const roundsNeededB = targetGamesPerTeam / gamesPerRoundB
       
@@ -706,6 +707,11 @@ export default function SeasonDetailsPage() {
       let groupAIndex = 0
       let groupBIndex = 0
       
+      // Track games per team for verification
+      const teamGameCounts = new Map<string, number>()
+      groupATeams.forEach((team: any) => teamGameCounts.set(team.team_id, 0))
+      groupBTeams.forEach((team: any) => teamGameCounts.set(team.team_id, 0))
+
       for (let weekend = 1; weekend <= weekendsToSchedule; weekend++) {
         const saturdayIndex = (weekend - 1) * 2
         const sundayIndex = (weekend - 1) * 2 + 1
@@ -724,42 +730,48 @@ export default function SeasonDetailsPage() {
             let validMatchup = null
 
             // Try Group A first, then Group B
-            if (game === 0 && groupAIndex < shuffledGroupA.length) {
-              const potentialMatchup = shuffledGroupA[groupAIndex]
+            if (game === 0 && shuffledGroupA.length > 0) {
               const saturdayTeams = teamsPlayedPerDay.get(saturday)
               
-              // Check if teams are available on Saturday
-              if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                  !saturdayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupAIndex++
-              } else {
-                // If teams are busy, skip to next matchup
-                groupAIndex++
+              // Try to find a valid matchup from Group A, looking ahead if needed
+              let attempts = 0
+              while (attempts < shuffledGroupA.length && !validMatchup) {
+                const checkIndex = (groupAIndex + attempts) % shuffledGroupA.length
+                const potentialMatchup = shuffledGroupA[checkIndex]
+                
+                if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                    !saturdayTeams.has(potentialMatchup.team2_id)) {
+                  validMatchup = potentialMatchup
+                  groupAIndex = (checkIndex + 1) % shuffledGroupA.length
+                }
+                attempts++
               }
-            } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
-              const potentialMatchup = shuffledGroupB[groupBIndex]
-              const saturdayTeams = teamsPlayedPerDay.get(saturday)
               
-              if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                  !saturdayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupBIndex++
-              } else {
-                // If teams are busy, skip to next matchup
-                groupBIndex++
-              }
-            }
-
-            // If we didn't get a valid matchup, wrap around and reuse matchups
-            if (!validMatchup) {
-              if (game === 0 && shuffledGroupA.length > 0) {
-                // Wrap around for Group A
+              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
+              if (!validMatchup) {
                 const reuseIndex = groupAIndex % shuffledGroupA.length
                 validMatchup = shuffledGroupA[reuseIndex]
                 groupAIndex++
-              } else if (game === 1 && shuffledGroupB.length > 0) {
-                // Wrap around for Group B
+              }
+            } else if (game === 1 && shuffledGroupB.length > 0) {
+              const saturdayTeams = teamsPlayedPerDay.get(saturday)
+              
+              // Try to find a valid matchup from Group B, looking ahead if needed
+              let attempts = 0
+              while (attempts < shuffledGroupB.length && !validMatchup) {
+                const checkIndex = (groupBIndex + attempts) % shuffledGroupB.length
+                const potentialMatchup = shuffledGroupB[checkIndex]
+                
+                if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                    !saturdayTeams.has(potentialMatchup.team2_id)) {
+                  validMatchup = potentialMatchup
+                  groupBIndex = (checkIndex + 1) % shuffledGroupB.length
+                }
+                attempts++
+              }
+              
+              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
+              if (!validMatchup) {
                 const reuseIndex = groupBIndex % shuffledGroupB.length
                 validMatchup = shuffledGroupB[reuseIndex]
                 groupBIndex++
@@ -767,17 +779,17 @@ export default function SeasonDetailsPage() {
             }
 
             if (validMatchup) {
-              matches.push({
+                matches.push({
                 id: `match-${Date.now()}-w${weekend}-sat-${game}`,
                 team1_id: validMatchup.team1_id,
                 team2_id: validMatchup.team2_id,
-                date: saturday,
+                  date: saturday,
                 time: '',
                 group_id: validMatchup.groupId,
-                venue: defaultVenue,
-                status: 'scheduled',
+                  venue: defaultVenue,
+                  status: 'scheduled',
                 weekend: weekend,
-                day: 'Saturday',
+                  day: 'Saturday',
                 groupName: validMatchup.groupName,
                 type: 'group-stage' as const
               })
@@ -787,6 +799,12 @@ export default function SeasonDetailsPage() {
               teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
               teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
               teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
+              
+              // Track game counts
+              teamGameCounts.set(validMatchup.team1_id, (teamGameCounts.get(validMatchup.team1_id) || 0) + 1)
+              teamGameCounts.set(validMatchup.team2_id, (teamGameCounts.get(validMatchup.team2_id) || 0) + 1)
+            } else {
+              console.log(`WARNING: No matchup found for Weekend ${weekend}, Saturday, Game ${game}`)
             }
           }
           
@@ -795,37 +813,48 @@ export default function SeasonDetailsPage() {
           for (let game = 0; game < 2; game++) {
             let validMatchup = null
 
-            if (game === 0 && groupAIndex < shuffledGroupA.length) {
-              const potentialMatchup = shuffledGroupA[groupAIndex]
+            if (game === 0 && shuffledGroupA.length > 0) {
               const sundayTeams = teamsPlayedPerDay.get(sunday)
               
-              if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                  !sundayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupAIndex++
-              } else {
-                groupAIndex++
+              // Try to find a valid matchup from Group A, looking ahead if needed
+              let attempts = 0
+              while (attempts < shuffledGroupA.length && !validMatchup) {
+                const checkIndex = (groupAIndex + attempts) % shuffledGroupA.length
+                const potentialMatchup = shuffledGroupA[checkIndex]
+                
+                if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                    !sundayTeams.has(potentialMatchup.team2_id)) {
+                  validMatchup = potentialMatchup
+                  groupAIndex = (checkIndex + 1) % shuffledGroupA.length
+                }
+                attempts++
               }
-            } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
-              const potentialMatchup = shuffledGroupB[groupBIndex]
-              const sundayTeams = teamsPlayedPerDay.get(sunday)
               
-              if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                  !sundayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupBIndex++
-              } else {
-                groupBIndex++
-              }
-            }
-
-            // If we didn't get a valid matchup, wrap around and reuse matchups
-            if (!validMatchup) {
-              if (game === 0 && shuffledGroupA.length > 0) {
+              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
+              if (!validMatchup) {
                 const reuseIndex = groupAIndex % shuffledGroupA.length
                 validMatchup = shuffledGroupA[reuseIndex]
                 groupAIndex++
-              } else if (game === 1 && shuffledGroupB.length > 0) {
+              }
+            } else if (game === 1 && shuffledGroupB.length > 0) {
+              const sundayTeams = teamsPlayedPerDay.get(sunday)
+              
+              // Try to find a valid matchup from Group B, looking ahead if needed
+              let attempts = 0
+              while (attempts < shuffledGroupB.length && !validMatchup) {
+                const checkIndex = (groupBIndex + attempts) % shuffledGroupB.length
+                const potentialMatchup = shuffledGroupB[checkIndex]
+                
+                if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                    !sundayTeams.has(potentialMatchup.team2_id)) {
+                  validMatchup = potentialMatchup
+                  groupBIndex = (checkIndex + 1) % shuffledGroupB.length
+                }
+                attempts++
+              }
+              
+              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
+              if (!validMatchup) {
                 const reuseIndex = groupBIndex % shuffledGroupB.length
                 validMatchup = shuffledGroupB[reuseIndex]
                 groupBIndex++
@@ -853,10 +882,24 @@ export default function SeasonDetailsPage() {
               teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
               teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
               teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
+              
+              // Track game counts
+              teamGameCounts.set(validMatchup.team1_id, (teamGameCounts.get(validMatchup.team1_id) || 0) + 1)
+              teamGameCounts.set(validMatchup.team2_id, (teamGameCounts.get(validMatchup.team2_id) || 0) + 1)
             }
           }
         }
       }
+      
+      // Log game counts for verification
+      console.log("Game counts after weekends 1-3:")
+      teamGameCounts.forEach((count, teamId) => {
+        const team = getTeamById(teamId)
+        console.log(`  ${team?.name || teamId}: ${count} games`)
+      })
+      const minGames = Math.min(...Array.from(teamGameCounts.values()))
+      const maxGames = Math.max(...Array.from(teamGameCounts.values()))
+      console.log(`  Min games: ${minGames}, Max games: ${maxGames}, Target: ${targetGamesPerTeam}`)
       
       // Weekend 4 - Saturday: Quarterfinals - Handle last Saturday with placeholder logic
       const lastSaturday = findLastSaturday(weekendDates)
@@ -936,12 +979,26 @@ export default function SeasonDetailsPage() {
             teamsPlayedPerDay.get(lastSaturday).add(team2.team_id)
             teamsPlayedPerWeekend.get(4).add(team1.team_id)
             teamsPlayedPerWeekend.get(4).add(team2.team_id)
+            
+            // Track game counts
+            teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
+            teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
           }
         }
       }
       
       // Note: Weekend 4 Sunday is reserved for playoffs and is NOT included in randomization
       // Playoffs will be scheduled separately after league standings are finalized
+
+      // Log final game counts
+      console.log("Final game counts after all weekends:")
+      teamGameCounts.forEach((count, teamId) => {
+        const team = getTeamById(teamId)
+        console.log(`  ${team?.name || teamId}: ${count} games`)
+      })
+      const finalMinGames = Math.min(...Array.from(teamGameCounts.values()))
+      const finalMaxGames = Math.max(...Array.from(teamGameCounts.values()))
+      console.log(`  Final - Min games: ${finalMinGames}, Max games: ${finalMaxGames}`)
 
       setScheduledMatches(matches)
       
@@ -1113,32 +1170,32 @@ export default function SeasonDetailsPage() {
           const saturday = weekendDates[saturdayIndex]
           const sunday = weekendDates[sundayIndex]
           
-          if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
-          if (!teamsPlayedPerDay.has(sunday)) teamsPlayedPerDay.set(sunday, new Set())
-          
+        if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
+        if (!teamsPlayedPerDay.has(sunday)) teamsPlayedPerDay.set(sunday, new Set())
+        
           // Saturday: 2 matches
-          for (let game = 0; game < 2; game++) {
-            let validMatchup = null
+        for (let game = 0; game < 2; game++) {
+          let validMatchup = null
 
-            if (game === 0 && groupAIndex < shuffledGroupA.length) {
-              const potentialMatchup = shuffledGroupA[groupAIndex]
-              const saturdayTeams = teamsPlayedPerDay.get(saturday)
-              
-              if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                  !saturdayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupAIndex++
+          if (game === 0 && groupAIndex < shuffledGroupA.length) {
+            const potentialMatchup = shuffledGroupA[groupAIndex]
+            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+            
+            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                !saturdayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupAIndex++
               } else {
-                groupAIndex++
-              }
-            } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
-              const potentialMatchup = shuffledGroupB[groupBIndex]
-              const saturdayTeams = teamsPlayedPerDay.get(saturday)
-              
-              if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                  !saturdayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupBIndex++
+              groupAIndex++
+            }
+          } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
+            const potentialMatchup = shuffledGroupB[groupBIndex]
+            const saturdayTeams = teamsPlayedPerDay.get(saturday)
+            
+            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
+                !saturdayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupBIndex++
               } else {
                 groupBIndex++
               }
@@ -1152,56 +1209,56 @@ export default function SeasonDetailsPage() {
               } else if (game === 1 && shuffledGroupB.length > 0) {
                 const reuseIndex = groupBIndex % shuffledGroupB.length
                 validMatchup = shuffledGroupB[reuseIndex]
-                groupBIndex++
-              }
-            }
-
-            if (validMatchup) {
-              matches.push({
-                id: `match-${Date.now()}-w${weekend}-sat-${game}`,
-                team1_id: validMatchup.team1_id,
-                team2_id: validMatchup.team2_id,
-                date: saturday,
-                time: '',
-                group_id: validMatchup.groupId,
-                venue: defaultVenue,
-                status: 'scheduled',
-                weekend: weekend,
-                day: 'Saturday',
-                groupName: validMatchup.groupName,
-                type: 'group-stage' as const
-              })
-              
-              teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
-              teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
+              groupBIndex++
             }
           }
-          
-          // Sunday: 2 matches
-          for (let game = 0; game < 2; game++) {
-            let validMatchup = null
 
-            if (game === 0 && groupAIndex < shuffledGroupA.length) {
-              const potentialMatchup = shuffledGroupA[groupAIndex]
-              const sundayTeams = teamsPlayedPerDay.get(sunday)
-              
-              if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                  !sundayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupAIndex++
+          if (validMatchup) {
+                matches.push({
+                id: `match-${Date.now()}-w${weekend}-sat-${game}`,
+              team1_id: validMatchup.team1_id,
+              team2_id: validMatchup.team2_id,
+              date: saturday,
+              time: '',
+              group_id: validMatchup.groupId,
+              venue: defaultVenue,
+              status: 'scheduled',
+                weekend: weekend,
+              day: 'Saturday',
+              groupName: validMatchup.groupName,
+                type: 'group-stage' as const
+            })
+            
+            teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
+            teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
+              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
+              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
+          }
+        }
+        
+          // Sunday: 2 matches
+        for (let game = 0; game < 2; game++) {
+          let validMatchup = null
+
+          if (game === 0 && groupAIndex < shuffledGroupA.length) {
+            const potentialMatchup = shuffledGroupA[groupAIndex]
+            const sundayTeams = teamsPlayedPerDay.get(sunday)
+            
+            if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                !sundayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupAIndex++
               } else {
-                groupAIndex++
-              }
-            } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
-              const potentialMatchup = shuffledGroupB[groupBIndex]
-              const sundayTeams = teamsPlayedPerDay.get(sunday)
-              
-              if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                  !sundayTeams.has(potentialMatchup.team2_id)) {
-                validMatchup = potentialMatchup
-                groupBIndex++
+              groupAIndex++
+            }
+          } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
+            const potentialMatchup = shuffledGroupB[groupBIndex]
+            const sundayTeams = teamsPlayedPerDay.get(sunday)
+            
+            if (!sundayTeams.has(potentialMatchup.team1_id) && 
+                !sundayTeams.has(potentialMatchup.team2_id)) {
+              validMatchup = potentialMatchup
+              groupBIndex++
               } else {
                 groupBIndex++
               }
@@ -1215,28 +1272,28 @@ export default function SeasonDetailsPage() {
               } else if (game === 1 && shuffledGroupB.length > 0) {
                 const reuseIndex = groupBIndex % shuffledGroupB.length
                 validMatchup = shuffledGroupB[reuseIndex]
-                groupBIndex++
-              }
+              groupBIndex++
             }
+          }
 
-            if (validMatchup) {
-              matches.push({
+          if (validMatchup) {
+            matches.push({
                 id: `match-${Date.now()}-w${weekend}-sun-${game}`,
-                team1_id: validMatchup.team1_id,
-                team2_id: validMatchup.team2_id,
-                date: sunday,
-                time: '',
-                group_id: validMatchup.groupId,
-                venue: defaultVenue,
-                status: 'scheduled',
+              team1_id: validMatchup.team1_id,
+              team2_id: validMatchup.team2_id,
+                  date: sunday,
+              time: '',
+              group_id: validMatchup.groupId,
+                  venue: defaultVenue,
+                  status: 'scheduled',
                 weekend: weekend,
-                day: 'Sunday',
-                groupName: validMatchup.groupName,
+                  day: 'Sunday',
+              groupName: validMatchup.groupName,
                 type: 'group-stage' as const
-              })
-              
-              teamsPlayedPerDay.get(sunday).add(validMatchup.team1_id)
-              teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
+            })
+            
+            teamsPlayedPerDay.get(sunday).add(validMatchup.team1_id)
+            teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
               teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
               teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
             }
@@ -1668,6 +1725,96 @@ export default function SeasonDetailsPage() {
   const [numberOfGroups, setNumberOfGroups] = useState(2)
   const [defaultVenue, setDefaultVenue] = useState("Prime Arena")
   const [isSchedulingPerformance, setIsSchedulingPerformance] = useState(false)
+  
+  // Match swapping state
+  const [selectedMatchForSwap, setSelectedMatchForSwap] = useState<string | null>(null)
+
+  // Swap teams between two matches (on any day)
+  const swapMatches = (matchId1: string, matchId2: string) => {
+    const match1 = scheduledMatches.find(m => m.id === matchId1)
+    const match2 = scheduledMatches.find(m => m.id === matchId2)
+    
+    if (!match1 || !match2) {
+      toast({
+        title: "Cannot Swap",
+        description: "One or both matches not found",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Check if either match is a placeholder
+    if (!match1.team2_id || !match2.team2_id) {
+      toast({
+        title: "Cannot Swap",
+        description: "Cannot swap placeholder matches",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Swap the teams between matches (keeping their dates)
+    const updatedMatches = scheduledMatches.map(m => {
+      if (m.id === matchId1) {
+        return {
+          ...m,
+          team1_id: match2.team1_id,
+          team2_id: match2.team2_id
+        }
+      }
+      if (m.id === matchId2) {
+        return {
+          ...m,
+          team1_id: match1.team1_id,
+          team2_id: match1.team2_id
+        }
+      }
+      return m
+    })
+    
+    setScheduledMatches(updatedMatches)
+    setSelectedMatchForSwap(null)
+    
+    toast({
+      title: "Matches Swapped!",
+      description: "Teams have been swapped between the two matches.",
+    })
+  }
+
+  const handleMatchClick = (matchId: string, match: any) => {
+    // Only allow swapping for non-placeholder matches
+    if (!match.team2_id) {
+      toast({
+        title: "Cannot Select",
+        description: "Cannot select placeholder matches",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    if (!selectedMatchForSwap) {
+      // First match selected
+      setSelectedMatchForSwap(matchId)
+      toast({
+        title: "Match Selected",
+        description: "Click another match (any day) to swap teams",
+      })
+    } else {
+      // Second match selected
+      if (selectedMatchForSwap === matchId) {
+        // Deselect if clicking the same match
+        setSelectedMatchForSwap(null)
+        toast({
+          title: "Selection Cleared",
+          description: "Match selection has been cleared.",
+        })
+        return
+      }
+      
+      // Perform the swap
+      swapMatches(selectedMatchForSwap, matchId)
+    }
+  }
 
   if (loading) {
     return (
@@ -2052,90 +2199,93 @@ export default function SeasonDetailsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-3">
                 {matchSchedules
                   .filter((match: any) => match.season_id === seasonId)
-                  .map((match: any, index: number) => {
-                    // Generate different colors for each card
-                    const colors = [
-                      { bg: 'from-blue-500/20 to-purple-600/20', border: 'border-blue-400/30', accent: 'text-blue-600' },
-                      { bg: 'from-green-500/20 to-emerald-600/20', border: 'border-green-400/30', accent: 'text-green-600' },
-                      { bg: 'from-orange-500/20 to-red-500/20', border: 'border-orange-400/30', accent: 'text-orange-600' },
-                      { bg: 'from-purple-500/20 to-pink-600/20', border: 'border-purple-400/30', accent: 'text-purple-600' },
-                      { bg: 'from-teal-500/20 to-cyan-600/20', border: 'border-teal-400/30', accent: 'text-teal-600' },
-                      { bg: 'from-indigo-500/20 to-blue-600/20', border: 'border-indigo-400/30', accent: 'text-indigo-600' }
-                    ]
-                    const colorScheme = colors[index % colors.length]
-                    
-                    return (
-                      <div 
-                        key={match.id} 
-                        className={`relative group overflow-hidden rounded-2xl bg-gradient-to-br ${colorScheme.bg} backdrop-blur-xl border ${colorScheme.border} hover:scale-105 transition-all duration-300 hover:shadow-2xl`}
-                        style={{
-                          backgroundImage: 'url(/mainbg.jpg)',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center'
-                        }}
-                      >
-                        {/* Glass overlay */}
-                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-2xl"></div>
-                        
-                        {/* Content */}
-                        <div className="relative z-10 p-6">
-                          {/* Header */}
-                          <div className="flex items-center justify-between mb-4">
-                            <Badge 
-                              className={`text-xs font-semibold px-3 py-1 bg-white/20 backdrop-blur-sm border-0 text-white`}
-                            >
-                              {match.location}
-                            </Badge>
-                            <div className="text-xs text-white/70 font-mono">
-                              #{match.id}
+                  .map((match: any) => (
+                    <div 
+                      key={match.id} 
+                      className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-4 hover:bg-white/10 transition-all duration-200"
+                    >
+                      <div className="flex items-center justify-between">
+                        {/* Teams with logos */}
+                        <div className="flex items-center gap-6 flex-1">
+                          {/* Team 1 */}
+                          <div className="flex items-center gap-3">
+                            {match.Team1?.logo ? (
+                              <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
+                                <img
+                                  src={match.Team1.logo}
+                                  alt={`${match.Team1.name} Logo`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
+                                <span className="text-sm font-bold text-white">
+                                  {match.Team1?.name?.substring(0, 2).toUpperCase() || 'T1'}
+                                </span>
+                              </div>
+                            )}
+                            <div className="text-white font-semibold">
+                              {match.Team1?.name || `Team ${match.team1}`}
                             </div>
                           </div>
                           
-                          {/* Teams */}
-                          <div className="text-center space-y-4 mb-6">
-                            {/* Team 1 */}
-                            <div className="font-bold text-white text-xl drop-shadow-lg">
-                              {match.Team1?.name || `Team ${match.team1}`}
-                            </div>
-                            
-                            {/* VS */}
-                            <div className="text-white/80 font-semibold text-lg tracking-wider">VS</div>
-                            
-                            {/* Team 2 */}
-                            <div className="font-bold text-white text-xl drop-shadow-lg">
+                          {/* VS */}
+                          <div className="text-white/60 font-medium">vs</div>
+                          
+                          {/* Team 2 */}
+                          <div className="flex items-center gap-3">
+                            {match.Team2?.logo ? (
+                              <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
+                                <img
+                                  src={match.Team2.logo}
+                                  alt={`${match.Team2.name} Logo`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
+                                <span className="text-sm font-bold text-white">
+                                  {match.Team2?.name?.substring(0, 2).toUpperCase() || 'T2'}
+                                </span>
+                              </div>
+                            )}
+                            <div className="text-white font-semibold">
                               {match.Team2?.name || `Team ${match.team2}`}
                             </div>
                           </div>
-                          
-                          {/* Date and Time */}
-                          <div className="pt-4 border-t border-white/20">
-                            <div className="text-center">
-                              <div className="text-sm font-bold text-white mb-1">
-                                {new Date(match.dateAndtime).toLocaleDateString('en-US', { 
-                                  weekday: 'long', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })}
-                              </div>
-                              <div className="text-xs text-white/80 font-medium">
-                                {new Date(match.dateAndtime).toLocaleTimeString([], { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </div>
+                        </div>
+                        
+                        {/* Date, Time, Venue */}
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <div className="text-sm text-white/80">
+                              {new Date(match.dateAndtime).toLocaleDateString('en-US', { 
+                                month: 'short',
+                                day: 'numeric' 
+                              })}
+                            </div>
+                            <div className="text-xs text-white/60 flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(match.dateAndtime).toLocaleTimeString([], { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
                             </div>
                           </div>
                           
-                          {/* Decorative elements */}
-                          <div className="absolute top-2 right-2 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
-                          <div className="absolute bottom-2 left-2 w-12 h-12 bg-white/5 rounded-full blur-xl"></div>
+                          <Badge 
+                            variant="outline"
+                            className="text-xs bg-white/10 backdrop-blur-sm text-white border-white/20 px-3 py-1"
+                          >
+                            {match.location}
+                          </Badge>
                         </div>
                       </div>
-                    )
-                  })}
+                    </div>
+                  ))}
               </div>
             )}
           </CardContent>
@@ -2665,8 +2815,8 @@ export default function SeasonDetailsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                View Season Groups & Statistics
+              <Users className="h-5 w-5" />
+              View Season Groups & Statistics
               </div>
               {/* Show Edit Groups button only if season hasn't started */}
               {status.status === 'upcoming' && (
@@ -2927,6 +3077,30 @@ export default function SeasonDetailsPage() {
                   </Badge>
                 </div>
 
+                {/* Swap Instructions */}
+                {selectedMatchForSwap && (
+                  <div className="p-4 bg-blue-500/20 backdrop-blur-sm rounded-lg border border-blue-400/30 flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-blue-300 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-200">
+                        Match selected for swap
+                      </p>
+                      <p className="text-xs text-blue-200/80 mt-0.5">
+                        Click another match (any day) to swap teams. Click the selected match again to cancel.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {!selectedMatchForSwap && scheduledMatches.some(m => m.team2_id) && (
+                  <div className="p-3 bg-gray-500/10 backdrop-blur-sm rounded-lg border border-gray-400/20 flex items-center gap-2">
+                    <Swap className="h-4 w-4 text-gray-300 flex-shrink-0" />
+                    <p className="text-xs text-gray-300">
+                      💡 <strong>Tip:</strong> Click any match to swap teams with another match from any day
+                    </p>
+                  </div>
+                )}
+
                 {/* Group matches by date */}
                 {(() => {
                   const matchesByDate = scheduledMatches.reduce((acc: any, match) => {
@@ -2955,11 +3129,28 @@ export default function SeasonDetailsPage() {
                             const team1 = getTeamById(match.team1_id)
                             const team2 = match.team2_id ? getTeamById(match.team2_id) : null
                             const isPlaceholder = match.type === 'placeholder' || !match.team2_id
+                            const isSelected = selectedMatchForSwap === match.id
+                            const isSwapable = !isPlaceholder // Only non-placeholder matches can be swapped
                             
                             return (
-                              <div key={match.id} className="flex items-center justify-between p-3 border border-white/20 rounded-lg bg-white/5 backdrop-blur-sm">
+                              <div 
+                                key={match.id} 
+                                onClick={() => isSwapable && handleMatchClick(match.id, match)}
+                                className={`flex items-center justify-between p-3 border rounded-lg backdrop-blur-sm transition-all cursor-pointer ${
+                                  isSelected 
+                                    ? 'border-blue-400 bg-blue-500/20 shadow-lg' 
+                                    : isSwapable 
+                                      ? 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10' 
+                                      : 'border-white/20 bg-white/5 cursor-not-allowed'
+                                }`}
+                              >
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3">
+                                    {isSwapable && (
+                                      <Badge variant="outline" className={`text-xs ${isSelected ? 'bg-blue-600 text-white' : 'bg-white/10 text-white/70'}`}>
+                                        {isSelected ? 'Selected' : 'Click to swap'}
+                                      </Badge>
+                                    )}
                                     <span className="font-medium text-white">
                                       {team1?.name || team1?.team_name || `Team ${match.team1_id}`}
                                     </span>
@@ -2967,9 +3158,9 @@ export default function SeasonDetailsPage() {
                                     {isPlaceholder ? (
                                       <span className="font-medium text-yellow-300 text-lg">?</span>
                                     ) : (
-                                      <span className="font-medium text-white">
-                                        {team2?.name || team2?.team_name || `Team ${match.team2_id}`}
-                                      </span>
+                                    <span className="font-medium text-white">
+                                      {team2?.name || team2?.team_name || `Team ${match.team2_id}`}
+                                    </span>
                                     )}
                                   </div>
                                   <div className="text-sm text-white/70 mt-1">
@@ -2977,17 +3168,17 @@ export default function SeasonDetailsPage() {
                                       <Badge variant="secondary" className="bg-yellow-500/20 backdrop-blur-sm text-yellow-300 border-yellow-400/30">Pending Opponent</Badge>
                                     ) : (
                                       <>
-                                        Group: {seasonGroups.find((g: any) => g.id === match.group_id)?.name || 'N/A'} | 
-                                        Weekend {match.weekend} - {match.day}
-                                        {match.type === 'performance' && (
-                                          <Badge variant="secondary" className="ml-2 bg-white/10 backdrop-blur-sm text-white border-white/20">Performance</Badge>
+                                                                         Group: {seasonGroups.find((g: any) => g.id === match.group_id)?.name || 'N/A'} | 
+                                    Weekend {match.weekend} - {match.day}
+                                    {match.type === 'performance' && (
+                                      <Badge variant="secondary" className="ml-2 bg-white/10 backdrop-blur-sm text-white border-white/20">Performance</Badge>
                                         )}
                                       </>
                                     )}
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center space-x-2 mt-2">
+                                <div className="flex items-center space-x-2 mt-2" onClick={(e) => e.stopPropagation()}>
                                   <Input
                                     value={match.venue}
                                     onChange={(e) => {

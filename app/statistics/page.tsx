@@ -295,7 +295,6 @@ export default function StatisticsPage() {
         return matchDate > now
       })
       .sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
-      .slice(0, 8)
       .map((match: any) => {
         const team1 = teams.find((t: any) => t.id === match.team1)
         const team2 = teams.find((t: any) => t.id === match.team2)
@@ -320,7 +319,6 @@ export default function StatisticsPage() {
         return isPastMatch && hasGoals
       })
       .sort((a: any, b: any) => new Date(b.dateAndtime).getTime() - new Date(a.dateAndtime).getTime())
-      .slice(0, 8)
       .map((match: any) => {
         const team1 = teams.find((t: any) => t.id === match.team1)
         const team2 = teams.find((t: any) => t.id === match.team2)
@@ -577,12 +575,14 @@ export default function StatisticsPage() {
         },
         groupATeams: groupATeams.map(team => ({
           name: team.name,
+          logo: team.logo || null,
           points: team.points || 0,
           goalDifference: team.goalDifference || 0,
           goalsFor: team.goalsFor || 0
         })),
         groupBTeams: groupBTeams.map(team => ({
           name: team.name,
+          logo: team.logo || null,
           points: team.points || 0,
           goalDifference: team.goalDifference || 0,
           goalsFor: team.goalsFor || 0
@@ -647,12 +647,14 @@ export default function StatisticsPage() {
       knockoutMatches: { quarterfinals, semifinals, final },
       groupATeams: groupATeams.map(team => ({
         name: team.name,
+        logo: team.logo || null,
         points: team.points || 0,
         goalDifference: team.goalDifference || 0,
         goalsFor: team.goalsFor || 0
       })),
       groupBTeams: groupBTeams.map(team => ({
         name: team.name,
+        logo: team.logo || null,
         points: team.points || 0,
         goalDifference: team.goalDifference || 0,
         goalsFor: team.goalsFor || 0
@@ -680,11 +682,10 @@ export default function StatisticsPage() {
   const upcomingMatches = fixtures.upcomingMatches
   const pastResults = fixtures.pastResults
 
-  const filteredUpcoming =
-    selectedGroup === "all" ? upcomingMatches : upcomingMatches.filter((match: any) => match.group === selectedGroup)
+  // Show all matches without group filtering
+  const filteredUpcoming = upcomingMatches
 
-  const filteredResults =
-    selectedGroup === "all" ? pastResults : pastResults.filter((match: any) => match.group === selectedGroup)
+  const filteredResults = pastResults
 
 
 
@@ -1243,97 +1244,90 @@ export default function StatisticsPage() {
               </div>
             </div>
 
-            {/* Group Filter */}
-            <div className="flex justify-center">
-              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
-                <Button
-                  variant={selectedGroup === "all" ? "default" : "ghost"}
-                  onClick={() => setSelectedGroup("all")}
-                  className={selectedGroup === "all" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  All Groups
-                </Button>
-                <Button
-                  variant={selectedGroup === "A" ? "default" : "ghost"}
-                  onClick={() => setSelectedGroup("A")}
-                  className={selectedGroup === "A" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  Group A
-                </Button>
-                <Button
-                  variant={selectedGroup === "B" ? "default" : "ghost"}
-                  onClick={() => setSelectedGroup("B")}
-                  className={selectedGroup === "B" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  Group B
-                </Button>
-              </div>
-            </div>
 
             {/* Upcoming Matches */}
             {selectedFixtureTab === "upcoming" && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-3">
                 {filteredUpcoming.map((match: any) => (
-                  <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                    <CardContent className="p-6">
-                      <div className="text-center mb-4">
-                        <Badge variant="outline" className="bg-white/20 backdrop-blur-sm border-white/30 text-white">
-                          {new Date(match.date).toLocaleDateString()}
-                        </Badge>
-                        <p className="text-sm text-white/80 mt-2">{match.time}</p>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            {match.team1Logo ? (
-                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
-                                <img 
-                                  src={match.team1Logo} 
-                                  alt={`${match.team1} Logo`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                                <span className="text-xs font-bold text-white">
-                                  {match.team1.substring(0, 2).toUpperCase()}
-                                </span>
-                              </div>
-                            )}
+                  <div 
+                    key={match.id} 
+                    className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-4 hover:bg-white/10 transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      {/* Teams with logos */}
+                      <div className="flex items-center gap-6 flex-1">
+                        {/* Team 1 */}
+                        <div className="flex items-center gap-3">
+                          {match.team1Logo ? (
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
+                              <img 
+                                src={match.team1Logo} 
+                                alt={`${match.team1} Logo`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
+                              <span className="text-sm font-bold text-white">
+                                {match.team1.substring(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-white font-semibold">
+                            {match.team1}
                           </div>
-                          <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
                         </div>
-                        <div className="text-center text-sm text-white/80 font-medium">VS</div>
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            {match.team2Logo ? (
-                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
-                                <img 
-                                  src={match.team2Logo} 
-                                  alt={`${match.team2} Logo`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                                <span className="text-xs font-bold text-white">
-                                  {match.team2.substring(0, 2).toUpperCase()}
-                                </span>
-                              </div>
-                            )}
+                        
+                        {/* VS */}
+                        <div className="text-white/60 font-medium">vs</div>
+                        
+                        {/* Team 2 */}
+                        <div className="flex items-center gap-3">
+                          {match.team2Logo ? (
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
+                              <img 
+                                src={match.team2Logo} 
+                                alt={`${match.team2} Logo`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
+                              <span className="text-sm font-bold text-white">
+                                {match.team2.substring(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-white font-semibold">
+                            {match.team2}
                           </div>
-                          <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>
                         </div>
                       </div>
-                      <div className="mt-4 pt-4 border-t border-white/20 text-center">
-                        <div className="flex items-center justify-center gap-1 text-sm text-white/80">
-                          <MapPin className="w-4 h-4" />
+                      
+                      {/* Date, Time, Venue */}
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <div className="text-sm text-white/80">
+                            {new Date(match.date).toLocaleDateString('en-US', { 
+                              month: 'short',
+                              day: 'numeric' 
+                            })}
+                          </div>
+                          <div className="text-xs text-white/60 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {match.time}
+                          </div>
+                        </div>
+                        
+                        <Badge 
+                          variant="outline"
+                          className="text-xs bg-white/10 backdrop-blur-sm text-white border-white/20 px-3 py-1"
+                        >
                           {match.venue}
-                        </div>
-                        <Badge className="mt-2 bg-blue-600/90 backdrop-blur-md text-white">Group {match.group}</Badge>
+                        </Badge>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
