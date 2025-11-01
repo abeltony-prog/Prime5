@@ -34,6 +34,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useMatchSchedules } from "@/hooks/use-matches"
+import { toast } from "@/components/ui/use-toast"
 
 interface Match {
   id: string
@@ -129,6 +130,122 @@ export function Matches() {
     }
   }
 
+  const exportSeasonCalendar = () => {
+    // Sort matches by date
+    const sortedMatches = [...matches].sort((a: Match, b: Match) => {
+      const dateA = new Date(a.dateAndtime).getTime()
+      const dateB = new Date(b.dateAndtime).getTime()
+      return dateA - dateB
+    })
+
+    // Create CSV content
+    const headers = [
+      'Date',
+      'Day',
+      'Time',
+      'Team 1',
+      'Team 1 Logo',
+      'Team 2',
+      'Team 2 Logo',
+      'Venue/Location',
+      'Season ID',
+      'Status'
+    ]
+
+    const rows = sortedMatches.map((match: Match) => {
+      const matchDate = new Date(match.dateAndtime)
+      const dateStr = matchDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
+      const dayStr = matchDate.toLocaleDateString('en-US', { weekday: 'long' })
+      const timeStr = matchDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+      const team1Name = match.Team1?.name || match.team1 || "Unknown Team"
+      const team2Name = match.Team2?.name || match.team2 || "Unknown Team"
+      // Get logo URLs - handle both full URLs and relative paths
+      const team1Logo = match.Team1?.logo || ""
+      const team2Logo = match.Team2?.logo || ""
+      // If logo is a relative path, convert to full URL
+      const getFullLogoUrl = (logo: string) => {
+        if (!logo) return ""
+        if (logo.startsWith('http://') || logo.startsWith('https://')) {
+          return logo
+        }
+        // Ensure window is available (should always be true in browser)
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+        // If it's a relative path, make it absolute
+        if (logo.startsWith('/')) {
+          return baseUrl ? `${baseUrl}${logo}` : logo
+        }
+        // If it's just a filename, assume it's in public folder
+        return baseUrl ? `${baseUrl}/${logo}` : logo
+      }
+      const team1LogoUrl = getFullLogoUrl(team1Logo)
+      const team2LogoUrl = getFullLogoUrl(team2Logo)
+      const location = match.location || "TBD"
+      const seasonId = match.season_id ? match.season_id.substring(0, 8) + "..." : "No Season"
+      const status = match.team1Goals !== undefined && match.team2Goals !== undefined 
+        ? `Completed (${match.team1Goals}-${match.team2Goals})` 
+        : "Scheduled"
+
+      return [
+        dateStr,
+        dayStr,
+        timeStr,
+        team1Name,
+        team1LogoUrl,
+        team2Name,
+        team2LogoUrl,
+        location,
+        seasonId,
+        status
+      ]
+    })
+
+    // Helper function to escape CSV cell values
+    const escapeCSV = (value: string) => {
+      if (!value) return ''
+      // Replace double quotes with two double quotes (CSV escaping)
+      const escaped = value.toString().replace(/"/g, '""')
+      return `"${escaped}"`
+    }
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map(row => row.map(cell => escapeCSV(cell.toString())).join(','))
+    ].join('\n')
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    
+    // Generate filename with current date
+    const exportDate = new Date().toISOString().split('T')[0]
+    link.setAttribute('href', url)
+    link.setAttribute('download', `season-calendar-${exportDate}.csv`)
+    link.style.visibility = 'hidden'
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    // Clean up
+    URL.revokeObjectURL(url)
+    
+    // Show success notification
+    toast({
+      title: "Calendar Exported!",
+      description: `Successfully exported ${sortedMatches.length} matches to CSV file.`,
+    })
+  }
+
   // Show loading state
   if (loading) {
     return (
@@ -196,9 +313,14 @@ export function Matches() {
             )}
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
-          <Button variant="outline" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
+          <Button 
+            variant="outline" 
+            onClick={exportSeasonCalendar}
+            className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+            disabled={matches.length === 0}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export Calendar
           </Button>
           <Link href="/admin/season-scheduler">
             <Button variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
