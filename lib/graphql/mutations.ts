@@ -355,6 +355,23 @@ export const UPDATE_MATCH_RESULT = gql`
   }
 `
 
+// Mutation to update match schedule (teams, location, dateAndtime)
+export const UPDATE_MATCH_SCHEDULER = gql`
+  mutation updateMatchScheduler($matchId: uuid!, $team1: uuid, $team2: uuid, $location: String, $dateAndtime: String) {
+    update_matches(where: {id: {_eq: $matchId}}, _set: {team1: $team1, team2: $team2, location: $location, dateAndtime: $dateAndtime}) {
+      affected_rows
+      returning { 
+        id 
+        team1 
+        team2 
+        location 
+        dateAndtime 
+        season_id 
+      }
+    }
+  }
+`
+
 // Mutation to update team information (for UUID-based Teams table)
 export const UPDATE_TEAM_INFO = gql`
   mutation updateTeamInfo($teamId: uuid = "", $name: String = "", $shortname: String = "", $location: String = "", $logo: String = "") {

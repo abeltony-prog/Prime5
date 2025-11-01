@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import { useSeasons, useSeason, useUpdateSeason, useSeasonGroups, useSeasonTeamStatistics, useCreateGroup, useCreateTeamStatistics, useAddMatchScheduler, useMatchSchedules, useTeamsByIds, useDeleteTeamStatisticsForSeason, useDeleteGroupsForSeason } from '@/hooks/use-seasons'
 import { useTeams } from "@/hooks/use-teams"
+import { useUpdateMatchScheduler } from "@/hooks/use-matches"
 import Link from "next/link"
 import React from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -111,6 +112,7 @@ export default function SeasonDetailsPage() {
   const { teamStatistics: seasonTeamStatistics, loading: statsLoading, error: statsError, refetch: refetchStats } = useSeasonTeamStatistics(seasonId)
   const { addMatchScheduler, loading: addMatchLoading } = useAddMatchScheduler()
   const { matches: matchSchedules, loading: matchSchedulesLoading, error: matchSchedulesError, refetch: refetchMatchSchedules } = useMatchSchedules()
+  const { updateMatchScheduler, loading: updateMatchLoading } = useUpdateMatchScheduler()
 
   // Calculate total teams for overview card
   const totalTeams = seasonTeams.length
@@ -2045,6 +2047,16 @@ export default function SeasonDetailsPage() {
   // Edit opponent state
   const [matchBeingEdited, setMatchBeingEdited] = useState<string | null>(null)
   const [newOpponentId, setNewOpponentId] = useState<string>("")
+  
+  // Edit match state (for Season Matches section)
+  const [editingMatch, setEditingMatch] = useState<any>(null)
+  const [editMatchForm, setEditMatchForm] = useState({
+    team1_id: "",
+    team2_id: "",
+    location: "",
+    dateAndtime: ""
+  })
+  const [isEditMatchModalOpen, setIsEditMatchModalOpen] = useState(false)
 
   // Swap teams between two matches (on any day)
   const swapMatches = (matchId1: string, matchId2: string) => {
@@ -2185,6 +2197,64 @@ export default function SeasonDetailsPage() {
       title: "Opponent Changed!",
       description: "Match opponent has been updated successfully.",
     })
+  }
+
+  const handleEditMatch = (match: any) => {
+    const matchDate = new Date(match.dateAndtime)
+    const dateStr = matchDate.toISOString().split('T')[0]
+    const timeStr = matchDate.toTimeString().slice(0, 5)
+    
+    setEditingMatch(match)
+    setEditMatchForm({
+      team1_id: match.team1 || "",
+      team2_id: match.team2 || "",
+      location: match.location || "",
+      dateAndtime: `${dateStr}T${timeStr}`
+    })
+    setIsEditMatchModalOpen(true)
+  }
+
+  const handleSaveMatchEdit = async () => {
+    if (!editingMatch) return
+
+    try {
+      const matchDate = new Date(editMatchForm.dateAndtime)
+      const dateAndtimeStr = matchDate.toISOString()
+
+      await updateMatchScheduler({
+        variables: {
+          matchId: editingMatch.id,
+          team1: editMatchForm.team1_id || null,
+          team2: editMatchForm.team2_id || null,
+          location: editMatchForm.location || null,
+          dateAndtime: dateAndtimeStr || null
+        }
+      })
+
+      toast({
+        title: "Match Updated!",
+        description: "Match details have been updated successfully.",
+      })
+
+      setIsEditMatchModalOpen(false)
+      setEditingMatch(null)
+      setEditMatchForm({
+        team1_id: "",
+        team2_id: "",
+        location: "",
+        dateAndtime: ""
+      })
+
+      // Refetch matches to show updated data
+      refetchMatchSchedules()
+    } catch (error: any) {
+      console.error('Error updating match:', error)
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update match. Please try again.",
+        variant: "destructive"
+      })
+    }
   }
 
   if (loading) {
@@ -2630,7 +2700,7 @@ export default function SeasonDetailsPage() {
                         </div>
                         
                         {/* Date, Time, Venue */}
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-4">
                           <div className="text-right">
                             <div className="text-sm text-white/80">
                               {new Date(match.dateAndtime).toLocaleDateString('en-US', { 
@@ -2653,6 +2723,16 @@ export default function SeasonDetailsPage() {
                           >
                             {match.location}
                           </Badge>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditMatch(match)}
+                            className="bg-orange-600/80 hover:bg-orange-700/80 text-white border-orange-400/30"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -3746,6 +3826,147 @@ export default function SeasonDetailsPage() {
                 {addMatchLoading ? 'Saving...' : 'Schedule Match'}
               </Button>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Match Modal */}
+      <Dialog open={isEditMatchModalOpen} onOpenChange={setIsEditMatchModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit Match
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Team 1 Selection */}
+            <div>
+              <Label htmlFor="editTeam1" className="text-white">Team 1 *</Label>
+              <Select 
+                value={editMatchForm.team1_id} 
+                onValueChange={(value) => setEditMatchForm({ ...editMatchForm, team1_id: value })}
+              >
+                <SelectTrigger className="bg-white/10 backdrop-blur-sm text-white border-white/20">
+                  <SelectValue placeholder="Select Team 1" />
+                </SelectTrigger>
+                <SelectContent>
+                  {seasonTeams.map((team: any) => {
+                    const teamId = team.id || team.team_id
+                    return (
+                      <SelectItem key={teamId} value={teamId?.toString()}>
+                        {team.name || team.team_name}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Team 2 Selection */}
+            <div>
+              <Label htmlFor="editTeam2" className="text-white">Team 2 *</Label>
+              <Select 
+                value={editMatchForm.team2_id} 
+                onValueChange={(value) => setEditMatchForm({ ...editMatchForm, team2_id: value })}
+              >
+                <SelectTrigger className="bg-white/10 backdrop-blur-sm text-white border-white/20">
+                  <SelectValue placeholder="Select Team 2" />
+                </SelectTrigger>
+                <SelectContent>
+                  {seasonTeams.filter((team: any) => {
+                    const teamId = team.id || team.team_id
+                    return teamId?.toString() !== editMatchForm.team1_id
+                  }).map((team: any) => {
+                    const teamId = team.id || team.team_id
+                    return (
+                      <SelectItem key={teamId} value={teamId?.toString()}>
+                        {team.name || team.team_name}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Location/Arena */}
+            <div>
+              <Label htmlFor="editLocation" className="text-white">Arena/Venue *</Label>
+              <Input
+                id="editLocation"
+                placeholder="e.g., Prime Arena"
+                value={editMatchForm.location}
+                onChange={(e) => setEditMatchForm({ ...editMatchForm, location: e.target.value })}
+                className="bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
+              />
+            </div>
+
+            {/* Date and Time */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="editDate" className="text-white">Date *</Label>
+                <Input
+                  id="editDate"
+                  type="date"
+                  value={editMatchForm.dateAndtime.split('T')[0]}
+                  onChange={(e) => {
+                    const currentTime = editMatchForm.dateAndtime.split('T')[1] || '12:00'
+                    setEditMatchForm({ ...editMatchForm, dateAndtime: `${e.target.value}T${currentTime}` })
+                  }}
+                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                />
+              </div>
+              <div>
+                <Label htmlFor="editTime" className="text-white">Time *</Label>
+                <Input
+                  id="editTime"
+                  type="time"
+                  value={editMatchForm.dateAndtime.split('T')[1] || '12:00'}
+                  onChange={(e) => {
+                    const currentDate = editMatchForm.dateAndtime.split('T')[0]
+                    setEditMatchForm({ ...editMatchForm, dateAndtime: `${currentDate}T${e.target.value}` })
+                  }}
+                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsEditMatchModalOpen(false)
+                setEditingMatch(null)
+                setEditMatchForm({
+                  team1_id: "",
+                  team2_id: "",
+                  location: "",
+                  dateAndtime: ""
+                })
+              }}
+              className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveMatchEdit}
+              disabled={updateMatchLoading || !editMatchForm.team1_id || !editMatchForm.team2_id || !editMatchForm.location || !editMatchForm.dateAndtime}
+              className="bg-green-600/80 backdrop-blur-sm hover:bg-green-700/80 text-white border-green-400/30"
+            >
+              {updateMatchLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
