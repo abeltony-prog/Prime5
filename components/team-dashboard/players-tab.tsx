@@ -9,11 +9,13 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Users, Plus, User, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react"
 import { useMutation, useQuery } from "@apollo/client"
 import { GET_ALL_PLAYERS_WHERE_TEAM_ID } from "@/lib/graphql/queries"
-import { ADD_TEAM_PLAYER_DETAILS } from "@/lib/graphql/mutations"
+import { ADD_TEAM_PLAYER_DETAILS, UPDATE_PLAYER_DETAILS, DELETE_PLAYER } from "@/lib/graphql/mutations"
+import { toast } from "@/components/ui/use-toast"
 
 interface Player {
   id: string
@@ -32,7 +34,17 @@ interface PlayersTabProps {
 
 export function PlayersTab({ teamId }: PlayersTabProps) {
   const [showAddPlayerDialog, setShowAddPlayerDialog] = useState(false)
+  const [showEditPlayerDialog, setShowEditPlayerDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
   const [newPlayer, setNewPlayer] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    gender: "",
+    dob: ""
+  })
+  const [editPlayer, setEditPlayer] = useState({
     name: "",
     email: "",
     phone: "",
@@ -42,6 +54,14 @@ export function PlayersTab({ teamId }: PlayersTabProps) {
 
   // GraphQL hooks
   const [addPlayer] = useMutation(ADD_TEAM_PLAYER_DETAILS, {
+    refetchQueries: [{ query: GET_ALL_PLAYERS_WHERE_TEAM_ID, variables: { teamId } }]
+  })
+
+  const [updatePlayer] = useMutation(UPDATE_PLAYER_DETAILS, {
+    refetchQueries: [{ query: GET_ALL_PLAYERS_WHERE_TEAM_ID, variables: { teamId } }]
+  })
+
+  const [deletePlayer] = useMutation(DELETE_PLAYER, {
     refetchQueries: [{ query: GET_ALL_PLAYERS_WHERE_TEAM_ID, variables: { teamId } }]
   })
 
@@ -69,6 +89,8 @@ export function PlayersTab({ teamId }: PlayersTabProps) {
         }
       })
       
+      const playerName = newPlayer.name
+      
       // Reset form and close dialog
       setNewPlayer({
         name: "",
@@ -78,8 +100,100 @@ export function PlayersTab({ teamId }: PlayersTabProps) {
         dob: ""
       })
       setShowAddPlayerDialog(false)
-    } catch (error) {
+      toast({
+        title: "Player Added!",
+        description: `${playerName} has been added to your team.`,
+      })
+    } catch (error: any) {
       console.error("Error adding player:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add player. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Function to handle opening edit dialog
+  const handleEditClick = (player: Player) => {
+    setSelectedPlayer(player)
+    setEditPlayer({
+      name: player.name || "",
+      email: player.email || "",
+      phone: player.phone || "",
+      gender: player.gender || "",
+      dob: player.dob || ""
+    })
+    setShowEditPlayerDialog(true)
+  }
+
+  // Function to handle updating player
+  const handleUpdatePlayer = async () => {
+    if (!selectedPlayer) {
+      return
+    }
+
+    try {
+      await updatePlayer({
+        variables: {
+          player_id: selectedPlayer.id,
+          name: editPlayer.name,
+          email: editPlayer.email,
+          phone: editPlayer.phone,
+          gender: editPlayer.gender,
+          dob: editPlayer.dob
+        }
+      })
+
+      setShowEditPlayerDialog(false)
+      setSelectedPlayer(null)
+      toast({
+        title: "Player Updated!",
+        description: `${editPlayer.name}'s details have been updated.`,
+      })
+    } catch (error: any) {
+      console.error("Error updating player:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update player. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Function to handle delete confirmation
+  const handleDeleteClick = (player: Player) => {
+    setSelectedPlayer(player)
+    setShowDeleteDialog(true)
+  }
+
+  // Function to handle deleting player
+  const handleDeletePlayer = async () => {
+    if (!selectedPlayer) {
+      return
+    }
+
+    try {
+      await deletePlayer({
+        variables: {
+          player_id: selectedPlayer.id
+        }
+      })
+
+      setShowDeleteDialog(false)
+      const playerName = selectedPlayer.name
+      setSelectedPlayer(null)
+      toast({
+        title: "Player Removed!",
+        description: `${playerName} has been removed from your team.`,
+      })
+    } catch (error: any) {
+      console.error("Error deleting player:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove player. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -237,15 +351,14 @@ export function PlayersTab({ teamId }: PlayersTabProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditClick(player)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit Player
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(player)}
+                            className="text-red-600 focus:text-red-600"
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Remove Player
                           </DropdownMenuItem>
@@ -259,6 +372,107 @@ export function PlayersTab({ teamId }: PlayersTabProps) {
           </Table>
         </div>
       </CardContent>
+
+      {/* Edit Player Dialog */}
+      <Dialog open={showEditPlayerDialog} onOpenChange={setShowEditPlayerDialog}>
+        <DialogContent className="bg-white/95 backdrop-blur-xl border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-gray-800">Edit Player Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-player-name" className="text-gray-700">Name</Label>
+              <Input
+                id="edit-player-name"
+                value={editPlayer.name}
+                onChange={(e) => setEditPlayer({...editPlayer, name: e.target.value})}
+                placeholder="Player's full name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-player-email" className="text-gray-700">Email</Label>
+              <Input
+                id="edit-player-email"
+                type="email"
+                value={editPlayer.email}
+                onChange={(e) => setEditPlayer({...editPlayer, email: e.target.value})}
+                placeholder="player@example.com"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-player-phone" className="text-gray-700">Phone</Label>
+              <Input
+                id="edit-player-phone"
+                value={editPlayer.phone}
+                onChange={(e) => setEditPlayer({...editPlayer, phone: e.target.value})}
+                placeholder="+1234567890"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-player-gender" className="text-gray-700">Gender</Label>
+              <Select value={editPlayer.gender} onValueChange={(value) => setEditPlayer({...editPlayer, gender: value})}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-player-dob" className="text-gray-700">Date of Birth</Label>
+              <Input
+                id="edit-player-dob"
+                type="date"
+                value={editPlayer.dob}
+                onChange={(e) => setEditPlayer({...editPlayer, dob: e.target.value})}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button 
+                onClick={handleUpdatePlayer}
+                className="bg-green-600 hover:bg-green-700 text-white flex-1"
+              >
+                Update Player
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowEditPlayerDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Player?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <strong>{selectedPlayer?.name}</strong> from your team? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePlayer}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Remove Player
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 } 

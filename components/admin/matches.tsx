@@ -31,10 +31,13 @@ import {
   MapPin,
   RefreshCw,
   AlertCircle,
+  Users,
 } from "lucide-react"
 import Link from "next/link"
 import { useMatchSchedules } from "@/hooks/use-matches"
 import { toast } from "@/components/ui/use-toast"
+import { useLazyQuery } from "@apollo/client"
+import { GET_ALL_PLAYERS_WHERE_TEAM_ID } from "@/lib/graphql/queries"
 
 interface Match {
   id: string
@@ -69,9 +72,14 @@ export function Matches() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [groupFilter, setGroupFilter] = useState("all")
   const [isExporting, setIsExporting] = useState(false)
+  const [exportingMatchId, setExportingMatchId] = useState<string | null>(null)
 
   // Use the hook to get matches from database
   const { matches, loading, error, refetch } = useMatchSchedules()
+  
+  // Lazy query to fetch players for teams
+  const [getTeam1Players, { loading: loadingTeam1Players }] = useLazyQuery(GET_ALL_PLAYERS_WHERE_TEAM_ID)
+  const [getTeam2Players, { loading: loadingTeam2Players }] = useLazyQuery(GET_ALL_PLAYERS_WHERE_TEAM_ID)
 
   const filteredMatches = matches.filter((match: Match) => {
     const team1Name = match.Team1?.name || match.team1 || ""
@@ -220,6 +228,163 @@ export function Matches() {
       })
     } finally {
       setIsExporting(false)
+    }
+  }
+
+  const exportMatchPlayers = async (match: Match) => {
+    setExportingMatchId(match.id)
+    setIsExporting(true)
+    
+    try {
+      const team1Id = match.Team1?.id || match.team1
+      const team2Id = match.Team2?.id || match.team2
+      
+      if (!team1Id || !team2Id) {
+        toast({
+          title: "Export Failed",
+          description: "Team information is missing for this match.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Fetch players for both teams
+      const [team1Result, team2Result] = await Promise.all([
+        getTeam1Players({ variables: { teamId: team1Id } }),
+        getTeam2Players({ variables: { teamId: team2Id } })
+      ])
+
+      const team1Players = team1Result.data?.players || []
+      const team2Players = team2Result.data?.players || []
+
+      // Format date and time
+      const matchDate = new Date(match.dateAndtime)
+      const dateTimeStr = matchDate.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+
+      // Prepare data for export
+      const exportData: any[] = []
+
+      // Add team 1 players
+      team1Players.forEach((player: any) => {
+        exportData.push({
+          matchDate: dateTimeStr,
+          matchLocation: match.location || "TBD",
+          teamName: match.Team1?.name || "Unknown Team",
+          teamShortName: match.Team1?.shortname || "",
+          teamLocation: match.Team1?.location || "",
+          teamManager: match.Team1?.team_manager || "",
+          playerName: player.name || "Unknown Player",
+          playerEmail: player.email || "",
+          playerPhone: player.phone || "",
+          playerDOB: player.dob || "",
+          playerGender: player.gender || "",
+          playerPosition: player.position || "N/A",
+        })
+      })
+
+      // Add team 2 players
+      team2Players.forEach((player: any) => {
+        exportData.push({
+          matchDate: dateTimeStr,
+          matchLocation: match.location || "TBD",
+          teamName: match.Team2?.name || "Unknown Team",
+          teamShortName: match.Team2?.shortname || "",
+          teamLocation: match.Team2?.location || "",
+          teamManager: match.Team2?.team_manager || "",
+          playerName: player.name || "Unknown Player",
+          playerEmail: player.email || "",
+          playerPhone: player.phone || "",
+          playerDOB: player.dob || "",
+          playerGender: player.gender || "",
+          playerPosition: player.position || "N/A",
+        })
+      })
+
+      // Helper function to escape CSV cell values
+      const escapeCSV = (value: string) => {
+        if (!value) return ''
+        const escaped = value.toString().replace(/"/g, '""')
+        return `"${escaped}"`
+      }
+
+      // Create CSV content
+      const headers = [
+        'Match Date & Time',
+        'Match Location',
+        'Team Name',
+        'Team Short Name',
+        'Team Location',
+        'Team Manager',
+        'Player Name',
+        'Player Email',
+        'Player Phone',
+        'Player Date of Birth',
+        'Player Gender',
+        'Player Position'
+      ]
+
+      const csvRows = exportData.map(row => [
+        row.matchDate,
+        row.matchLocation,
+        row.teamName,
+        row.teamShortName,
+        row.teamLocation,
+        row.teamManager,
+        row.playerName,
+        row.playerEmail,
+        row.playerPhone,
+        row.playerDOB,
+        row.playerGender,
+        row.playerPosition,
+      ])
+
+      // Combine headers and rows
+      const csvContent = [
+        headers.map(escapeCSV).join(','),
+        ...csvRows.map(row => row.map(cell => escapeCSV(cell.toString())).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      
+      // Generate filename
+      const team1Name = (match.Team1?.name || match.team1 || "Team1").replace(/\s+/g, '-')
+      const team2Name = (match.Team2?.name || match.team2 || "Team2").replace(/\s+/g, '-')
+      const matchDateStr = matchDate.toISOString().split('T')[0]
+      link.setAttribute('href', url)
+      link.setAttribute('download', `match-players-${team1Name}-vs-${team2Name}-${matchDateStr}.csv`)
+      link.style.visibility = 'hidden'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Clean up
+      URL.revokeObjectURL(url)
+      
+      toast({
+        title: "Players Exported!",
+        description: `Successfully exported ${exportData.length} players (${team1Players.length} from ${match.Team1?.name || 'Team 1'} and ${team2Players.length} from ${match.Team2?.name || 'Team 2'}) to CSV file.`,
+      })
+    } catch (error: any) {
+      console.error('Error exporting players:', error)
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export players. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsExporting(false)
+      setExportingMatchId(null)
     }
   }
 
@@ -463,6 +628,22 @@ export function Matches() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => exportMatchPlayers(match)}
+                                disabled={exportingMatchId === match.id || loadingTeam1Players || loadingTeam2Players}
+                              >
+                                {exportingMatchId === match.id ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                    Exporting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Users className="h-4 w-4 mr-2" />
+                                    Export Players List
+                                  </>
+                                )}
+                              </DropdownMenuItem>
                               <DropdownMenuItem>
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details

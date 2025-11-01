@@ -572,7 +572,7 @@ function TeamDashboardContent() {
                   <Users className="h-5 w-5" />
                   Squad Management
                 </CardTitle>
-                  <Dialog open={showAddPlayerDialog} onOpenChange={setShowAddPlayerDialog}>
+                  {/* <Dialog open={showAddPlayerDialog} onOpenChange={setShowAddPlayerDialog}>
                     <DialogTrigger asChild>
                       <Button 
                         className="bg-green-600 hover:bg-green-700 text-white"
@@ -659,7 +659,7 @@ function TeamDashboardContent() {
                         </div>
                       </div>
                     </DialogContent>
-                  </Dialog>
+                  </Dialog> */}
                 </div>
               </CardHeader>
               <CardContent>

@@ -328,6 +328,33 @@ export const ADD_TEAM_PLAYER_DETAILS = gql`
   }
 `
 
+// Mutation to update player details
+export const UPDATE_PLAYER_DETAILS = gql`
+  mutation updatePlayerDetails($player_id: uuid!, $name: String, $email: String, $phone: String, $gender: String, $dob: String) {
+    update_players(where: {id: {_eq: $player_id}}, _set: {name: $name, email: $email, phone: $phone, gender: $gender, dob: $dob}) {
+      affected_rows
+      returning {
+        id
+        name
+        email
+        phone
+        gender
+        dob
+        team_id
+      }
+    }
+  }
+`
+
+// Mutation to delete player
+export const DELETE_PLAYER = gql`
+  mutation deletePlayer($player_id: uuid!) {
+    delete_players(where: {id: {_eq: $player_id}}) {
+      affected_rows
+    }
+  }
+`
+
 // Mutation to update player statistics
 export const UPDATE_PLAYER_STATS = gql`
   mutation updatePlayerStats($player_id: uuid = "", $match_id: uuid = "", $yellow_cards: String = "", $red_cards: String = "", $minutes_played: String = "", $goals: String = "", $assists: String = "") {
