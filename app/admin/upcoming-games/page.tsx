@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -29,8 +29,8 @@ import {
   TrendingUp,
 } from "lucide-react"
 import { useQuery, useMutation } from "@apollo/client"
-import { GET_MATCH_SCHEDULES, GET_TEAM_PLAYER_STATISTICS, GET_TEAM_STATISTICS } from "@/lib/graphql/queries"
-import { UPDATE_PLAYER_STATS, UPDATE_TEAM_STATISTICS, UPDATE_MATCH_RESULT, CREATE_TEAM_STATISTICS } from "@/lib/graphql/mutations"
+import { GET_MATCH_SCHEDULES, GET_TEAM_PLAYER_STATISTICS, GET_TEAM_STATISTICS, GET_ALL_PLAYERS_WHERE_TEAM_ID } from "@/lib/graphql/queries"
+import { UPDATE_PLAYER_STATS, UPDATE_TEAM_STATISTICS, UPDATE_MATCH_RESULT, CREATE_TEAM_STATISTICS, CREATE_PLAYER_STATISTICS } from "@/lib/graphql/mutations"
 import Link from "next/link"
 
 export default function UpcomingGamesPage() {
@@ -45,13 +45,26 @@ export default function UpcomingGamesPage() {
   const { data: matchesData, loading: matchesLoading, error: matchesError, refetch: refetchMatches } = useQuery(GET_MATCH_SCHEDULES)
   
   // Fetch player statistics
-  const { data: playerStatsData, loading: playerStatsLoading, error: playerStatsError } = useQuery(GET_TEAM_PLAYER_STATISTICS)
+  const { data: playerStatsData, loading: playerStatsLoading, error: playerStatsError, refetch: refetchPlayerStats } = useQuery(GET_TEAM_PLAYER_STATISTICS)
   
   // Fetch team statistics
   const { data: teamStatsData, loading: teamStatsLoading, error: teamStatsError } = useQuery(GET_TEAM_STATISTICS)
 
+  // Fetch players for team 1
+  const { data: team1PlayersData, loading: team1PlayersLoading } = useQuery(GET_ALL_PLAYERS_WHERE_TEAM_ID, {
+    variables: { teamId: selectedMatch?.team1 || "" },
+    skip: !selectedMatch?.team1
+  })
+
+  // Fetch players for team 2
+  const { data: team2PlayersData, loading: team2PlayersLoading } = useQuery(GET_ALL_PLAYERS_WHERE_TEAM_ID, {
+    variables: { teamId: selectedMatch?.team2 || "" },
+    skip: !selectedMatch?.team2
+  })
+
   // Mutations
   const [updatePlayerStats] = useMutation(UPDATE_PLAYER_STATS)
+  const [createPlayerStatistics] = useMutation(CREATE_PLAYER_STATISTICS)
   const [updateTeamStatistics] = useMutation(UPDATE_TEAM_STATISTICS)
   const [updateMatchResult] = useMutation(UPDATE_MATCH_RESULT)
   const [createTeamStatistics] = useMutation(CREATE_TEAM_STATISTICS)
@@ -72,8 +85,57 @@ export default function UpcomingGamesPage() {
     setTeam1Goals(match.team1Goals || 0)
     setTeam2Goals(match.team2Goals || 0)
     setMatchNotes("")
-    setPlayerStats({})
+    
+    // Load existing player statistics for this match if available
+    const existingPlayerStats: any = {}
+    if (playerStatsData?.player_statistics && match.id) {
+      playerStatsData.player_statistics
+        .filter((stat: any) => stat.match_id === match.id)
+        .forEach((stat: any) => {
+          existingPlayerStats[stat.player_id] = {
+            goals: stat.goals || "0",
+            assists: stat.assists || "0",
+            minutes_played: stat.minutes_played || "0",
+            yellow_cards: stat.yellow_cards || "0",
+            red_cards: stat.red_cards || "0"
+          }
+        })
+    }
+    setPlayerStats(existingPlayerStats)
   }
+
+  // Update player stats when playerStatsData or selectedMatch changes
+  useEffect(() => {
+    if (selectedMatch?.id && playerStatsData?.player_statistics) {
+      const existingPlayerStats: any = {}
+      playerStatsData.player_statistics
+        .filter((stat: any) => stat.match_id === selectedMatch.id)
+        .forEach((stat: any) => {
+          existingPlayerStats[stat.player_id] = {
+            goals: stat.goals || "0",
+            assists: stat.assists || "0",
+            minutes_played: stat.minutes_played || "0",
+            yellow_cards: stat.yellow_cards || "0",
+            red_cards: stat.red_cards || "0"
+          }
+        })
+      // Only update if we found stats (don't overwrite user input if they're currently editing)
+      if (Object.keys(existingPlayerStats).length > 0) {
+        // Merge with existing playerStats to preserve any unsaved user input
+        setPlayerStats((prev: any) => {
+          const merged = { ...prev }
+          Object.keys(existingPlayerStats).forEach((playerId) => {
+            // Only update if this player doesn't have unsaved changes
+            // or if we're viewing a completed match (where we want to show saved stats)
+            if (!prev[playerId] || selectedMatch.status === "completed") {
+              merged[playerId] = existingPlayerStats[playerId]
+            }
+          })
+          return merged
+        })
+      }
+    }
+  }, [playerStatsData, selectedMatch?.id, selectedMatch?.status])
 
   const handlePlayerStatChange = (playerId: string, field: string, value: string) => {
     setPlayerStats((prev: any) => ({
@@ -115,21 +177,37 @@ export default function UpcomingGamesPage() {
     }
   }
 
-  // Get player statistics for a specific team
+  // Get players for a specific team (team1 or team2)
   const getTeamPlayerStats = (teamId: string) => {
-    if (!playerStatsData?.player_statistics) return []
+    // Get players from the appropriate team query
+    let players: any[] = []
     
-    return playerStatsData.player_statistics.filter((player: any) => 
-      player.team_id === teamId
-    ).map((player: any) => ({
-      id: player.id,
-      name: player.player_name,
-      position: player.position,
-      goals: player.goals || 0,
-      assists: player.assists || 0,
-      minutes_played: player.minutes_played || 0,
-      rating: player.rating || 0
-    }))
+    if (teamId === selectedMatch?.team1 && team1PlayersData?.players) {
+      players = team1PlayersData.players
+    } else if (teamId === selectedMatch?.team2 && team2PlayersData?.players) {
+      players = team2PlayersData.players
+    }
+    
+    // Map players and merge with any existing statistics
+    return players.map((player: any) => {
+      // Find existing statistics for this player if any
+      const existingStats = playerStatsData?.player_statistics?.find((stat: any) => 
+        stat.player_id === player.id && stat.match_id === selectedMatch?.id
+      )
+      
+      // Get default position if not in player data (you might need to add position field)
+      return {
+        id: player.id,
+        name: player.name || player.player_name || "Unknown Player",
+        position: player.position || "N/A",
+        goals: existingStats?.goals || playerStats[player.id]?.goals || 0,
+        assists: existingStats?.assists || playerStats[player.id]?.assists || 0,
+        minutes_played: existingStats?.minutes_played || playerStats[player.id]?.minutes_played || 0,
+        yellow_cards: existingStats?.yellow_cards || playerStats[player.id]?.yellow_cards || 0,
+        red_cards: existingStats?.red_cards || playerStats[player.id]?.red_cards || 0,
+        rating: 0 // Default rating
+      }
+    })
   }
 
   const handleSaveMatchData = async () => {
@@ -155,19 +233,57 @@ export default function UpcomingGamesPage() {
         }
       })
 
-      // Update player statistics
-      for (const [playerId, stats] of Object.entries(playerStats)) {
-        const playerStatsData = stats as any
-        await updatePlayerStats({
-          variables: {
-            player_id: playerId,
-            goals: playerStatsData.goals || "0",
-            assists: playerStatsData.assists || "0",
-            yellow_cards: playerStatsData.yellow_cards || "0",
-            red_cards: playerStatsData.red_cards || "0",
-            minutes_played: playerStatsData.minutes_played || "0"
-          }
-        })
+      // Update player statistics - create if doesn't exist, update and accumulate if exists
+      for (const [playerId, enteredStats] of Object.entries(playerStats)) {
+        const statsData = enteredStats as any
+        
+        // Get new values entered by user
+        const newGoals = parseInt(statsData.goals || "0")
+        const newAssists = parseInt(statsData.assists || "0")
+        const newYellowCards = parseInt(statsData.yellow_cards || "0")
+        const newRedCards = parseInt(statsData.red_cards || "0")
+        const newMinutes = parseInt(statsData.minutes_played || "0")
+        
+        // Check if player statistics already exist for this player and match from the query
+        const existingStats = playerStatsData?.player_statistics?.find((stat: any) => 
+          stat.player_id === playerId && stat.match_id === selectedMatch.id
+        )
+        
+        if (existingStats) {
+          // If statistics exist, add new values to existing values (accumulate)
+          const accumulatedGoals = (parseInt(existingStats.goals || "0") + newGoals).toString()
+          const accumulatedAssists = (parseInt(existingStats.assists || "0") + newAssists).toString()
+          const accumulatedYellowCards = (parseInt(existingStats.yellow_cards || "0") + newYellowCards).toString()
+          const accumulatedRedCards = (parseInt(existingStats.red_cards || "0") + newRedCards).toString()
+          const accumulatedMinutes = (parseInt(existingStats.minutes_played || "0") + newMinutes).toString()
+          
+          // Update existing record with accumulated values
+          await updatePlayerStats({
+            variables: {
+              player_id: playerId,
+              match_id: selectedMatch.id,
+              goals: accumulatedGoals,
+              assists: accumulatedAssists,
+              yellow_cards: accumulatedYellowCards,
+              red_cards: accumulatedRedCards,
+              minutes_played: accumulatedMinutes
+            }
+          })
+        } else {
+          // If statistics don't exist, create new record with entered values
+          await createPlayerStatistics({
+            variables: {
+              player_id: playerId,
+              match_id: selectedMatch.id,
+              season_id: selectedMatch.season_id,
+              goals: newGoals.toString(),
+              assists: newAssists.toString(),
+              yellow_cards: newYellowCards.toString(),
+              red_cards: newRedCards.toString(),
+              minutes_played: newMinutes.toString()
+            }
+          })
+        }
       }
 
       // Get existing team statistics and calculate new accumulated stats
@@ -324,6 +440,9 @@ export default function UpcomingGamesPage() {
 
       // Refresh the matches data to show updated status
       await refetchMatches()
+      
+      // Refresh player statistics to show updated data
+      await refetchPlayerStats()
 
     } catch (error) {
       console.error("Error saving match data:", error)
@@ -673,10 +792,15 @@ export default function UpcomingGamesPage() {
                       </TabsList>
 
                                              <TabsContent value="team1" className="space-y-3">
-                         {playerStatsLoading ? (
+                         {team1PlayersLoading ? (
                            <div className="text-center py-4">
                              <Loader2 className="h-6 w-6 animate-spin text-white mx-auto mb-2" />
-                             <p className="text-white/70 text-sm">Loading player stats...</p>
+                             <p className="text-white/70 text-sm">Loading players...</p>
+                           </div>
+                         ) : getTeamPlayerStats(selectedMatch.team1).length === 0 ? (
+                           <div className="text-center py-4">
+                             <Users className="h-6 w-6 text-white/50 mx-auto mb-2" />
+                             <p className="text-white/70 text-sm">No players found for this team</p>
                            </div>
                          ) : (
                            <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -750,10 +874,15 @@ export default function UpcomingGamesPage() {
                        </TabsContent>
 
                                              <TabsContent value="team2" className="space-y-3">
-                         {playerStatsLoading ? (
+                         {team2PlayersLoading ? (
                            <div className="text-center py-4">
                              <Loader2 className="h-6 w-6 animate-spin text-white mx-auto mb-2" />
-                             <p className="text-white/70 text-sm">Loading player stats...</p>
+                             <p className="text-white/70 text-sm">Loading players...</p>
+                           </div>
+                         ) : getTeamPlayerStats(selectedMatch.team2).length === 0 ? (
+                           <div className="text-center py-4">
+                             <Users className="h-6 w-6 text-white/50 mx-auto mb-2" />
+                             <p className="text-white/70 text-sm">No players found for this team</p>
                            </div>
                          ) : (
                            <div className="space-y-2 max-h-48 overflow-y-auto">

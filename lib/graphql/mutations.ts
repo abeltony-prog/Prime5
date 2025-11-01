@@ -330,9 +330,29 @@ export const ADD_TEAM_PLAYER_DETAILS = gql`
 
 // Mutation to update player statistics
 export const UPDATE_PLAYER_STATS = gql`
-  mutation updatePlayerStats($player_id: uuid = "", $yellow_cards: String = "", $red_cards: String = "", $minutes_played: String = "", $goals: String = "", $assists: String = "") {
-    update_player_statistics(where: {player_id: {_eq: $player_id}}, _set: {yellow_cards: $yellow_cards, red_cards: $red_cards, minutes_played: $minutes_played, goals: $goals, assists: $assists}) {
+  mutation updatePlayerStats($player_id: uuid = "", $match_id: uuid = "", $yellow_cards: String = "", $red_cards: String = "", $minutes_played: String = "", $goals: String = "", $assists: String = "") {
+    update_player_statistics(where: {player_id: {_eq: $player_id}, match_id: {_eq: $match_id}}, _set: {yellow_cards: $yellow_cards, red_cards: $red_cards, minutes_played: $minutes_played, goals: $goals, assists: $assists}) {
       affected_rows
+    }
+  }
+`
+
+// Mutation to create player statistics
+export const CREATE_PLAYER_STATISTICS = gql`
+  mutation addPlayerStaticts($player_id: uuid = "", $red_cards: String = "", $season_id: uuid = "", $yellow_cards: String = "", $minutes_played: String = "", $goals: String = "", $assists: String = "", $match_id: uuid = "") {
+    insert_player_statistics(objects: {player_id: $player_id, red_cards: $red_cards, season_id: $season_id, yellow_cards: $yellow_cards, minutes_played: $minutes_played, goals: $goals, assists: $assists, match_id: $match_id}) {
+      affected_rows
+      returning {
+        id
+        player_id
+        match_id
+        season_id
+        goals
+        assists
+        yellow_cards
+        red_cards
+        minutes_played
+      }
     }
   }
 `
