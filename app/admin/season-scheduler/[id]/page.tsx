@@ -518,7 +518,7 @@ export default function SeasonDetailsPage() {
     setIsScheduling(true)
     
     try {
-      // Validate we have exactly 2 groups with 4 teams each
+      // Validate we have exactly 2 groups
       if (seasonGroups.length !== 2) {
         toast({
           title: "Invalid Group Structure",
@@ -531,34 +531,42 @@ export default function SeasonDetailsPage() {
       const groupA = seasonGroups[0]
       const groupB = seasonGroups[1]
 
-      // Get teams from each group
-      const groupATeams = seasonTeamStatistics
-        .filter((stat: any) => stat.group_id === groupA.id)
-        .map((stat: any) => ({
+      // Get all teams from both groups
+      const allTeams = seasonTeamStatistics
+        .map((stat: any) => {
+          const team = getTeamById(stat.team_id)
+          return {
           team_id: stat.team_id,
-          teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
-          groupId: groupA.id,
-          groupName: groupA.name
-        }))
+            teamName: team?.name || `Team ${stat.team_id}`,
+            groupId: stat.group_id,
+            groupName: stat.group_id === groupA.id ? groupA.name : groupB.name
+          }
+        })
 
-      const groupBTeams = seasonTeamStatistics
-        .filter((stat: any) => stat.group_id === groupB.id)
-        .map((stat: any) => ({
-          team_id: stat.team_id,
-          teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
-          groupId: groupB.id,
-          groupName: groupB.name
-        }))
-
-      // Validate we have teams in both groups
-      if (groupATeams.length === 0 || groupBTeams.length === 0) {
+      const totalTeams = allTeams.length
+      
+      // Validate we have teams
+      if (totalTeams === 0) {
         toast({
           title: "Invalid Team Distribution",
-          description: "Both groups must have at least one team",
+          description: "No teams available to schedule",
           variant: "destructive"
         })
         return
       }
+
+      // Identify special teams (case-insensitive, handle variations)
+      const titansFC = allTeams.find((t: any) => {
+        const name = t.teamName.toLowerCase().trim()
+        return name.includes("titan's fc") || 
+               name.includes("titans fc") ||
+               name === "titan's fc" ||
+               name === "titans fc"
+      })
+      const aceTitans = allTeams.find((t: any) => {
+        const name = t.teamName.toLowerCase().trim()
+        return name.includes("ace titans") || name === "ace titans"
+      })
 
       const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
       const totalWeekends = weekendDates.length
@@ -579,56 +587,24 @@ export default function SeasonDetailsPage() {
       const numWeekends = Math.ceil(totalWeekends / 2) // Each weekend has Sat + Sun
       const weekendsToSchedule = Math.min(4, numWeekends)
 
-      // Generate matches ensuring all teams play equal number of games
-      const groupAMatchups = []
-      const groupBMatchups = []
-
-      // Determine target games based on group sizes to ensure ALL teams play equal games
-      const maxGroupSize = Math.max(groupATeams.length, groupBTeams.length)
-      const minGroupSize = Math.min(groupATeams.length, groupBTeams.length)
+      // Generate all possible matchups within each group
+      const groupATeams = allTeams.filter((t: any) => t.groupId === groupA.id)
+      const groupBTeams = allTeams.filter((t: any) => t.groupId === groupB.id)
       
-      // For 7 teams (4 in one group, 3 in another):
-      // Group A (4 teams): 3 games per round
-      // Group B (3 teams): 2 games per round
-      // To balance: each group plays 6 games total (2 rounds for Group A, 3 rounds for Group B)
-      // This means: Group A plays 6 games, Group B plays 6 games
+      // Generate matchups for both groups
+      const allMatchups: Array<{
+        team1_id: string
+        team2_id: string
+        team1Name: string
+        team2Name: string
+        groupId: string
+        groupName: string
+      }> = []
       
-      const gamesPerRoundA = groupATeams.length - 1
-      const gamesPerRoundB = groupBTeams.length - 1
-      
-      // Find LCM (Least Common Multiple) to ensure equal games
-      const targetGamesPerTeam = (() => {
-        if (maxGroupSize === minGroupSize) {
-          // Same group sizes: just do round-robin
-          return maxGroupSize - 1
-        }
-        
-        // Different group sizes: find LCM
-        // LCM(a, b) = (a * b) / GCD(a, b)
-        const gcd = (a: number, b: number): number => {
-          while (b !== 0) {
-            const temp = b
-            b = a % b
-            a = temp
-          }
-          return a
-        }
-        
-        const lcm = (gamesPerRoundA * gamesPerRoundB) / gcd(gamesPerRoundA, gamesPerRoundB)
-        return lcm
-      })()
-      
-      const totalAvailableSlots = weekendsToSchedule * 2 * 2 // weekends × days × matches per day
-      
-      console.log(`Scheduling for ${groupATeams.length} teams in Group A and ${groupBTeams.length} in Group B`)
-      console.log(`Games per round: Group A = ${gamesPerRoundA}, Group B = ${gamesPerRoundB}`)
-      console.log(`Target games per team: ${targetGamesPerTeam}`)
-      console.log(`Total available slots: ${totalAvailableSlots}`)
-
-      // Group A: Generate matchups
+      // Group A matchups
       for (let i = 0; i < groupATeams.length; i++) {
         for (let j = i + 1; j < groupATeams.length; j++) {
-          groupAMatchups.push({
+          allMatchups.push({
             team1_id: groupATeams[i].team_id,
             team2_id: groupATeams[j].team_id,
             team1Name: groupATeams[i].teamName,
@@ -639,26 +615,10 @@ export default function SeasonDetailsPage() {
         }
       }
 
-      // Calculate rounds needed for Group A
-      const roundsNeededA = targetGamesPerTeam / gamesPerRoundA
-      
-      // Repeat the round-robin to reach target games
-      if (roundsNeededA > 1) {
-        const initialCount = groupAMatchups.length
-        for (let round = 1; round < roundsNeededA; round++) {
-          for (let i = 0; i < initialCount; i++) {
-            groupAMatchups.push({ ...groupAMatchups[i] })
-          }
-        }
-        console.log(`Group A: ${roundsNeededA} rounds needed, ${groupAMatchups.length} total matches`)
-      } else {
-        console.log(`Group A: 1 round-robin, ${groupAMatchups.length} matches`)
-      }
-
-      // Group B: Generate matchups
+      // Group B matchups
       for (let i = 0; i < groupBTeams.length; i++) {
         for (let j = i + 1; j < groupBTeams.length; j++) {
-          groupBMatchups.push({
+          allMatchups.push({
             team1_id: groupBTeams[i].team_id,
             team2_id: groupBTeams[j].team_id,
             team1Name: groupBTeams[i].teamName,
@@ -669,225 +629,919 @@ export default function SeasonDetailsPage() {
         }
       }
 
-      // Calculate rounds needed for Group B
-      const roundsNeededB = targetGamesPerTeam / gamesPerRoundB
+      // Shuffle all matchups for randomness
+      const shuffledMatchups = [...allMatchups].sort(() => Math.random() - 0.5)
       
-      // Repeat the round-robin to reach target games
-      if (roundsNeededB > 1) {
-        const initialCount = groupBMatchups.length
-        for (let round = 1; round < roundsNeededB; round++) {
-          for (let i = 0; i < initialCount; i++) {
-            groupBMatchups.push({ ...groupBMatchups[i] })
+      // Helper function to check if team can play on a specific day
+      const canPlayOnDay = (teamId: string, day: 'Saturday' | 'Sunday', isLastSaturday: boolean) => {
+        if (isLastSaturday) return true // All teams can play on last Saturday
+        const team = allTeams.find((t: any) => t.team_id === teamId)
+        if (!team) return true
+        
+        // Titan's FC only plays on Sundays (except last Saturday)
+        if (titansFC && teamId === titansFC.team_id) {
+          return day === 'Sunday'
+        }
+        
+        // Ace titans only plays on Saturdays
+        if (aceTitans && teamId === aceTitans.team_id) {
+          return day === 'Saturday'
+        }
+        
+        return true
+      }
+      
+      // Track opponents per team per weekend to avoid repeats in consecutive weekends
+      const opponentsPerWeekend = new Map<number, Map<string, Set<string>>>()
+      
+      // Track ALL matchups across the entire season to prevent teams playing each other too many times
+      const seasonMatchups = new Set<string>() // Store as "team1_id:team2_id" (sorted for consistency)
+      
+      // Helper to create matchup key (always sorted for consistency)
+      const getMatchupKey = (team1Id: string, team2Id: string): string => {
+        return team1Id < team2Id ? `${team1Id}:${team2Id}` : `${team2Id}:${team1Id}`
+      }
+      
+      // Helper to check if teams have already played each other in the season
+      const havePlayedInSeason = (team1Id: string, team2Id: string): boolean => {
+        const key = getMatchupKey(team1Id, team2Id)
+        return seasonMatchups.has(key)
+      }
+      
+      // Helper to mark matchup as played in season
+      const markMatchupPlayed = (team1Id: string, team2Id: string) => {
+        const key = getMatchupKey(team1Id, team2Id)
+        seasonMatchups.add(key)
+      }
+      
+      // Helper to check how many times teams have played in season
+      const getMatchupCount = (team1Id: string, team2Id: string): number => {
+        const key = getMatchupKey(team1Id, team2Id)
+        // Count occurrences (since Set only has one, we track separately if needed)
+        // For now, just check if it exists (1 time) - we can enhance later
+        return seasonMatchups.has(key) ? 1 : 0
+      }
+      
+      // Helper to check if teams played in previous weekend
+      const playedInPreviousWeekend = (team1Id: string, team2Id: string, weekend: number) => {
+        if (weekend === 1) return false
+        const prevWeekend = weekend - 1
+        const prevOpponents = opponentsPerWeekend.get(prevWeekend)
+        if (!prevOpponents) return false
+        
+        const team1Opponents = prevOpponents.get(team1Id)
+        const team2Opponents = prevOpponents.get(team2Id)
+        
+        return (team1Opponents?.has(team2Id)) || (team2Opponents?.has(team1Id))
+      }
+      
+      // Helper to find valid matchup for a day
+      const findValidMatchup = (
+        day: 'Saturday' | 'Sunday',
+        weekend: number,
+        teamsPlayedToday: Set<string>,
+        isLastSaturday: boolean,
+        matchupIndex: number
+      ) => {
+        // Try to find a matchup where:
+        // 1. Both teams can play on this day
+        // 2. Neither team has played today
+        // 3. Teams didn't play each other in previous weekend (if weekend > 1)
+        // 4. Teams haven't played each other in the season yet (PREFERRED)
+        // 5. For 7 teams, we allow one team to play twice but not same opponent
+        
+        let attempts = 0
+        const maxAttempts = shuffledMatchups.length * 3
+        
+        // First pass: Prefer matchups that haven't happened in the season
+        while (attempts < maxAttempts) {
+          const index = (matchupIndex + attempts) % shuffledMatchups.length
+          const matchup = shuffledMatchups[index]
+          
+          const team1CanPlay = canPlayOnDay(matchup.team1_id, day, isLastSaturday)
+          const team2CanPlay = canPlayOnDay(matchup.team2_id, day, isLastSaturday)
+          const team1NotPlayed = !teamsPlayedToday.has(matchup.team1_id)
+          const team2NotPlayed = !teamsPlayedToday.has(matchup.team2_id)
+          const notPlayedLastWeekend = !playedInPreviousWeekend(matchup.team1_id, matchup.team2_id, weekend)
+          const notPlayedInSeason = !havePlayedInSeason(matchup.team1_id, matchup.team2_id)
+          
+          // PREFERRED: Matchup that hasn't happened in season
+          if (totalTeams === 7) {
+            if (team1CanPlay && team2CanPlay) {
+              if (team1NotPlayed && team2NotPlayed && notPlayedLastWeekend && notPlayedInSeason) {
+                return { matchup, index }
+              }
+            }
+          } else {
+            // For 8 teams, both teams must not have played
+            if (team1CanPlay && team2CanPlay && team1NotPlayed && team2NotPlayed && notPlayedLastWeekend && notPlayedInSeason) {
+              return { matchup, index }
+            }
+          }
+          
+          attempts++
+        }
+        
+        // Second pass: Allow matchups that played in season but not last weekend
+        attempts = 0
+        while (attempts < shuffledMatchups.length * 2) {
+          const index = (matchupIndex + attempts) % shuffledMatchups.length
+          const matchup = shuffledMatchups[index]
+          
+          const team1CanPlay = canPlayOnDay(matchup.team1_id, day, isLastSaturday)
+          const team2CanPlay = canPlayOnDay(matchup.team2_id, day, isLastSaturday)
+          const team1NotPlayed = !teamsPlayedToday.has(matchup.team1_id)
+          const team2NotPlayed = !teamsPlayedToday.has(matchup.team2_id)
+          const notPlayedLastWeekend = !playedInPreviousWeekend(matchup.team1_id, matchup.team2_id, weekend)
+          
+          // Relaxed: Allow even if played in season, but not last weekend
+          if (totalTeams === 7) {
+            if (team1CanPlay && team2CanPlay) {
+              if (team1NotPlayed && team2NotPlayed && notPlayedLastWeekend) {
+                return { matchup, index }
+              }
+            }
+          } else {
+            if (team1CanPlay && team2CanPlay && team1NotPlayed && team2NotPlayed && notPlayedLastWeekend) {
+              return { matchup, index }
+            }
+          }
+          
+          attempts++
+        }
+        
+        // Final pass: Last resort - allow any valid matchup (relax all constraints except day restrictions)
+        attempts = 0
+        while (attempts < shuffledMatchups.length) {
+          const index = (matchupIndex + attempts) % shuffledMatchups.length
+          const matchup = shuffledMatchups[index]
+          
+          const team1CanPlay = canPlayOnDay(matchup.team1_id, day, isLastSaturday)
+          const team2CanPlay = canPlayOnDay(matchup.team2_id, day, isLastSaturday)
+          const team1NotPlayed = !teamsPlayedToday.has(matchup.team1_id)
+          const team2NotPlayed = !teamsPlayedToday.has(matchup.team2_id)
+          
+          if (totalTeams === 7) {
+            if (team1CanPlay && team2CanPlay && team1NotPlayed && team2NotPlayed) {
+              return { matchup, index }
+            }
+          } else {
+            if (team1CanPlay && team2CanPlay && team1NotPlayed && team2NotPlayed) {
+              return { matchup, index }
+            }
+          }
+          
+          attempts++
+        }
+        
+        return null
+      }
+      
+      // Track games per team
+      const teamGameCounts = new Map<string, number>()
+      allTeams.forEach((team: any) => teamGameCounts.set(team.team_id, 0))
+      
+      // For 7 teams: Track which team played twice each weekend (for rotation fairness)
+      const teamsPlayedTwicePerWeekend = new Map<number, string>()
+      
+      let matchupIndex = 0
+      const lastSaturday = findLastSaturday(weekendDates)
+      
+      // Helper to find which team should play twice this weekend (rotate fairly)
+      // Excludes Titan's FC (Sunday only) and Ace titans (Saturday only) since they can't play both days
+      const getTeamToPlayTwice = (weekend: number): string | null => {
+        if (totalTeams !== 7) return null
+        
+        // Get available teams (exclude special teams that can only play one day)
+        const availableTeams = allTeams.filter((t: any) => {
+          const teamId = t.team_id
+          // Exclude Titan's FC (can only play Sunday, so can't play twice Sat+Sun)
+          if (titansFC && teamId === titansFC.team_id) return false
+          // Exclude Ace titans (can only play Saturday, so can't play twice Sat+Sun)
+          if (aceTitans && teamId === aceTitans.team_id) return false
+          return true
+        })
+        
+        if (availableTeams.length === 0) {
+          // If no available teams (unlikely), return null
+          return null
+        }
+        
+        // For first weekend, start with first available team
+        if (weekend === 1) {
+          return availableTeams[0].team_id
+        }
+        
+        // For subsequent weekends, rotate through available teams
+        const prevWeekend = weekend - 1
+        const prevTeamPlayedTwice = teamsPlayedTwicePerWeekend.get(prevWeekend)
+        
+        if (prevTeamPlayedTwice) {
+          // Find the index of the previous team in available teams
+          const prevIndex = availableTeams.findIndex((t: any) => t.team_id === prevTeamPlayedTwice)
+          if (prevIndex !== -1) {
+            // Rotate to next available team
+            const nextIndex = (prevIndex + 1) % availableTeams.length
+            return availableTeams[nextIndex].team_id
           }
         }
-        console.log(`Group B: ${roundsNeededB} rounds needed, ${groupBMatchups.length} total matches`)
-      } else {
-        console.log(`Group B: 1 round-robin, ${groupBMatchups.length} matches`)
+        
+        // Fallback: rotate through available teams based on weekend number
+        return availableTeams[(weekend - 1) % availableTeams.length].team_id
       }
       
-      console.log(`Final: Each team will play exactly ${targetGamesPerTeam} games`)
-
-      // Shuffle matchups within each group for randomness
-      const shuffledGroupA = [...groupAMatchups].sort(() => Math.random() - 0.5)
-      const shuffledGroupB = [...groupBMatchups].sort(() => Math.random() - 0.5)
-      
-      console.log(`Final: Group A = ${shuffledGroupA.length} matches, Group B = ${shuffledGroupB.length} matches`)
-
-      // Track teams that have played on each day
-      const teamsPlayedPerDay = new Map()
-      const teamsPlayedPerWeekend = new Map()
-      
-      // Initialize tracking maps based on actual weekend count
-      for (let weekend = 1; weekend <= numWeekends; weekend++) {
-        teamsPlayedPerWeekend.set(weekend, new Set())
-      }
-
-      // Schedule Group Stage matches with ALWAYS 2 matches per group per weekend (4 total per weekend)
-      // Strategy: Rotate through all matchups, allowing repeats if needed
-      let groupAIndex = 0
-      let groupBIndex = 0
-      
-      // Track games per team for verification
-      const teamGameCounts = new Map<string, number>()
-      groupATeams.forEach((team: any) => teamGameCounts.set(team.team_id, 0))
-      groupBTeams.forEach((team: any) => teamGameCounts.set(team.team_id, 0))
-
-      for (let weekend = 1; weekend <= weekendsToSchedule; weekend++) {
+      // Schedule matches for weekends 1-3
+      for (let weekend = 1; weekend <= weekendsToSchedule - 1; weekend++) {
         const saturdayIndex = (weekend - 1) * 2
         const sundayIndex = (weekend - 1) * 2 + 1
         
         if (saturdayIndex < weekendDates.length && sundayIndex < weekendDates.length) {
           const saturday = weekendDates[saturdayIndex]
           const sunday = weekendDates[sundayIndex]
+          const isLastSat = saturday === lastSaturday
           
-          // Initialize day tracking
-          if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
-          if (!teamsPlayedPerDay.has(sunday)) teamsPlayedPerDay.set(sunday, new Set())
+          // Initialize opponent tracking for this weekend
+          const weekendOpponents = new Map<string, Set<string>>()
+          allTeams.forEach((team: any) => weekendOpponents.set(team.team_id, new Set()))
           
-          // Saturday: 2 matches (1 from each group)
-          // Ensure we always get 2 matches, even if teams need to repeat
+          // Saturday: 4 teams play (2 games)
+          const saturdayTeams = new Set<string>()
+          const saturdayMatches: any[] = []
+          
+          if (totalTeams === 8) {
+            // Need exactly 4 teams to play
           for (let game = 0; game < 2; game++) {
-            let validMatchup = null
-
-            // Try Group A first, then Group B
-            if (game === 0 && shuffledGroupA.length > 0) {
-              const saturdayTeams = teamsPlayedPerDay.get(saturday)
-              
-              // Try to find a valid matchup from Group A, looking ahead if needed
-              let attempts = 0
-              while (attempts < shuffledGroupA.length && !validMatchup) {
-                const checkIndex = (groupAIndex + attempts) % shuffledGroupA.length
-                const potentialMatchup = shuffledGroupA[checkIndex]
+              const result = findValidMatchup('Saturday', weekend, saturdayTeams, isLastSat, matchupIndex)
+              if (result) {
+                const { matchup, index } = result
+                matchupIndex = (index + 1) % shuffledMatchups.length
                 
-                if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                    !saturdayTeams.has(potentialMatchup.team2_id)) {
-                  validMatchup = potentialMatchup
-                  groupAIndex = (checkIndex + 1) % shuffledGroupA.length
-                }
-                attempts++
-              }
-              
-              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
-              if (!validMatchup) {
-                const reuseIndex = groupAIndex % shuffledGroupA.length
-                validMatchup = shuffledGroupA[reuseIndex]
-                groupAIndex++
-              }
-            } else if (game === 1 && shuffledGroupB.length > 0) {
-              const saturdayTeams = teamsPlayedPerDay.get(saturday)
-              
-              // Try to find a valid matchup from Group B, looking ahead if needed
-              let attempts = 0
-              while (attempts < shuffledGroupB.length && !validMatchup) {
-                const checkIndex = (groupBIndex + attempts) % shuffledGroupB.length
-                const potentialMatchup = shuffledGroupB[checkIndex]
+                saturdayTeams.add(matchup.team1_id)
+                saturdayTeams.add(matchup.team2_id)
+                weekendOpponents.get(matchup.team1_id)?.add(matchup.team2_id)
+                weekendOpponents.get(matchup.team2_id)?.add(matchup.team1_id)
                 
-                if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                    !saturdayTeams.has(potentialMatchup.team2_id)) {
-                  validMatchup = potentialMatchup
-                  groupBIndex = (checkIndex + 1) % shuffledGroupB.length
-                }
-                attempts++
-              }
-              
-              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
-              if (!validMatchup) {
-                const reuseIndex = groupBIndex % shuffledGroupB.length
-                validMatchup = shuffledGroupB[reuseIndex]
-                groupBIndex++
+                // Mark this matchup as played in the season
+                markMatchupPlayed(matchup.team1_id, matchup.team2_id)
+                
+                saturdayMatches.push({
+                  id: `match-${Date.now()}-w${weekend}-sat-${game}`,
+                  team1_id: matchup.team1_id,
+                  team2_id: matchup.team2_id,
+                  date: saturday,
+                  time: '',
+                  group_id: matchup.groupId,
+                  venue: defaultVenue,
+                  status: 'scheduled',
+                  weekend: weekend,
+                  day: 'Saturday',
+                  groupName: matchup.groupName,
+                  type: 'group-stage' as const
+                })
+                
+                teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
               }
             }
-
-            if (validMatchup) {
-                matches.push({
-                id: `match-${Date.now()}-w${weekend}-sat-${game}`,
-                team1_id: validMatchup.team1_id,
-                team2_id: validMatchup.team2_id,
+          } else if (totalTeams === 7) {
+            // 7 teams: ONE team plays twice (Saturday + Sunday), rotating each weekend
+            // Saturday: EXACTLY 2 games = 4 teams play (one will also play Sunday)
+            // Sunday: EXACTLY 2 games = 4 teams play (one already played Saturday, three did NOT)
+            // CRITICAL: Teams that play Saturday (except the designated one) MUST NOT play Sunday
+            const teamToPlayTwice = getTeamToPlayTwice(weekend)
+            
+            // Saturday: Schedule EXACTLY 2 games
+            // Ensure the designated team plays on Saturday
+            let saturdayGamesScheduled = 0
+            const saturdayTarget = 2
+            let designatedTeamScheduled = false
+            
+            // Step 1: Try to schedule the designated team first
+            if (teamToPlayTwice && canPlayOnDay(teamToPlayTwice, 'Saturday', isLastSat)) {
+              let attempts = 0
+              while (attempts < shuffledMatchups.length * 2 && !designatedTeamScheduled && saturdayGamesScheduled < saturdayTarget) {
+                const index = (matchupIndex + attempts) % shuffledMatchups.length
+                const matchup = shuffledMatchups[index]
+                
+                if (matchup.team1_id === teamToPlayTwice || matchup.team2_id === teamToPlayTwice) {
+                  const opponentId = matchup.team1_id === teamToPlayTwice ? matchup.team2_id : matchup.team1_id
+                  
+                  if (!saturdayTeams.has(opponentId) && 
+                      canPlayOnDay(opponentId, 'Saturday', isLastSat) &&
+                      !playedInPreviousWeekend(teamToPlayTwice, opponentId, weekend)) {
+                    designatedTeamScheduled = true
+                    matchupIndex = (index + 1) % shuffledMatchups.length
+                    
+                    saturdayTeams.add(teamToPlayTwice)
+                    saturdayTeams.add(opponentId)
+                    weekendOpponents.get(teamToPlayTwice)?.add(opponentId)
+                    weekendOpponents.get(opponentId)?.add(teamToPlayTwice)
+                    
+                    // Mark this matchup as played in the season
+                    markMatchupPlayed(matchup.team1_id, matchup.team2_id)
+                    
+                    saturdayMatches.push({
+                      id: `match-${Date.now()}-w${weekend}-sat-${saturdayGamesScheduled}`,
+                      team1_id: matchup.team1_id,
+                      team2_id: matchup.team2_id,
+                      date: saturday,
+                      time: '',
+                      group_id: matchup.groupId,
+                      venue: defaultVenue,
+                      status: 'scheduled',
+                      weekend: weekend,
+                      day: 'Saturday',
+                      groupName: matchup.groupName,
+                      type: 'group-stage' as const
+                    })
+                    
+                    teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                    teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                    saturdayGamesScheduled++
+                  }
+                }
+                attempts++
+              }
+            }
+            
+            // Step 2: Schedule remaining Saturday games (must have 2 total)
+            while (saturdayGamesScheduled < saturdayTarget) {
+              let foundMatch = false
+              let attempts = 0
+              const maxAttempts = shuffledMatchups.length * 3
+              
+              while (attempts < maxAttempts && !foundMatch) {
+                const index = (matchupIndex + attempts) % shuffledMatchups.length
+                const matchup = shuffledMatchups[index]
+                
+                const team1CanPlay = canPlayOnDay(matchup.team1_id, 'Saturday', isLastSat)
+                const team2CanPlay = canPlayOnDay(matchup.team2_id, 'Saturday', isLastSat)
+                const team1NotPlayed = !saturdayTeams.has(matchup.team1_id)
+                const team2NotPlayed = !saturdayTeams.has(matchup.team2_id)
+                const notPlayedLastWeekend = !playedInPreviousWeekend(matchup.team1_id, matchup.team2_id, weekend)
+                
+                // Both teams must be available and not have played today
+                if (team1CanPlay && team2CanPlay && team1NotPlayed && team2NotPlayed && notPlayedLastWeekend) {
+                  foundMatch = true
+                  matchupIndex = (index + 1) % shuffledMatchups.length
+                  
+                  saturdayTeams.add(matchup.team1_id)
+                  saturdayTeams.add(matchup.team2_id)
+                  weekendOpponents.get(matchup.team1_id)?.add(matchup.team2_id)
+                  weekendOpponents.get(matchup.team2_id)?.add(matchup.team1_id)
+                  
+                  // Mark this matchup as played in the season
+                  markMatchupPlayed(matchup.team1_id, matchup.team2_id)
+                  
+                  saturdayMatches.push({
+                    id: `match-${Date.now()}-w${weekend}-sat-${saturdayGamesScheduled}`,
+                    team1_id: matchup.team1_id,
+                    team2_id: matchup.team2_id,
+                    date: saturday,
+                    time: '',
+                    group_id: matchup.groupId,
+                    venue: defaultVenue,
+                    status: 'scheduled',
+                    weekend: weekend,
+                    day: 'Saturday',
+                    groupName: matchup.groupName,
+                    type: 'group-stage' as const
+                  })
+                  
+                  teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                  teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                  saturdayGamesScheduled++
+                }
+                
+                attempts++
+              }
+              
+              if (!foundMatch) {
+                // If we can't find a match with all constraints, we must still schedule
+                // Try with relaxed constraints
+                attempts = 0
+                while (attempts < shuffledMatchups.length && !foundMatch) {
+                  const index = (matchupIndex + attempts) % shuffledMatchups.length
+                  const matchup = shuffledMatchups[index]
+                  
+                  const team1CanPlay = canPlayOnDay(matchup.team1_id, 'Saturday', isLastSat)
+                  const team2CanPlay = canPlayOnDay(matchup.team2_id, 'Saturday', isLastSat)
+                  const team1NotPlayed = !saturdayTeams.has(matchup.team1_id)
+                  const team2NotPlayed = !saturdayTeams.has(matchup.team2_id)
+                  
+                  if (team1CanPlay && team2CanPlay && team1NotPlayed && team2NotPlayed) {
+                    foundMatch = true
+                    matchupIndex = (index + 1) % shuffledMatchups.length
+                    
+                    saturdayTeams.add(matchup.team1_id)
+                    saturdayTeams.add(matchup.team2_id)
+                    weekendOpponents.get(matchup.team1_id)?.add(matchup.team2_id)
+                    weekendOpponents.get(matchup.team2_id)?.add(matchup.team1_id)
+                    
+                    // Mark this matchup as played in the season
+                    markMatchupPlayed(matchup.team1_id, matchup.team2_id)
+                    
+                    saturdayMatches.push({
+                      id: `match-${Date.now()}-w${weekend}-sat-${saturdayGamesScheduled}`,
+                      team1_id: matchup.team1_id,
+                      team2_id: matchup.team2_id,
+                      date: saturday,
+                      time: '',
+                      group_id: matchup.groupId,
+                      venue: defaultVenue,
+                      status: 'scheduled',
+                      weekend: weekend,
+                      day: 'Saturday',
+                      groupName: matchup.groupName,
+                      type: 'group-stage' as const
+                    })
+                    
+                    teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                    teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                    saturdayGamesScheduled++
+                  }
+                  attempts++
+                }
+              }
+              
+              if (!foundMatch) {
+                // Last resort: we absolutely need 2 games, create one from available teams
+                const availableTeams = allTeams.filter((t: any) => 
+                  !saturdayTeams.has(t.team_id) && canPlayOnDay(t.team_id, 'Saturday', isLastSat)
+                )
+                
+                if (availableTeams.length >= 2) {
+                  // Create a match between first two available teams
+                  const team1 = availableTeams[0]
+                  const team2 = availableTeams[1]
+                  
+                  saturdayTeams.add(team1.team_id)
+                  saturdayTeams.add(team2.team_id)
+                  weekendOpponents.get(team1.team_id)?.add(team2.team_id)
+                  weekendOpponents.get(team2.team_id)?.add(team1.team_id)
+                  
+                  // Mark this matchup as played in the season
+                  markMatchupPlayed(team1.team_id, team2.team_id)
+                  
+                  saturdayMatches.push({
+                    id: `match-${Date.now()}-w${weekend}-sat-${saturdayGamesScheduled}`,
+                    team1_id: team1.team_id,
+                    team2_id: team2.team_id,
                   date: saturday,
                 time: '',
-                group_id: validMatchup.groupId,
+                    group_id: team1.groupId,
                   venue: defaultVenue,
                   status: 'scheduled',
                 weekend: weekend,
                   day: 'Saturday',
-                groupName: validMatchup.groupName,
+                    groupName: team1.groupName,
                 type: 'group-stage' as const
               })
               
-              // Mark teams as played
-              teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
-              teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
+                  teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
+                  teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
+                  saturdayGamesScheduled++
+                  foundMatch = true
+                }
+              }
               
-              // Track game counts
-              teamGameCounts.set(validMatchup.team1_id, (teamGameCounts.get(validMatchup.team1_id) || 0) + 1)
-              teamGameCounts.set(validMatchup.team2_id, (teamGameCounts.get(validMatchup.team2_id) || 0) + 1)
-            } else {
-              console.log(`WARNING: No matchup found for Weekend ${weekend}, Saturday, Game ${game}`)
+              if (!foundMatch) break
+            }
+            
+            // Store which team played twice for this weekend
+            if (teamToPlayTwice && designatedTeamScheduled) {
+              teamsPlayedTwicePerWeekend.set(weekend, teamToPlayTwice)
             }
           }
           
-          // Sunday: 2 matches (1 from each group)
-          // Ensure we always get 2 matches, even if teams need to repeat
+          matches.push(...saturdayMatches)
+          
+          // Sunday: 4 different teams play (2 games)
+          const sundayTeams = new Set<string>()
+          const sundayMatches: any[] = []
+          
+          if (totalTeams === 8) {
+            // Need exactly 4 different teams (not from Saturday)
           for (let game = 0; game < 2; game++) {
-            let validMatchup = null
-
-            if (game === 0 && shuffledGroupA.length > 0) {
-              const sundayTeams = teamsPlayedPerDay.get(sunday)
-              
-              // Try to find a valid matchup from Group A, looking ahead if needed
-              let attempts = 0
-              while (attempts < shuffledGroupA.length && !validMatchup) {
-                const checkIndex = (groupAIndex + attempts) % shuffledGroupA.length
-                const potentialMatchup = shuffledGroupA[checkIndex]
-                
-                if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                    !sundayTeams.has(potentialMatchup.team2_id)) {
-                  validMatchup = potentialMatchup
-                  groupAIndex = (checkIndex + 1) % shuffledGroupA.length
+              const result = findValidMatchup('Sunday', weekend, sundayTeams, false, matchupIndex)
+              if (result) {
+                const { matchup, index } = result
+                // Ensure these teams didn't play on Saturday
+                if (!saturdayTeams.has(matchup.team1_id) && !saturdayTeams.has(matchup.team2_id)) {
+                  matchupIndex = (index + 1) % shuffledMatchups.length
+                  
+                  sundayTeams.add(matchup.team1_id)
+                  sundayTeams.add(matchup.team2_id)
+                  weekendOpponents.get(matchup.team1_id)?.add(matchup.team2_id)
+                  weekendOpponents.get(matchup.team2_id)?.add(matchup.team1_id)
+                  
+                  // Mark this matchup as played in the season
+                  markMatchupPlayed(matchup.team1_id, matchup.team2_id)
+                  
+                  sundayMatches.push({
+                    id: `match-${Date.now()}-w${weekend}-sun-${game}`,
+                    team1_id: matchup.team1_id,
+                    team2_id: matchup.team2_id,
+                    date: sunday,
+                    time: '',
+                    group_id: matchup.groupId,
+                    venue: defaultVenue,
+                    status: 'scheduled',
+                    weekend: weekend,
+                    day: 'Sunday',
+                    groupName: matchup.groupName,
+                    type: 'group-stage' as const
+                  })
+                  
+                  teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                  teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                } else {
+                  // Skip this matchup and try next
+                  matchupIndex = (index + 1) % shuffledMatchups.length
+                  game-- // Retry this game
                 }
-                attempts++
-              }
-              
-              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
-              if (!validMatchup) {
-                const reuseIndex = groupAIndex % shuffledGroupA.length
-                validMatchup = shuffledGroupA[reuseIndex]
-                groupAIndex++
-              }
-            } else if (game === 1 && shuffledGroupB.length > 0) {
-              const sundayTeams = teamsPlayedPerDay.get(sunday)
-              
-              // Try to find a valid matchup from Group B, looking ahead if needed
-              let attempts = 0
-              while (attempts < shuffledGroupB.length && !validMatchup) {
-                const checkIndex = (groupBIndex + attempts) % shuffledGroupB.length
-                const potentialMatchup = shuffledGroupB[checkIndex]
-                
-                if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                    !sundayTeams.has(potentialMatchup.team2_id)) {
-                  validMatchup = potentialMatchup
-                  groupBIndex = (checkIndex + 1) % shuffledGroupB.length
-                }
-                attempts++
-              }
-              
-              // If still no valid matchup, just take the next one (will have conflict but at least teams play)
-              if (!validMatchup) {
-                const reuseIndex = groupBIndex % shuffledGroupB.length
-                validMatchup = shuffledGroupB[reuseIndex]
-                groupBIndex++
               }
             }
-
-            if (validMatchup) {
-              matches.push({
-                id: `match-${Date.now()}-w${weekend}-sun-${game}`,
-                team1_id: validMatchup.team1_id,
-                team2_id: validMatchup.team2_id,
-                date: sunday,
-                time: '',
-                group_id: validMatchup.groupId,
-                venue: defaultVenue,
-                status: 'scheduled',
-                weekend: weekend,
-                day: 'Sunday',
-                groupName: validMatchup.groupName,
-                type: 'group-stage' as const
-              })
+          } else if (totalTeams === 7) {
+            // 7 teams: Sunday scheduling
+            // CRITICAL RULE: Teams that played Saturday (except the designated team) MUST NOT play Sunday
+            // Sunday: EXACTLY 2 games = 4 teams total
+            // - The designated team (who played Saturday) MUST play
+            // - The other 3 teams MUST NOT have played Saturday
+            const teamToPlayTwice = getTeamToPlayTwice(weekend)
+            let sundayGamesScheduled = 0
+            const sundayTarget = 2
+            let designatedTeamPlayedSunday = false
+            
+            // Step 1: Schedule the designated team's game (it played Saturday, now plays Sunday)
+            // We MUST schedule this game - it's critical for 7-team logic
+            if (teamToPlayTwice && saturdayTeams.has(teamToPlayTwice) && canPlayOnDay(teamToPlayTwice, 'Sunday', false)) {
+              // Try with strict constraints first
+              let attempts = 0
+              const maxAttempts = shuffledMatchups.length * 3
               
-              // Mark teams as played
-              teamsPlayedPerDay.get(sunday).add(validMatchup.team1_id)
-              teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
+              while (attempts < maxAttempts && !designatedTeamPlayedSunday) {
+                const index = (matchupIndex + attempts) % shuffledMatchups.length
+                const matchup = shuffledMatchups[index]
+                
+                if (matchup.team1_id === teamToPlayTwice || matchup.team2_id === teamToPlayTwice) {
+                  const opponentId = matchup.team1_id === teamToPlayTwice ? matchup.team2_id : matchup.team1_id
+                  
+                  // STRICT: Opponent MUST NOT have played Saturday (except the designated team)
+                  const opponentNotPlayedSaturday = !saturdayTeams.has(opponentId)
+                  const opponentCanPlay = canPlayOnDay(opponentId, 'Sunday', false)
+                  const opponentNotPlayedSunday = !sundayTeams.has(opponentId)
+                  const notPlayedLastWeekend = !playedInPreviousWeekend(teamToPlayTwice, opponentId, weekend)
+                  
+                  if (opponentNotPlayedSaturday && opponentCanPlay && opponentNotPlayedSunday && notPlayedLastWeekend) {
+                    designatedTeamPlayedSunday = true
+                    matchupIndex = (index + 1) % shuffledMatchups.length
+                    
+                    sundayTeams.add(teamToPlayTwice)
+                    sundayTeams.add(opponentId)
+                    weekendOpponents.get(teamToPlayTwice)?.add(opponentId)
+                    weekendOpponents.get(opponentId)?.add(teamToPlayTwice)
+                    
+                    // Mark this matchup as played in the season
+                    markMatchupPlayed(matchup.team1_id, matchup.team2_id)
+                    
+                    sundayMatches.push({
+                      id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                      team1_id: matchup.team1_id,
+                      team2_id: matchup.team2_id,
+                      date: sunday,
+                      time: '',
+                      group_id: matchup.groupId,
+                      venue: defaultVenue,
+                      status: 'scheduled',
+                      weekend: weekend,
+                      day: 'Sunday',
+                      groupName: matchup.groupName,
+                      type: 'group-stage' as const
+                    })
+                    
+                    teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                    teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                    sundayGamesScheduled++
+                    teamsPlayedTwicePerWeekend.set(weekend, teamToPlayTwice)
+                  }
+                }
+                attempts++
+              }
               
-              // Track game counts
-              teamGameCounts.set(validMatchup.team1_id, (teamGameCounts.get(validMatchup.team1_id) || 0) + 1)
-              teamGameCounts.set(validMatchup.team2_id, (teamGameCounts.get(validMatchup.team2_id) || 0) + 1)
+              // Fallback: If strict constraints didn't work, relax the "last weekend" constraint
+              if (!designatedTeamPlayedSunday) {
+                attempts = 0
+                while (attempts < shuffledMatchups.length * 2 && !designatedTeamPlayedSunday) {
+                  const index = (matchupIndex + attempts) % shuffledMatchups.length
+                  const matchup = shuffledMatchups[index]
+                  
+                  if (matchup.team1_id === teamToPlayTwice || matchup.team2_id === teamToPlayTwice) {
+                    const opponentId = matchup.team1_id === teamToPlayTwice ? matchup.team2_id : matchup.team1_id
+                    
+                    const opponentNotPlayedSaturday = !saturdayTeams.has(opponentId)
+                    const opponentCanPlay = canPlayOnDay(opponentId, 'Sunday', false)
+                    const opponentNotPlayedSunday = !sundayTeams.has(opponentId)
+                    
+                    // Relaxed: allow even if played last weekend
+                    if (opponentNotPlayedSaturday && opponentCanPlay && opponentNotPlayedSunday) {
+                      designatedTeamPlayedSunday = true
+                      matchupIndex = (index + 1) % shuffledMatchups.length
+                      
+                      sundayTeams.add(teamToPlayTwice)
+                      sundayTeams.add(opponentId)
+                      weekendOpponents.get(teamToPlayTwice)?.add(opponentId)
+                      weekendOpponents.get(opponentId)?.add(teamToPlayTwice)
+                      
+                      sundayMatches.push({
+                        id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                        team1_id: matchup.team1_id,
+                        team2_id: matchup.team2_id,
+                        date: sunday,
+                        time: '',
+                        group_id: matchup.groupId,
+                        venue: defaultVenue,
+                        status: 'scheduled',
+                        weekend: weekend,
+                        day: 'Sunday',
+                        groupName: matchup.groupName,
+                        type: 'group-stage' as const
+                      })
+                      
+                      teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                      teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                      sundayGamesScheduled++
+                      teamsPlayedTwicePerWeekend.set(weekend, teamToPlayTwice)
+                    }
+                  }
+                  attempts++
+                }
+              }
+              
+              // Last resort: Find ANY team that didn't play Saturday to pair with designated team
+              if (!designatedTeamPlayedSunday) {
+                const availableOpponents = allTeams.filter((t: any) => 
+                  t.team_id !== teamToPlayTwice &&
+                  !saturdayTeams.has(t.team_id) && 
+                  !sundayTeams.has(t.team_id) && 
+                  canPlayOnDay(t.team_id, 'Sunday', false)
+                )
+                
+                if (availableOpponents.length > 0) {
+                  const opponent = availableOpponents[0]
+                  designatedTeamPlayedSunday = true
+                  
+                  sundayTeams.add(teamToPlayTwice)
+                  sundayTeams.add(opponent.team_id)
+                  weekendOpponents.get(teamToPlayTwice)?.add(opponent.team_id)
+                  weekendOpponents.get(opponent.team_id)?.add(teamToPlayTwice)
+                  
+                  sundayMatches.push({
+                    id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                    team1_id: teamToPlayTwice,
+                    team2_id: opponent.team_id,
+                    date: sunday,
+                    time: '',
+                    group_id: opponent.groupId,
+                    venue: defaultVenue,
+                    status: 'scheduled',
+                    weekend: weekend,
+                    day: 'Sunday',
+                    groupName: opponent.groupName,
+                    type: 'group-stage' as const
+                  })
+                  
+                  teamGameCounts.set(teamToPlayTwice, (teamGameCounts.get(teamToPlayTwice) || 0) + 1)
+                  teamGameCounts.set(opponent.team_id, (teamGameCounts.get(opponent.team_id) || 0) + 1)
+                  sundayGamesScheduled++
+                  teamsPlayedTwicePerWeekend.set(weekend, teamToPlayTwice)
+                }
+              }
+            }
+            
+            // Step 2: Schedule the second game with teams that did NOT play Saturday
+            // STRICT: Both teams in this match MUST NOT have played Saturday
+            while (sundayGamesScheduled < sundayTarget) {
+              let foundMatch = false
+              let attempts = 0
+              const maxAttempts = shuffledMatchups.length * 3
+              
+              while (attempts < maxAttempts && !foundMatch) {
+                const index = (matchupIndex + attempts) % shuffledMatchups.length
+                const matchup = shuffledMatchups[index]
+                
+                // STRICT CHECK: Both teams MUST NOT have played Saturday
+                const team1NotPlayedSat = !saturdayTeams.has(matchup.team1_id)
+                const team2NotPlayedSat = !saturdayTeams.has(matchup.team2_id)
+                const team1NotPlayedSun = !sundayTeams.has(matchup.team1_id)
+                const team2NotPlayedSun = !sundayTeams.has(matchup.team2_id)
+                const team1CanPlay = canPlayOnDay(matchup.team1_id, 'Sunday', false)
+                const team2CanPlay = canPlayOnDay(matchup.team2_id, 'Sunday', false)
+                const notPlayedLastWeekend = !playedInPreviousWeekend(matchup.team1_id, matchup.team2_id, weekend)
+                
+                // CRITICAL: Both teams must NOT have played Saturday
+                if (team1NotPlayedSat && team2NotPlayedSat && 
+                    team1NotPlayedSun && team2NotPlayedSun &&
+                    team1CanPlay && team2CanPlay && notPlayedLastWeekend) {
+                  foundMatch = true
+                  matchupIndex = (index + 1) % shuffledMatchups.length
+                  
+                  sundayTeams.add(matchup.team1_id)
+                  sundayTeams.add(matchup.team2_id)
+                  weekendOpponents.get(matchup.team1_id)?.add(matchup.team2_id)
+                  weekendOpponents.get(matchup.team2_id)?.add(matchup.team1_id)
+                  
+                  sundayMatches.push({
+                    id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                    team1_id: matchup.team1_id,
+                    team2_id: matchup.team2_id,
+                    date: sunday,
+                    time: '',
+                    group_id: matchup.groupId,
+                    venue: defaultVenue,
+                    status: 'scheduled',
+                    weekend: weekend,
+                    day: 'Sunday',
+                    groupName: matchup.groupName,
+                    type: 'group-stage' as const
+                  })
+                  
+                  teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                  teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                  sundayGamesScheduled++
+                }
+                
+                attempts++
+              }
+              
+              // If strict constraints don't work, relax only the "last weekend" constraint
+              if (!foundMatch && sundayGamesScheduled < sundayTarget) {
+                attempts = 0
+                while (attempts < shuffledMatchups.length * 2 && !foundMatch) {
+                  const index = (matchupIndex + attempts) % shuffledMatchups.length
+                  const matchup = shuffledMatchups[index]
+                  
+                  // STILL STRICT: Both teams must NOT have played Saturday
+                  const team1NotPlayedSat = !saturdayTeams.has(matchup.team1_id)
+                  const team2NotPlayedSat = !saturdayTeams.has(matchup.team2_id)
+                  const team1NotPlayedSun = !sundayTeams.has(matchup.team1_id)
+                  const team2NotPlayedSun = !sundayTeams.has(matchup.team2_id)
+                  const team1CanPlay = canPlayOnDay(matchup.team1_id, 'Sunday', false)
+                  const team2CanPlay = canPlayOnDay(matchup.team2_id, 'Sunday', false)
+                  
+                  // Relaxed: allow even if played last weekend, but STILL must not have played Saturday
+                  if (team1NotPlayedSat && team2NotPlayedSat && 
+                      team1NotPlayedSun && team2NotPlayedSun &&
+                      team1CanPlay && team2CanPlay) {
+                    foundMatch = true
+                    matchupIndex = (index + 1) % shuffledMatchups.length
+                    
+                    sundayTeams.add(matchup.team1_id)
+                    sundayTeams.add(matchup.team2_id)
+                    weekendOpponents.get(matchup.team1_id)?.add(matchup.team2_id)
+                    weekendOpponents.get(matchup.team2_id)?.add(matchup.team1_id)
+                    
+                    sundayMatches.push({
+                      id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                      team1_id: matchup.team1_id,
+                      team2_id: matchup.team2_id,
+                      date: sunday,
+                      time: '',
+                      group_id: matchup.groupId,
+                      venue: defaultVenue,
+                      status: 'scheduled',
+                      weekend: weekend,
+                      day: 'Sunday',
+                      groupName: matchup.groupName,
+                      type: 'group-stage' as const
+                    })
+                    
+                    teamGameCounts.set(matchup.team1_id, (teamGameCounts.get(matchup.team1_id) || 0) + 1)
+                    teamGameCounts.set(matchup.team2_id, (teamGameCounts.get(matchup.team2_id) || 0) + 1)
+                    sundayGamesScheduled++
+                  }
+                  
+                  attempts++
+                }
+              }
+              
+              // Last resort: create match from teams that didn't play Saturday
+              // We MUST have at least 2 teams available since: 7 total - 4 Saturday = 3 didn't play Saturday
+              // One might be used in first game, but we should still have 2 left
+              if (!foundMatch && sundayGamesScheduled < sundayTarget) {
+                const availableTeams = allTeams.filter((t: any) => 
+                  !saturdayTeams.has(t.team_id) && 
+                  !sundayTeams.has(t.team_id) && 
+                  canPlayOnDay(t.team_id, 'Sunday', false)
+                )
+                
+                if (availableTeams.length >= 2) {
+                  // Pair up first two available teams
+                  const team1 = availableTeams[0]
+                  const team2 = availableTeams[1]
+                  
+                  sundayTeams.add(team1.team_id)
+                  sundayTeams.add(team2.team_id)
+                  weekendOpponents.get(team1.team_id)?.add(team2.team_id)
+                  weekendOpponents.get(team2.team_id)?.add(team1.team_id)
+                  
+                  sundayMatches.push({
+                    id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                    team1_id: team1.team_id,
+                    team2_id: team2.team_id,
+                    date: sunday,
+                    time: '',
+                    group_id: team1.groupId,
+                    venue: defaultVenue,
+                    status: 'scheduled',
+                    weekend: weekend,
+                    day: 'Sunday',
+                    groupName: team1.groupName,
+                    type: 'group-stage' as const
+                  })
+                  
+                  teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
+                  teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
+                  sundayGamesScheduled++
+                  foundMatch = true
+                } else if (availableTeams.length === 1) {
+                  // Edge case: only one team left, need to use it with the designated team or find another solution
+                  // Actually, this shouldn't happen - we should have 2 teams left
+                  // But if it does, we need to pair this one with... wait, designated team already played
+                  // So we need to find any team that can play (maybe relax Saturday restriction?)
+                  const remainingTeam = availableTeams[0]
+                  
+                  // Find any other team that hasn't played Sunday yet (even if they played Saturday)
+                  // But wait - we can't do that because it violates our rule
+                  // So we need to check if we can pair with a team that's in a different group or something
+                  // Actually, the math should work: 7 teams - 4 Saturday = 3 for Sunday, so we should always have 2 left
+                  console.warn(`Unexpected: Only 1 team available for second Sunday game on weekend ${weekend}`)
+                }
+              }
+              
+              // If we still don't have 2 games, we have a critical error
+              // But let's try one more time with a completely different approach
+              if (!foundMatch && sundayGamesScheduled < sundayTarget) {
+                // Emergency: Check all teams and try to create a match
+                // List teams that didn't play Saturday
+                const teamsNotPlayedSaturday = allTeams.filter((t: any) => 
+                  !saturdayTeams.has(t.team_id) && canPlayOnDay(t.team_id, 'Sunday', false)
+                )
+                
+                // List teams already scheduled for Sunday
+                const teamsPlayedSunday = Array.from(sundayTeams)
+                
+                // Find two teams that can play together
+                for (let i = 0; i < teamsNotPlayedSaturday.length; i++) {
+                  for (let j = i + 1; j < teamsNotPlayedSaturday.length; j++) {
+                    const team1 = teamsNotPlayedSaturday[i]
+                    const team2 = teamsNotPlayedSaturday[j]
+                    
+                    if (!teamsPlayedSunday.includes(team1.team_id) && !teamsPlayedSunday.includes(team2.team_id)) {
+                      foundMatch = true
+                      
+                      sundayTeams.add(team1.team_id)
+                      sundayTeams.add(team2.team_id)
+                      weekendOpponents.get(team1.team_id)?.add(team2.team_id)
+                      weekendOpponents.get(team2.team_id)?.add(team1.team_id)
+                      
+                      sundayMatches.push({
+                        id: `match-${Date.now()}-w${weekend}-sun-${sundayGamesScheduled}`,
+                        team1_id: team1.team_id,
+                        team2_id: team2.team_id,
+                        date: sunday,
+                        time: '',
+                        group_id: team1.groupId,
+                        venue: defaultVenue,
+                        status: 'scheduled',
+                        weekend: weekend,
+                        day: 'Sunday',
+                        groupName: team1.groupName,
+                        type: 'group-stage' as const
+                      })
+                      
+                      teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
+                      teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
+                      sundayGamesScheduled++
+                      break
+                    }
+                  }
+                  if (foundMatch) break
+                }
+              }
+              
+              if (!foundMatch && sundayGamesScheduled < sundayTarget) {
+                console.error(`CRITICAL: Could not schedule second Sunday game for weekend ${weekend}. Saturday teams: ${Array.from(saturdayTeams).join(', ')}, Sunday teams so far: ${Array.from(sundayTeams).join(', ')}`)
+                // Break out of the loop to prevent infinite loop
+                break
+              }
             }
           }
+          
+          matches.push(...sundayMatches)
+          
+          // Store opponents for this weekend
+          opponentsPerWeekend.set(weekend, weekendOpponents)
         }
       }
       
@@ -899,92 +1553,102 @@ export default function SeasonDetailsPage() {
       })
       const minGames = Math.min(...Array.from(teamGameCounts.values()))
       const maxGames = Math.max(...Array.from(teamGameCounts.values()))
-      console.log(`  Min games: ${minGames}, Max games: ${maxGames}, Target: ${targetGamesPerTeam}`)
+      console.log(`  Min games: ${minGames}, Max games: ${maxGames}`)
       
-      // Weekend 4 - Saturday: Quarterfinals - Handle last Saturday with placeholder logic
-      const lastSaturday = findLastSaturday(weekendDates)
-      const weekend4SaturdayIndex = 6
-      
+      // Last Saturday of the month
+      // For 8 teams: 4 games (all teams play once)
+      // For 7 teams: 3 games (6 teams play) + 1 placeholder (1 team has no opponent)
+      // CRITICAL: No team plays more than once on last Saturday
       if (lastSaturday) {
-        // Initialize day tracking
-        if (!teamsPlayedPerDay.has(lastSaturday)) teamsPlayedPerDay.set(lastSaturday, new Set())
+        const lastSaturdayTeams = new Set<string>()
+        const lastSaturdayMatches: any[] = []
         
-        // Create quarterfinal matchups - all teams should play on last Saturday
-        const allTeams = [...groupATeams, ...groupBTeams]
-        const totalTeams = allTeams.length
-        
-        // Declare teamWithLowestStats outside the if block
-        let teamWithLowestStats: string | undefined = undefined
-        
-        // Check if we have odd number of teams
-        if (totalTeams % 2 !== 0) {
-          // Find team with lowest stats to get the placeholder
-          teamWithLowestStats = findTeamWithLowestStats(allTeams.map(t => t.team_id))
+        if (totalTeams === 8) {
+          // 8 teams: Schedule exactly 4 games, each team plays exactly once
+          // Shuffle all teams for randomness
+          const shuffledAllTeams = [...allTeams].sort(() => Math.random() - 0.5)
           
-          // Create placeholder match for the team with lowest stats
-          matches.push({
+          // Create 4 matches from 8 teams
+          for (let i = 0; i < 4; i++) {
+            const team1 = shuffledAllTeams[i * 2]
+            const team2 = shuffledAllTeams[i * 2 + 1]
+            
+            lastSaturdayTeams.add(team1.team_id)
+            lastSaturdayTeams.add(team2.team_id)
+            
+            lastSaturdayMatches.push({
+              id: `match-${Date.now()}-last-sat-${i}`,
+              team1_id: team1.team_id,
+              team2_id: team2.team_id,
+              date: lastSaturday,
+              time: '',
+              group_id: null,
+              venue: defaultVenue,
+              status: 'scheduled',
+              weekend: weekendsToSchedule,
+              day: 'Saturday',
+              groupName: 'Quarterfinals',
+              type: 'quarterfinal' as const
+            })
+            
+            teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
+            teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
+          }
+        } else if (totalTeams === 7) {
+          // 7 teams: Schedule exactly 3 games (6 teams) + 1 placeholder (1 team)
+          // Shuffle all teams for randomness
+          const shuffledAllTeams = [...allTeams].sort(() => Math.random() - 0.5)
+          
+          // Create 3 matches from first 6 teams
+          for (let i = 0; i < 3; i++) {
+            const team1 = shuffledAllTeams[i * 2]
+            const team2 = shuffledAllTeams[i * 2 + 1]
+            
+            lastSaturdayTeams.add(team1.team_id)
+            lastSaturdayTeams.add(team2.team_id)
+            
+            lastSaturdayMatches.push({
+              id: `match-${Date.now()}-last-sat-${i}`,
+              team1_id: team1.team_id,
+              team2_id: team2.team_id,
+              date: lastSaturday,
+              time: '',
+              group_id: null,
+              venue: defaultVenue,
+              status: 'scheduled',
+              weekend: weekendsToSchedule,
+              day: 'Saturday',
+              groupName: 'Quarterfinals',
+              type: 'quarterfinal' as const
+            })
+            
+            teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
+            teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
+          }
+          
+          // The 7th team (index 6) gets a placeholder match
+          const placeholderTeam = shuffledAllTeams[6]
+          lastSaturdayTeams.add(placeholderTeam.team_id)
+          
+          lastSaturdayMatches.push({
             id: `match-${Date.now()}-placeholder`,
-            team1_id: teamWithLowestStats,
+            team1_id: placeholderTeam.team_id,
             team2_id: null, // Placeholder - opponent to be determined
             date: lastSaturday,
             time: '',
             group_id: null,
             venue: defaultVenue,
             status: 'scheduled',
-            weekend: 4,
+            weekend: weekendsToSchedule,
             day: 'Saturday',
             groupName: 'Pending Matchup',
             type: 'placeholder' as const
           })
           
-          // Mark the placeholder team as played
-          teamsPlayedPerDay.get(lastSaturday).add(teamWithLowestStats)
-          teamsPlayedPerWeekend.get(4).add(teamWithLowestStats)
-          
-          console.log(`Placeholder match created for team with lowest stats: ${teamWithLowestStats}`)
+          // Don't increment game count for placeholder (will be resolved later)
         }
         
-        // For remaining teams, create normal matchups
-        const shuffledAllTeams = [...allTeams].sort(() => Math.random() - 0.5)
-        const teamsForMatches = totalTeams % 2 === 0 
-          ? shuffledAllTeams 
-          : (teamWithLowestStats ? shuffledAllTeams.filter(t => t.team_id !== teamWithLowestStats) : shuffledAllTeams)
-        
-        // Create matches for pairs
-        for (let game = 0; game < Math.floor(teamsForMatches.length / 2); game++) {
-          const team1Index = game * 2
-          const team2Index = game * 2 + 1
-          
-          if (team1Index < teamsForMatches.length && team2Index < teamsForMatches.length) {
-            const team1 = teamsForMatches[team1Index]
-            const team2 = teamsForMatches[team2Index]
-            
-            matches.push({
-              id: `match-${Date.now()}-w4-sat-qf-${game + 1}`,
-              team1_id: team1.team_id,
-              team2_id: team2.team_id,
-              date: lastSaturday,
-              time: '',
-              group_id: null, // Cross-group match
-              venue: defaultVenue,
-              status: 'scheduled',
-              weekend: 4,
-              day: 'Saturday',
-              groupName: 'Quarterfinals',
-              type: 'quarterfinal' as const
-            })
-            
-            // Mark teams as played
-            teamsPlayedPerDay.get(lastSaturday).add(team1.team_id)
-            teamsPlayedPerDay.get(lastSaturday).add(team2.team_id)
-            teamsPlayedPerWeekend.get(4).add(team1.team_id)
-            teamsPlayedPerWeekend.get(4).add(team2.team_id)
-            
-            // Track game counts
-            teamGameCounts.set(team1.team_id, (teamGameCounts.get(team1.team_id) || 0) + 1)
-            teamGameCounts.set(team2.team_id, (teamGameCounts.get(team2.team_id) || 0) + 1)
-          }
-        }
+        matches.push(...lastSaturdayMatches)
       }
       
       // Note: Weekend 4 Sunday is reserved for playoffs and is NOT included in randomization
@@ -1002,13 +1666,13 @@ export default function SeasonDetailsPage() {
 
       setScheduledMatches(matches)
       
-      // Check if any placeholder matches were created
+      // Check if any placeholder matches were created (for 7 teams on last Saturday)
       const placeholderMatches = matches.filter(m => m.type === 'placeholder')
-      let description = `${matches.length} matches have been scheduled: Group stage matches across weekends 1-3, and quarterfinals on last Saturday.`
+      let description = `${matches.length} matches have been scheduled: Group stage matches across weekends 1-3, and ${totalTeams === 8 ? 'all teams' : '3 games + 1 placeholder'} on the last Saturday.`
       
       if (placeholderMatches.length > 0) {
         const placeholderTeam = placeholderMatches[0] ? getTeamById(placeholderMatches[0].team1_id)?.name : 'Team'
-        description += ` Note: ${placeholderTeam} has a placeholder match (vs ?) on the last Saturday - this will be resolved when the lowest performing team is removed.`
+        description += ` Note: ${placeholderTeam} has a placeholder match (vs ?) on the last Saturday.`
       }
       
       toast({
@@ -1030,7 +1694,8 @@ export default function SeasonDetailsPage() {
   }
 
   const reshuffleMatches = async () => {
-    // Simply recall scheduleMatches to regenerate with new randomization
+    // Reshuffle by calling scheduleMatches again - it will use fresh randomization
+    // This ensures reshuffling uses the same updated logic as the initial schedule
     if (!season || seasonGroups.length === 0) {
       toast({
         title: "Cannot Reshuffle",
@@ -1040,362 +1705,10 @@ export default function SeasonDetailsPage() {
       return
     }
 
-    setIsScheduling(true)
-    
-    try {
-      // Get the validated groups - this will be the same as the original
-      const groupA = seasonGroups[0]
-      const groupB = seasonGroups[1]
-
-      const groupATeams = seasonTeamStatistics
-        .filter((stat: any) => stat.group_id === groupA.id)
-        .map((stat: any) => ({
-          team_id: stat.team_id,
-          teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
-          groupId: groupA.id,
-          groupName: groupA.name
-        }))
-
-      const groupBTeams = seasonTeamStatistics
-        .filter((stat: any) => stat.group_id === groupB.id)
-        .map((stat: any) => ({
-          team_id: stat.team_id,
-          teamName: getTeamById(stat.team_id)?.name || `Team ${stat.team_id}`,
-          groupId: groupB.id,
-          groupName: groupB.name
-        }))
-
-      const weekendDates = generateWeekendDates(season.startDate, season.EndDate)
-      const totalWeekends = weekendDates.length
-      const numWeekends = Math.ceil(totalWeekends / 2)
-      const weekendsToSchedule = Math.min(4, numWeekends)
-
-      const defaultVenue = "Prime Arena"
-      const matches = []
-
-      // Re-generate matchups with NEW randomization
-      const groupAMatchups = []
-      const groupBMatchups = []
-      
-      const maxGroupSize = Math.max(groupATeams.length, groupBTeams.length)
-      const minGroupSize = Math.min(groupATeams.length, groupBTeams.length)
-      
-      const gamesPerRoundA = groupATeams.length - 1
-      const gamesPerRoundB = groupBTeams.length - 1
-      
-      const targetGamesPerTeam = (() => {
-        if (maxGroupSize === minGroupSize) {
-          return maxGroupSize - 1
-        }
-        
-        const gcd = (a: number, b: number): number => {
-          while (b !== 0) {
-            const temp = b
-            b = a % b
-            a = temp
-          }
-          return a
-        }
-        
-        const lcm = (gamesPerRoundA * gamesPerRoundB) / gcd(gamesPerRoundA, gamesPerRoundB)
-        return lcm
-      })()
-
-      // Generate new matchups with fresh randomization
-      for (let i = 0; i < groupATeams.length; i++) {
-        for (let j = i + 1; j < groupATeams.length; j++) {
-          groupAMatchups.push({
-            team1_id: groupATeams[i].team_id,
-            team2_id: groupATeams[j].team_id,
-            team1Name: groupATeams[i].teamName,
-            team2Name: groupATeams[j].teamName,
-            groupId: groupA.id,
-            groupName: groupA.name
-          })
-        }
-      }
-      
-      const roundsNeededA = targetGamesPerTeam / gamesPerRoundA
-      if (roundsNeededA > 1) {
-        const initialCount = groupAMatchups.length
-        for (let round = 1; round < roundsNeededA; round++) {
-          for (let i = 0; i < initialCount; i++) {
-            groupAMatchups.push({ ...groupAMatchups[i] })
-          }
-        }
-      }
-
-      for (let i = 0; i < groupBTeams.length; i++) {
-        for (let j = i + 1; j < groupBTeams.length; j++) {
-          groupBMatchups.push({
-            team1_id: groupBTeams[i].team_id,
-            team2_id: groupBTeams[j].team_id,
-            team1Name: groupBTeams[i].teamName,
-            team2Name: groupBTeams[j].teamName,
-            groupId: groupB.id,
-            groupName: groupB.name
-          })
-        }
-      }
-      
-      const roundsNeededB = targetGamesPerTeam / gamesPerRoundB
-      if (roundsNeededB > 1) {
-        const initialCount = groupBMatchups.length
-        for (let round = 1; round < roundsNeededB; round++) {
-          for (let i = 0; i < initialCount; i++) {
-            groupBMatchups.push({ ...groupBMatchups[i] })
-          }
-        }
-      }
-
-      // Shuffle FRESH with new randomization
-      const shuffledGroupA = [...groupAMatchups].sort(() => Math.random() - 0.5)
-      const shuffledGroupB = [...groupBMatchups].sort(() => Math.random() - 0.5)
-
-      const teamsPlayedPerDay = new Map()
-      const teamsPlayedPerWeekend = new Map()
-      
-      for (let weekend = 1; weekend <= numWeekends; weekend++) {
-        teamsPlayedPerWeekend.set(weekend, new Set())
-      }
-
-      let groupAIndex = 0
-      let groupBIndex = 0
-      
-      for (let weekend = 1; weekend <= weekendsToSchedule; weekend++) {
-        const saturdayIndex = (weekend - 1) * 2
-        const sundayIndex = (weekend - 1) * 2 + 1
-        
-        if (saturdayIndex < weekendDates.length && sundayIndex < weekendDates.length) {
-          const saturday = weekendDates[saturdayIndex]
-          const sunday = weekendDates[sundayIndex]
-          
-        if (!teamsPlayedPerDay.has(saturday)) teamsPlayedPerDay.set(saturday, new Set())
-        if (!teamsPlayedPerDay.has(sunday)) teamsPlayedPerDay.set(sunday, new Set())
-        
-          // Saturday: 2 matches
-        for (let game = 0; game < 2; game++) {
-          let validMatchup = null
-
-          if (game === 0 && groupAIndex < shuffledGroupA.length) {
-            const potentialMatchup = shuffledGroupA[groupAIndex]
-            const saturdayTeams = teamsPlayedPerDay.get(saturday)
-            
-            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                !saturdayTeams.has(potentialMatchup.team2_id)) {
-              validMatchup = potentialMatchup
-              groupAIndex++
-              } else {
-              groupAIndex++
-            }
-          } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
-            const potentialMatchup = shuffledGroupB[groupBIndex]
-            const saturdayTeams = teamsPlayedPerDay.get(saturday)
-            
-            if (!saturdayTeams.has(potentialMatchup.team1_id) && 
-                !saturdayTeams.has(potentialMatchup.team2_id)) {
-              validMatchup = potentialMatchup
-              groupBIndex++
-              } else {
-                groupBIndex++
-              }
-            }
-
-            if (!validMatchup) {
-              if (game === 0 && shuffledGroupA.length > 0) {
-                const reuseIndex = groupAIndex % shuffledGroupA.length
-                validMatchup = shuffledGroupA[reuseIndex]
-                groupAIndex++
-              } else if (game === 1 && shuffledGroupB.length > 0) {
-                const reuseIndex = groupBIndex % shuffledGroupB.length
-                validMatchup = shuffledGroupB[reuseIndex]
-              groupBIndex++
-            }
-          }
-
-          if (validMatchup) {
-                matches.push({
-                id: `match-${Date.now()}-w${weekend}-sat-${game}`,
-              team1_id: validMatchup.team1_id,
-              team2_id: validMatchup.team2_id,
-              date: saturday,
-              time: '',
-              group_id: validMatchup.groupId,
-              venue: defaultVenue,
-              status: 'scheduled',
-                weekend: weekend,
-              day: 'Saturday',
-              groupName: validMatchup.groupName,
-                type: 'group-stage' as const
-            })
-            
-            teamsPlayedPerDay.get(saturday).add(validMatchup.team1_id)
-            teamsPlayedPerDay.get(saturday).add(validMatchup.team2_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
-          }
-        }
-        
-          // Sunday: 2 matches
-        for (let game = 0; game < 2; game++) {
-          let validMatchup = null
-
-          if (game === 0 && groupAIndex < shuffledGroupA.length) {
-            const potentialMatchup = shuffledGroupA[groupAIndex]
-            const sundayTeams = teamsPlayedPerDay.get(sunday)
-            
-            if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                !sundayTeams.has(potentialMatchup.team2_id)) {
-              validMatchup = potentialMatchup
-              groupAIndex++
-              } else {
-              groupAIndex++
-            }
-          } else if (game === 1 && groupBIndex < shuffledGroupB.length) {
-            const potentialMatchup = shuffledGroupB[groupBIndex]
-            const sundayTeams = teamsPlayedPerDay.get(sunday)
-            
-            if (!sundayTeams.has(potentialMatchup.team1_id) && 
-                !sundayTeams.has(potentialMatchup.team2_id)) {
-              validMatchup = potentialMatchup
-              groupBIndex++
-              } else {
-                groupBIndex++
-              }
-            }
-
-            if (!validMatchup) {
-              if (game === 0 && shuffledGroupA.length > 0) {
-                const reuseIndex = groupAIndex % shuffledGroupA.length
-                validMatchup = shuffledGroupA[reuseIndex]
-                groupAIndex++
-              } else if (game === 1 && shuffledGroupB.length > 0) {
-                const reuseIndex = groupBIndex % shuffledGroupB.length
-                validMatchup = shuffledGroupB[reuseIndex]
-              groupBIndex++
-            }
-          }
-
-          if (validMatchup) {
-            matches.push({
-                id: `match-${Date.now()}-w${weekend}-sun-${game}`,
-              team1_id: validMatchup.team1_id,
-              team2_id: validMatchup.team2_id,
-                  date: sunday,
-              time: '',
-              group_id: validMatchup.groupId,
-                  venue: defaultVenue,
-                  status: 'scheduled',
-                weekend: weekend,
-                  day: 'Sunday',
-              groupName: validMatchup.groupName,
-                type: 'group-stage' as const
-            })
-            
-            teamsPlayedPerDay.get(sunday).add(validMatchup.team1_id)
-            teamsPlayedPerDay.get(sunday).add(validMatchup.team2_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team1_id)
-              teamsPlayedPerWeekend.get(weekend).add(validMatchup.team2_id)
-            }
-          }
-        }
-      }
-      
-      // Add last Saturday matches with placeholder logic
-      const lastSaturday = findLastSaturday(weekendDates)
-      
-      if (lastSaturday) {
-        if (!teamsPlayedPerDay.has(lastSaturday)) teamsPlayedPerDay.set(lastSaturday, new Set())
-        
-        const allTeams = [...groupATeams, ...groupBTeams]
-        const totalTeams = allTeams.length
-        
-        let teamWithLowestStats: string | undefined = undefined
-        
-        if (totalTeams % 2 !== 0) {
-          teamWithLowestStats = findTeamWithLowestStats(allTeams.map(t => t.team_id))
-          
-          matches.push({
-            id: `match-${Date.now()}-placeholder`,
-            team1_id: teamWithLowestStats,
-            team2_id: null,
-            date: lastSaturday,
-            time: '',
-            group_id: null,
-            venue: defaultVenue,
-            status: 'scheduled',
-            weekend: 4,
-            day: 'Saturday',
-            groupName: 'Pending Matchup',
-            type: 'placeholder' as const
-          })
-          
-          teamsPlayedPerDay.get(lastSaturday).add(teamWithLowestStats)
-          teamsPlayedPerWeekend.get(4).add(teamWithLowestStats)
-        }
-        
-        const shuffledAllTeams = [...allTeams].sort(() => Math.random() - 0.5)
-        const teamsForMatches = totalTeams % 2 === 0 
-          ? shuffledAllTeams 
-          : (teamWithLowestStats ? shuffledAllTeams.filter(t => t.team_id !== teamWithLowestStats) : shuffledAllTeams)
-        
-        for (let game = 0; game < Math.floor(teamsForMatches.length / 2); game++) {
-          const team1Index = game * 2
-          const team2Index = game * 2 + 1
-          
-          if (team1Index < teamsForMatches.length && team2Index < teamsForMatches.length) {
-            const team1 = teamsForMatches[team1Index]
-            const team2 = teamsForMatches[team2Index]
-            
-            matches.push({
-              id: `match-${Date.now()}-w4-sat-qf-${game + 1}`,
-              team1_id: team1.team_id,
-              team2_id: team2.team_id,
-              date: lastSaturday,
-              time: '',
-              group_id: null,
-              venue: defaultVenue,
-              status: 'scheduled',
-              weekend: 4,
-              day: 'Saturday',
-              groupName: 'Quarterfinals',
-              type: 'quarterfinal' as const
-            })
-            
-            teamsPlayedPerDay.get(lastSaturday).add(team1.team_id)
-            teamsPlayedPerDay.get(lastSaturday).add(team2.team_id)
-            teamsPlayedPerWeekend.get(4).add(team1.team_id)
-            teamsPlayedPerWeekend.get(4).add(team2.team_id)
-          }
-        }
-      }
-      
-      // Update state with reshuffled matches
-      setScheduledMatches(matches)
-      
-      const placeholderMatches = matches.filter(m => m.type === 'placeholder')
-      let description = `${matches.length} matches have been reshuffled with new random matchups!`
-      
-      if (placeholderMatches.length > 0) {
-        const placeholderTeam = placeholderMatches[0] ? getTeamById(placeholderMatches[0].team1_id)?.name : 'Team'
-        description += ` Note: ${placeholderTeam} has a placeholder match (vs ?) on the last Saturday.`
-      }
-      
-      toast({
-        title: "Matches Reshuffled!",
-        description: description,
-      })
-      
-    } catch (error) {
-      console.error("Error in reshuffleMatches:", error)
-      toast({
-        title: "Reshuffle Error",
-        description: "An error occurred while reshuffling matches. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsScheduling(false)
-    }
+    // Call the same scheduleMatches function - it already handles randomization
+    // The shuffle happens inside scheduleMatches, so calling it again will reshuffle
+    // This ensures reshuffle uses all the updated logic (7-team rotation, special teams, etc.)
+    await scheduleMatches()
   }
 
   const schedulePerformanceMatches = async () => {
@@ -1728,6 +2041,10 @@ export default function SeasonDetailsPage() {
   
   // Match swapping state
   const [selectedMatchForSwap, setSelectedMatchForSwap] = useState<string | null>(null)
+  
+  // Edit opponent state
+  const [matchBeingEdited, setMatchBeingEdited] = useState<string | null>(null)
+  const [newOpponentId, setNewOpponentId] = useState<string>("")
 
   // Swap teams between two matches (on any day)
   const swapMatches = (matchId1: string, matchId2: string) => {
@@ -1814,6 +2131,60 @@ export default function SeasonDetailsPage() {
       // Perform the swap
       swapMatches(selectedMatchForSwap, matchId)
     }
+  }
+
+  const changeOpponent = (matchId: string, newTeamId: string) => {
+    const match = scheduledMatches.find(m => m.id === matchId)
+    if (!match) {
+      toast({
+        title: "Error",
+        description: "Match not found",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Normalize IDs for comparison
+    const normalizedNewTeamId = newTeamId?.toString()
+    const normalizedTeam1Id = match.team1_id?.toString()
+    const normalizedTeam2Id = match.team2_id?.toString()
+    
+    // Check if the new opponent is the same as the current team
+    if (normalizedNewTeamId === normalizedTeam1Id || normalizedNewTeamId === normalizedTeam2Id) {
+      toast({
+        title: "Invalid Opponent",
+        description: "Cannot set a team to play against itself",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Update the match with the new opponent
+    const updatedMatches = scheduledMatches.map(m => {
+      if (m.id === matchId) {
+        const updatedMatch = {
+          ...m,
+          team2_id: normalizedNewTeamId
+        }
+        console.log('Updating match:', {
+          matchId,
+          oldTeam2Id: m.team2_id,
+          newTeam2Id: normalizedNewTeamId,
+          updatedMatch
+        })
+        return updatedMatch
+      }
+      return m
+    })
+    
+    setScheduledMatches(updatedMatches)
+    setMatchBeingEdited(null)
+    setNewOpponentId("")
+    
+    toast({
+      title: "Opponent Changed!",
+      description: "Match opponent has been updated successfully.",
+    })
   }
 
   if (loading) {
@@ -3178,31 +3549,103 @@ export default function SeasonDetailsPage() {
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center space-x-2 mt-2" onClick={(e) => e.stopPropagation()}>
-                                  <Input
-                                    value={match.venue}
-                                    onChange={(e) => {
-                                      const updatedMatches = scheduledMatches.map(m => 
-                                        m.id === match.id ? { ...m, venue: e.target.value } : m
-                                      )
-                                      setScheduledMatches(updatedMatches)
-                                    }}
-                                    placeholder="Venue"
-                                    className="text-xs h-8 bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
-                                  />
-                                  <span className="text-xs text-white/60">|</span>
-                                  <Input
-                                    type="time"
-                                    value={match.time}
-                                    onChange={(e) => {
-                                      const updatedMatches = scheduledMatches.map(m => 
-                                        m.id === match.id ? { ...m, time: e.target.value } : m
-                                      )
-                                      setScheduledMatches(updatedMatches)
-                                    }}
-                                    className="text-xs h-8 w-32 bg-white/10 backdrop-blur-sm text-white border-white/20"
-                                  />
-                                </div>
+                                {matchBeingEdited === match.id ? (
+                                  // Edit mode: show dropdown and buttons
+                                  <div className="flex items-center space-x-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                                    <Select value={newOpponentId} onValueChange={setNewOpponentId}>
+                                      <SelectTrigger className="text-xs h-8 bg-white/10 backdrop-blur-sm text-white border-white/20">
+                                        <SelectValue placeholder="Select opponent" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {seasonTeams.filter((t: any) => {
+                                          const teamId = t.id || t.team_id
+                                          return teamId && teamId.toString() !== match.team1_id?.toString() && teamId.toString() !== match.team2_id?.toString()
+                                        }).map((team: any) => {
+                                          const teamId = team.id || team.team_id
+                                          return (
+                                            <SelectItem key={teamId} value={teamId?.toString()}>
+                                              {team.name || team.team_name}
+                                            </SelectItem>
+                                          )
+                                        })}
+                                      </SelectContent>
+                                    </Select>
+                                    <Button
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        if (newOpponentId) {
+                                          changeOpponent(match.id, newOpponentId)
+                                        } else {
+                                          toast({
+                                            title: "Please select an opponent",
+                                            variant: "destructive"
+                                          })
+                                        }
+                                      }}
+                                      className="bg-green-600 hover:bg-green-700 text-white"
+                                    >
+                                      Save
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setMatchBeingEdited(null)
+                                        setNewOpponentId("")
+                                      }}
+                                      className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  // Normal mode: show venue/time and edit button
+                                  <div className="flex items-center space-x-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                                    <Input
+                                      value={match.venue}
+                                      onChange={(e) => {
+                                        const updatedMatches = scheduledMatches.map(m => 
+                                          m.id === match.id ? { ...m, venue: e.target.value } : m
+                                        )
+                                        setScheduledMatches(updatedMatches)
+                                      }}
+                                      placeholder="Venue"
+                                      className="text-xs h-8 bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
+                                    />
+                                    <span className="text-xs text-white/60">|</span>
+                                    <Input
+                                      type="time"
+                                      value={match.time}
+                                      onChange={(e) => {
+                                        const updatedMatches = scheduledMatches.map(m => 
+                                          m.id === match.id ? { ...m, time: e.target.value } : m
+                                        )
+                                        setScheduledMatches(updatedMatches)
+                                      }}
+                                      className="text-xs h-8 w-32 bg-white/10 backdrop-blur-sm text-white border-white/20"
+                                    />
+                                    {isSwapable && (
+                                      <>
+                                        <span className="text-xs text-white/60">|</span>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            setMatchBeingEdited(match.id)
+                                            setNewOpponentId("") // Reset when entering edit mode
+                                          }}
+                                          className="bg-orange-600/80 hover:bg-orange-700/80 text-white border-orange-400/30"
+                                        >
+                                          <Edit className="h-3 w-3 mr-1" />
+                                          Edit Opponent
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             )
                           })}

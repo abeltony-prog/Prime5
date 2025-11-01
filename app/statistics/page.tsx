@@ -292,7 +292,10 @@ export default function StatisticsPage() {
     const upcomingMatches = matches
       .filter((match: any) => {
         const matchDate = new Date(match.dateAndtime)
-        return matchDate > now
+        // Show matches that haven't happened yet (include matches happening today)
+        // Consider match as passed only if it's more than 2 hours after the scheduled time
+        const matchEndTime = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000) // Add 2 hours to match time
+        return now < matchEndTime && match.status !== 'completed'
       })
       .sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
       .map((match: any) => {

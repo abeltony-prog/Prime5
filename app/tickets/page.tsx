@@ -101,8 +101,10 @@ export default function TicketsPage() {
     ?.filter((match: any) => {
       const matchDate = new Date(match.dateAndtime)
       const now = new Date()
-      // Include matches with status 'scheduled' or 'Pending' that are in the future
-      return (match.status === 'scheduled' || match.status === 'Pending') && matchDate > now
+      // Include matches with status 'scheduled' or 'Pending' that haven't happened yet
+      // Consider match as passed only if it's more than 2 hours after the scheduled time
+      const matchEndTime = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000) // Add 2 hours to match time
+      return (match.status === 'scheduled' || match.status === 'Pending') && now < matchEndTime && match.status !== 'completed'
     })
     ?.sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
     ?.map((match: any) => {
