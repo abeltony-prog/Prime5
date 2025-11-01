@@ -68,6 +68,7 @@ export function Matches() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [groupFilter, setGroupFilter] = useState("all")
+  const [isExporting, setIsExporting] = useState(false)
 
   // Use the hook to get matches from database
   const { matches, loading, error, refetch } = useMatchSchedules()
@@ -130,81 +131,39 @@ export function Matches() {
     }
   }
 
-  const exportSeasonCalendar = () => {
-    // Sort matches by date
-    const sortedMatches = [...matches].sort((a: Match, b: Match) => {
-      const dateA = new Date(a.dateAndtime).getTime()
-      const dateB = new Date(b.dateAndtime).getTime()
-      return dateA - dateB
-    })
+  const exportSeasonCalendar = async () => {
+    setIsExporting(true)
+    try {
+      // Sort matches by date
+      const sortedMatches = [...matches].sort((a: Match, b: Match) => {
+        const dateA = new Date(a.dateAndtime).getTime()
+        const dateB = new Date(b.dateAndtime).getTime()
+        return dateA - dateB
+      })
 
-    // Create CSV content
-    const headers = [
-      'Date',
-      'Day',
-      'Time',
-      'Team 1',
-      'Team 1 Logo',
-      'Team 2',
-      'Team 2 Logo',
-      'Venue/Location',
-      'Season ID',
-      'Status'
-    ]
-
-    const rows = sortedMatches.map((match: Match) => {
+    // Process matches (no need to fetch images)
+    const processedMatches = sortedMatches.map((match: Match) => {
       const matchDate = new Date(match.dateAndtime)
-      const dateStr = matchDate.toLocaleDateString('en-US', {
+      // Combine date and time in one string
+      const dateTimeStr = matchDate.toLocaleString('en-US', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit'
-      })
-      const dayStr = matchDate.toLocaleDateString('en-US', { weekday: 'long' })
-      const timeStr = matchDate.toLocaleTimeString('en-US', {
+        day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
       })
       const team1Name = match.Team1?.name || match.team1 || "Unknown Team"
       const team2Name = match.Team2?.name || match.team2 || "Unknown Team"
-      // Get logo URLs - handle both full URLs and relative paths
-      const team1Logo = match.Team1?.logo || ""
-      const team2Logo = match.Team2?.logo || ""
-      // If logo is a relative path, convert to full URL
-      const getFullLogoUrl = (logo: string) => {
-        if (!logo) return ""
-        if (logo.startsWith('http://') || logo.startsWith('https://')) {
-          return logo
-        }
-        // Ensure window is available (should always be true in browser)
-        const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-        // If it's a relative path, make it absolute
-        if (logo.startsWith('/')) {
-          return baseUrl ? `${baseUrl}${logo}` : logo
-        }
-        // If it's just a filename, assume it's in public folder
-        return baseUrl ? `${baseUrl}/${logo}` : logo
-      }
-      const team1LogoUrl = getFullLogoUrl(team1Logo)
-      const team2LogoUrl = getFullLogoUrl(team2Logo)
+      // Combine teams in one cell: "Team A vs Team B"
+      const teamsPlaying = `${team1Name} vs ${team2Name}`
       const location = match.location || "TBD"
-      const seasonId = match.season_id ? match.season_id.substring(0, 8) + "..." : "No Season"
-      const status = match.team1Goals !== undefined && match.team2Goals !== undefined 
-        ? `Completed (${match.team1Goals}-${match.team2Goals})` 
-        : "Scheduled"
 
-      return [
-        dateStr,
-        dayStr,
-        timeStr,
-        team1Name,
-        team1LogoUrl,
-        team2Name,
-        team2LogoUrl,
-        location,
-        seasonId,
-        status
-      ]
+      return {
+        dateTime: dateTimeStr,
+        teamsPlaying,
+        location
+      }
     })
 
     // Helper function to escape CSV cell values
@@ -215,10 +174,18 @@ export function Matches() {
       return `"${escaped}"`
     }
 
+    // Create CSV content
+    const headers = ['Date & Time', 'Teams Playing', 'Arena']
+    const csvRows = processedMatches.map(match => [
+      match.dateTime,
+      match.teamsPlaying,
+      match.location
+    ])
+
     // Combine headers and rows
     const csvContent = [
       headers.map(escapeCSV).join(','),
-      ...rows.map(row => row.map(cell => escapeCSV(cell.toString())).join(','))
+      ...csvRows.map(row => row.map(cell => escapeCSV(cell.toString())).join(','))
     ].join('\n')
 
     // Create and download file
@@ -239,11 +206,21 @@ export function Matches() {
     // Clean up
     URL.revokeObjectURL(url)
     
-    // Show success notification
-    toast({
-      title: "Calendar Exported!",
-      description: `Successfully exported ${sortedMatches.length} matches to CSV file.`,
-    })
+      // Show success notification
+      toast({
+        title: "Calendar Exported!",
+        description: `Successfully exported ${sortedMatches.length} matches to CSV file.`,
+      })
+    } catch (error: any) {
+      console.error('Error exporting calendar:', error)
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export calendar. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   // Show loading state
@@ -317,10 +294,19 @@ export function Matches() {
             variant="outline" 
             onClick={exportSeasonCalendar}
             className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-            disabled={matches.length === 0}
+            disabled={matches.length === 0 || isExporting}
           >
-            <Download className="h-4 w-4 mr-2" />
-            Export Calendar
+            {isExporting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Export Calendar
+              </>
+            )}
           </Button>
           <Link href="/admin/season-scheduler">
             <Button variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
