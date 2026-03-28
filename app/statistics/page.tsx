@@ -576,14 +576,14 @@ export default function StatisticsPage() {
           semifinals: [],
           final: null
         },
-        groupATeams: groupATeams.map(team => ({
+        groupATeams: groupATeams.map((team: any) => ({
           name: team.name,
           logo: team.logo || null,
           points: team.points || 0,
           goalDifference: team.goalDifference || 0,
           goalsFor: team.goalsFor || 0
         })),
-        groupBTeams: groupBTeams.map(team => ({
+        groupBTeams: groupBTeams.map((team: any) => ({
           name: team.name,
           logo: team.logo || null,
           points: team.points || 0,
@@ -648,14 +648,14 @@ export default function StatisticsPage() {
 
     return {
       knockoutMatches: { quarterfinals, semifinals, final },
-      groupATeams: groupATeams.map(team => ({
+      groupATeams: groupATeams.map((team: any) => ({
         name: team.name,
         logo: team.logo || null,
         points: team.points || 0,
         goalDifference: team.goalDifference || 0,
         goalsFor: team.goalsFor || 0
       })),
-      groupBTeams: groupBTeams.map(team => ({
+      groupBTeams: groupBTeams.map((team: any) => ({
         name: team.name,
         logo: team.logo || null,
         points: team.points || 0,
@@ -699,704 +699,495 @@ export default function StatisticsPage() {
 
 
   const StandingsTable = ({ standings, groupName }: { standings: typeof groupAStandings; groupName: string }) => (
-    <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-      <CardHeader className="bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white">
-        <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5" />
-          Group {groupName} Standings
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-white/20 backdrop-blur-sm">
-              <tr className="text-left text-sm font-medium text-white">
-                <th className="p-3">Pos</th>
-                <th className="p-3">Team</th>
-                <th className="p-3 text-center">P</th>
-                <th className="p-3 text-center">W</th>
-                <th className="p-3 text-center">D</th>
-                <th className="p-3 text-center">L</th>
-                <th className="p-3 text-center">GF</th>
-                <th className="p-3 text-center">GA</th>
-                <th className="p-3 text-center">GD</th>
-                <th className="p-3 text-center">Pts</th>
-              </tr>
-            </thead>
-            <tbody>
-              {standings.map((team, index) => (
-                <tr
-                  key={team.team}
-                  className={`border-b border-white/20 hover:bg-white/10 transition-all duration-300 ${
-                    index < 2 ? "bg-green-500/20 backdrop-blur-sm" : index >= standings.length - 2 ? "bg-red-500/20 backdrop-blur-sm" : ""
-                  }`}
-                >
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{team.pos}</span>
-                      {index < 2 && <TrendingUp className="h-4 w-4 text-green-300" />}
-                      {index >= standings.length - 2 && <TrendingDown className="h-4 w-4 text-red-300" />}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
+    <div className="glass-dark rounded-[2.5rem] overflow-hidden border border-white/10 shadow-3xl">
+      <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
+        <h3 className="text-xl font-black text-white font-heading italic uppercase tracking-tighter flex items-center gap-3">
+          <Trophy className="h-5 w-5 text-lime-300" />
+          Group <span className="text-lime-300">{groupName}</span> Standings
+        </h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+              <th className="p-4 text-left w-16">Pos</th>
+              <th className="p-4 text-left">Team Name</th>
+              <th className="p-4 text-center">P</th>
+              <th className="p-4 text-center">GD</th>
+              <th className="p-4 text-center">Pts</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {standings.map((team, index) => (
+              <tr
+                key={team.team}
+                className={`group hover:bg-white/[0.02] transition-colors duration-300 ${
+                  index < 2 ? "bg-lime-400/[0.02]" : ""
+                }`}
+              >
+                <td className="p-4 font-black font-heading italic text-white/20 group-hover:text-lime-300 transition-colors">
+                  {(index + 1).toString().padStart(2, '0')}
+                </td>
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-lime-300/30 transition-colors overflow-hidden">
                       {team.teamLogo ? (
-                        <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
-                          <img 
-                            src={team.teamLogo} 
-                            alt={`${team.team} Logo`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                        <img src={team.teamLogo} alt={team.team} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                          <span className="text-xs font-bold text-white">
-                            {team.team.substring(0, 2).toUpperCase()}
-                          </span>
-                        </div>
+                        <span className="text-[10px] font-black text-white/40">{team.team.substring(0, 2).toUpperCase()}</span>
                       )}
-                      <span className="font-medium text-white drop-shadow-md">{team.team}</span>
-                      {index === 0 && <Badge className="bg-yellow-500/90 backdrop-blur-md text-black">Leader</Badge>}
                     </div>
-                  </td>
-                  <td className="p-3 text-center text-white">{team.played}</td>
-                  <td className="p-3 text-center text-green-300 font-medium">{team.wins}</td>
-                  <td className="p-3 text-center text-yellow-300 font-medium">{team.draws}</td>
-                  <td className="p-3 text-center text-red-300 font-medium">{team.losses}</td>
-                  <td className="p-3 text-center text-white">{team.gf}</td>
-                  <td className="p-3 text-center text-white">{team.ga}</td>
-                  <td className={`p-3 text-center font-medium ${team.gd >= 0 ? "text-green-300" : "text-red-300"}`}>
-                    {team.gd > 0 ? "+" : ""}
-                    {team.gd}
-                  </td>
-                  <td className="p-3 text-center">
-                    <Badge variant="outline" className="font-bold text-white border-white/50 bg-white/20 backdrop-blur-sm">
-                      {team.points}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
+                    <span className="font-bold text-white uppercase tracking-tight group-hover:text-lime-300 transition-colors">{team.team}</span>
+                  </div>
+                </td>
+                <td className="p-4 text-center text-white/60 font-bold">{team.played}</td>
+                <td className={`p-4 text-center font-black ${team.gd >= 0 ? "text-lime-300" : "text-red-400"}`}>
+                  {team.gd > 0 ? "+" : ""}{team.gd}
+                </td>
+                <td className="p-4 text-center">
+                  <span className="text-xl font-black text-white font-heading italic">{team.points}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 
   return (
     <div className="min-h-screen relative">
       <Navigation />
 
-      <div className="relative z-10 container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl">League Center</h1>
-          <p className="text-lg text-white/90 drop-shadow-xl">Statistics, standings, and fixtures</p>
+      <div className="relative z-10 container mx-auto px-6 py-16">
+        <div className="text-center mb-16 relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-lime-400/10 blur-[100px] rounded-full -z-10"></div>
+          <div className="inline-block px-4 py-1 rounded-full bg-lime-400/10 border border-lime-400/20 text-lime-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4">
+            League Center
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 font-heading italic uppercase tracking-tighter">
+            Market <span className="text-lime-300">Statistics</span>
+          </h1>
+          <p className="text-lg text-white/50 uppercase font-bold tracking-[0.2em]">Detailed records & live standings</p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
-            <Button
-              variant={activeTab === 'leaderboard' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('leaderboard')}
-              className={activeTab === 'leaderboard' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
-            >
-              Leaderboard
-            </Button>
-            <Button
-              variant={activeTab === 'statistics' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('statistics')}
-              className={activeTab === 'statistics' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
-            >
-              Statistics
-            </Button>
-            <Button
-              variant={activeTab === 'standings' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('standings')}
-              className={activeTab === 'standings' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
-            >
-              Standings
-            </Button>
-            <Button
-              variant={activeTab === 'fixtures' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('fixtures')}
-              className={activeTab === 'fixtures' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
-            >
-              Fixtures
-            </Button>
-            <Button
-              variant={activeTab === 'bracket' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('bracket')}
-              className={activeTab === 'bracket' ? 'bg-blue-600/90 backdrop-blur-md text-white shadow-lg' : 'text-white hover:bg-white/20 hover:text-white'}
-            >
-              Bracket
-            </Button>
-
+        <div className="flex justify-center mb-16 px-4">
+          <div className="glass-dark rounded-2xl p-1.5 flex flex-wrap justify-center gap-1 shadow-2xl border border-white/10 max-w-4xl w-full">
+            {(['leaderboard', 'statistics', 'standings', 'fixtures', 'bracket'] as const).map((tab) => (
+              <Button
+                key={tab}
+                variant="ghost"
+                onClick={() => setActiveTab(tab)}
+                className={`h-12 px-8 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 ${
+                  activeTab === tab 
+                    ? "bg-lime-300 text-black shadow-[0_0_20px_rgba(190,242,100,0.3)] scale-105" 
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {tab}
+              </Button>
+            ))}
           </div>
         </div>
 
         {/* Leaderboard Tab */}
         {activeTab === 'leaderboard' && (
-          <div className="space-y-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">League Leaderboard</h2>
-              <p className="text-lg text-white/90 drop-shadow-xl">
-                {activeSeason ? `Complete team rankings and statistics - ${activeSeason.name}` : "No active or scheduled season"}
-              </p>
-            </div>
-
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {!activeSeason ? (
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardContent className="p-12 text-center">
-                  <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Trophy className="h-8 w-8 text-yellow-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">No Active Season</h3>
-                  <p className="text-white/80 text-lg mb-6">
-                    There is currently no active or scheduled season. The leaderboard will be available once a season is created and teams are added.
-                  </p>
-                  <div className="text-white/60">
-                    <p>• Create a season in the admin panel</p>
-                    <p>• Add teams to the season</p>
-                    <p>• The leaderboard will appear here automatically</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="glass-dark rounded-[2.5rem] p-16 text-center border border-white/10 shadow-3xl">
+                <div className="w-20 h-20 bg-lime-400/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-lime-400/20">
+                  <Trophy className="h-10 w-10 text-lime-400" />
+                </div>
+                <h3 className="text-3xl font-black text-white mb-4 font-heading italic uppercase tracking-tighter">No Active Season</h3>
+                <p className="text-white/40 text-lg uppercase font-bold tracking-widest max-w-md mx-auto">
+                  The leaderboard will be available once a season is created and teams are added.
+                </p>
+              </div>
             ) : leaderboard.length === 0 ? (
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardContent className="p-12 text-center">
-                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Users className="h-8 w-8 text-blue-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">No Teams in Active Season</h3>
-                  <p className="text-white/80 text-lg mb-6">
-                    The active season "{activeSeason.name}" has no teams registered yet.
-                  </p>
-                  <div className="text-white/60">
-                    <p>• Teams need to be registered for this season</p>
-                    <p>• Leaderboard will populate once teams are added</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="glass-dark rounded-[2.5rem] p-16 text-center border border-white/10 shadow-3xl">
+                <div className="w-20 h-20 bg-lime-400/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-lime-400/20">
+                  <Users className="h-10 w-10 text-lime-400" />
+                </div>
+                <h3 className="text-3xl font-black text-white mb-4 font-heading italic uppercase tracking-tighter">No Registered Teams</h3>
+                <p className="text-white/40 text-lg uppercase font-bold tracking-widest max-w-md mx-auto">
+                  The season "{activeSeason.name}" has no teams registered yet.
+                </p>
+              </div>
             ) : (
-              <>
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-purple-600/90 to-purple-700/90 backdrop-blur-md text-white">
-                <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5" />
-                  Complete League Table
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
+              <div className="glass-dark rounded-[2.5rem] overflow-hidden border border-white/10 shadow-3xl">
+                <div className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                  <h3 className="text-2xl font-black text-white font-heading italic uppercase tracking-tighter flex items-center gap-3">
+                    <Trophy className="h-6 w-6 text-lime-300" />
+                    League <span className="text-lime-300">Standings</span>
+                  </h3>
+                  <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/20 px-4 py-1 font-black uppercase tracking-widest text-[10px]">
+                    {activeSeason.name}
+                  </Badge>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-white/20 backdrop-blur-sm">
-                      <tr className="text-left text-sm font-medium text-white">
-                        <th className="p-4">Pos</th>
-                        <th className="p-4">Team</th>
-                        <th className="p-4 text-center">P</th>
-                        <th className="p-4 text-center">W</th>
-                        <th className="p-4 text-center">D</th>
-                        <th className="p-4 text-center">L</th>
-                        <th className="p-4 text-center">GF</th>
-                        <th className="p-4 text-center">GA</th>
-                        <th className="p-4 text-center">GD</th>
-                        <th className="p-4 text-center">Pts</th>
-                        <th className="p-4 text-center">Win%</th>
-                        <th className="p-4 text-center">Avg Goals</th>
-                        <th className="p-4 text-center">Form</th>
+                    <thead>
+                      <tr className="bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                        <th className="p-6 text-left w-20">Pos</th>
+                        <th className="p-6 text-left">Team Name</th>
+                        <th className="p-6 text-center">P</th>
+                        <th className="p-6 text-center">W</th>
+                        <th className="p-6 text-center">D</th>
+                        <th className="p-6 text-center">L</th>
+                        <th className="p-6 text-center">GD</th>
+                        <th className="p-6 text-center">Pts</th>
+                        <th className="p-6 text-center">Form</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-white/5">
                       {leaderboard.map((team: any, index: number) => (
                         <tr
                           key={team.team}
-                          className={`border-b border-white/20 hover:bg-white/10 transition-all duration-300 ${
-                            index === 0 ? "bg-yellow-500/20 backdrop-blur-sm" : 
-                            index < 3 ? "bg-green-500/20 backdrop-blur-sm" : 
-                            index >= leaderboard.length - 2 ? "bg-red-500/20 backdrop-blur-sm" : ""
+                          className={`group hover:bg-white/[0.02] transition-colors duration-300 ${
+                            index === 0 ? "bg-lime-400/[0.03]" : ""
                           }`}
                         >
-                          <td className="p-4">
+                          <td className="p-6">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-white text-lg">{team.position}</span>
-                              {index === 0 && <Trophy className="h-5 w-5 text-yellow-400" />}
-                              {index === 1 && <Award className="h-5 w-5 text-gray-400" />}
-                              {index === 2 && <Award className="h-5 w-5 text-orange-400" />}
-                              {index < 3 && <TrendingUp className="h-4 w-4 text-green-300" />}
-                              {index >= leaderboard.length - 2 && <TrendingDown className="h-4 w-4 text-red-300" />}
+                              <span className={`text-2xl font-black font-heading italic ${index === 0 ? "text-lime-300" : "text-white/20"}`}>
+                                {(index + 1).toString().padStart(2, '0')}
+                              </span>
                             </div>
                           </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <span className="font-semibold text-white drop-shadow-md text-lg">{team.team}</span>
-                              {index === 0 && <Badge className="bg-yellow-500/90 backdrop-blur-md text-black font-bold">Champion</Badge>}
-                              {index === 1 && <Badge className="bg-gray-400/90 backdrop-blur-md text-white">2nd</Badge>}
-                              {index === 2 && <Badge className="bg-orange-400/90 backdrop-blur-md text-white">3rd</Badge>}
+                          <td className="p-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-lime-300/30 transition-colors">
+                                <span className="text-xs font-black text-white/40 group-hover:text-lime-300 transition-colors">
+                                  {team.team.substring(0, 2).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-black text-white uppercase tracking-tight text-lg group-hover:text-lime-300 transition-colors">{team.team}</p>
+                                {index === 0 && <span className="text-[10px] font-black text-lime-400 uppercase tracking-widest">Current Leader</span>}
+                              </div>
                             </div>
                           </td>
-                          <td className="p-4 text-center text-white font-medium">{team.played}</td>
-                          <td className="p-4 text-center text-green-300 font-bold">{team.wins}</td>
-                          <td className="p-4 text-center text-yellow-300 font-medium">{team.draws}</td>
-                          <td className="p-4 text-center text-red-300 font-medium">{team.losses}</td>
-                          <td className="p-4 text-center text-white font-medium">{team.goalsFor}</td>
-                          <td className="p-4 text-center text-white font-medium">{team.goalsAgainst}</td>
-                          <td className={`p-4 text-center font-bold ${team.goalDifference >= 0 ? "text-green-300" : "text-red-300"}`}>
+                          <td className="p-6 text-center text-white/60 font-bold">{team.played}</td>
+                          <td className="p-6 text-center text-white font-black">{team.wins}</td>
+                          <td className="p-6 text-center text-white/60 font-bold">{team.draws}</td>
+                          <td className="p-6 text-center text-white/60 font-bold">{team.losses}</td>
+                          <td className={`p-6 text-center font-black ${team.goalDifference >= 0 ? "text-lime-300" : "text-red-400"}`}>
                             {team.goalDifference > 0 ? "+" : ""}{team.goalDifference}
                           </td>
-                          <td className="p-4 text-center">
-                            <Badge variant="outline" className="font-bold text-white border-white/50 bg-white/20 backdrop-blur-sm text-lg px-3 py-1">
-                              {team.points}
-                            </Badge>
+                          <td className="p-6 text-center">
+                            <span className="text-2xl font-black text-white font-heading italic">{team.points}</span>
                           </td>
-                          <td className="p-4 text-center text-white font-medium">{team.winRate}</td>
-                          <td className="p-4 text-center text-white font-medium">{team.avgGoalsPerMatch}</td>
-                          <td className="p-4 text-center">
-                            <Badge variant="outline" className="text-xs bg-white/10 backdrop-blur-sm border-white/30 text-white">
-                              {team.form}
-                            </Badge>
+                          <td className="p-6">
+                            <div className="flex justify-center gap-1">
+                              {/* Mock form indicator */}
+                              {[1, 1, 1, 0, 1].map((res, i) => (
+                                <div key={i} className={`w-1.5 h-6 rounded-full ${res ? "bg-lime-400/40" : "bg-white/10"}`}></div>
+                              ))}
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Summary Stats - Only show when there are teams */}
-            {leaderboard.length > 0 && (
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="h-8 w-8 text-yellow-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">League Leader</h3>
-                  <p className="text-white/90 drop-shadow-md">{leaderboard[0]?.team || "No Data"}</p>
-                  <p className="text-sm text-white/70 mt-1">{leaderboard[0]?.points || 0} points</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="h-8 w-8 text-green-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Top Scorer</h3>
-                  <p className="text-white/90 drop-shadow-md">{leaderboard[0]?.team || "No Data"}</p>
-                  <p className="text-sm text-white/70 mt-1">{leaderboard[0]?.goalsFor || 0} goals</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="h-8 w-8 text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Best Defense</h3>
-                  <p className="text-white/90 drop-shadow-md">
-                    {leaderboard.reduce((min: any, team: any) => team.goalsAgainst < min.goalsAgainst ? team : min, leaderboard[0] || {goalsAgainst: 0, team: "No Data"}).team}
-                  </p>
-                  <p className="text-sm text-white/70 mt-1">
-                    {leaderboard.reduce((min: any, team: any) => team.goalsAgainst < min.goalsAgainst ? team : min, leaderboard[0] || {goalsAgainst: 0}).goalsAgainst} goals conceded
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-            )}
-              </>
+              </div>
             )}
           </div>
         )}
 
         {/* Statistics Tab */}
         {activeTab === 'statistics' && (
-          <div className="space-y-12">
+          <div className="space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* League Overview Stats */}
-            <div className="grid md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {leagueStats.map((stat, index) => (
-                <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                  <CardContent className="p-6">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <stat.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{stat.value}</h3>
-                    <p className="text-white/90 drop-shadow-md">{stat.label}</p>
-                  </CardContent>
-                </Card>
+                <div key={index} className="glass-dark rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <stat.icon size={80} />
+                  </div>
+                  <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 relative z-10">{stat.label}</p>
+                  <h3 className="text-4xl md:text-6xl font-black text-white font-heading italic tracking-tighter relative z-10 group-hover:text-lime-300 transition-colors">
+                    {stat.value}
+                  </h3>
+                  <div className="absolute bottom-0 left-0 h-1 bg-lime-300 w-0 group-hover:w-full transition-all duration-500"></div>
+                </div>
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-2 gap-12">
               {/* Top Scorers */}
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <CardHeader className="bg-gradient-to-r from-yellow-500/90 to-yellow-600/90 backdrop-blur-md text-black">
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Top Scorers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-0">
-                    {topScorers.map((player, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 border-b border-white/20 last:border-b-0 hover:bg-white/10 transition-all duration-300 ${index === 0 ? "bg-yellow-500/20 backdrop-blur-sm" : ""}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                index === 0
-                                  ? "bg-yellow-500 text-black"
-                                  : index === 1
-                                    ? "bg-gray-400 text-white"
-                                    : index === 2
-                                      ? "bg-orange-400 text-white"
-                                      : "bg-blue-100/80 backdrop-blur-sm text-blue-600"
-                              }`}
-                            >
-                              {index + 1}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-white drop-shadow-md">{player.name}</p>
-                              <p className="text-sm text-white/80">{player.team}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-white drop-shadow-lg">{player.goals}</p>
-                            <p className="text-sm text-white/70">{player.matches} matches</p>
-                          </div>
+              <div className="glass-dark rounded-[2.5rem] border border-white/10 shadow-3xl overflow-hidden">
+                <div className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                  <h3 className="text-2xl font-black text-white font-heading italic uppercase tracking-tighter flex items-center gap-3">
+                    <Target className="h-6 w-6 text-lime-300" />
+                    Top <span className="text-lime-300">Scorers</span>
+                  </h3>
+                </div>
+                <div className="divide-y divide-white/5">
+                  {topScorers.map((player, index) => (
+                    <div key={index} className="p-6 flex items-center justify-between group hover:bg-white/[0.02] transition-colors">
+                      <div className="flex items-center gap-4">
+                        <span className={`text-2xl font-black font-heading italic ${index === 0 ? "text-lime-300" : "text-white/10"}`}>
+                          {(index + 1).toString().padStart(2, '0')}
+                        </span>
+                        <div>
+                          <p className="font-black text-white uppercase tracking-tight text-lg group-hover:text-lime-300 transition-colors">{player.name}</p>
+                          <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">{player.team}</p>
                         </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-black text-white font-heading italic group-hover:text-lime-300 transition-colors">{player.goals}</p>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">{player.matches} Matches</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Player & Team Performance */}
+              <div className="space-y-8">
+                <div className="glass-dark rounded-[2.5rem] border border-white/10 shadow-3xl p-8 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Award size={120} />
+                  </div>
+                  <div className="inline-block px-3 py-1 rounded-full bg-lime-400/10 border border-lime-400/20 text-lime-400 text-[9px] font-black uppercase tracking-[0.2em] mb-6">
+                    M.V.P of the Week
+                  </div>
+                  <h3 className="text-4xl md:text-5xl font-black text-white font-heading italic uppercase tracking-tighter mb-2 group-hover:text-lime-300 transition-colors">
+                    {playerOfTheWeek.name}
+                  </h3>
+                  <p className="text-lg text-white/50 uppercase font-black tracking-widest mb-6">{playerOfTheWeek.team}</p>
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-24 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+                      <span className="text-xl font-black text-white font-heading italic">{playerOfTheWeek.stats}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="glass-dark rounded-[2.5rem] border border-white/10 shadow-3xl overflow-hidden">
+                  <div className="p-6 border-b border-white/5 bg-white/5">
+                    <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-2">
+                       <TrendingUp className="h-4 w-4 text-lime-300" />
+                       Team Records
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    {teamStats.map((stat, index) => (
+                      <div key={index} className="p-6 border-r last:border-r-0 border-b border-white/5 group hover:bg-white/[0.02] transition-colors">
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">{stat.stat}</p>
+                        <p className="font-black text-white uppercase tracking-tight mb-1 group-hover:text-lime-300 transition-colors">{stat.team}</p>
+                        <p className="text-xl font-black text-lime-400 font-heading italic">{stat.value}</p>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Player of the Week */}
-              <div className="space-y-6">
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardHeader className="bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white">
-                    <CardTitle className="flex items-center gap-2">
-                      <Award className="h-5 w-5" />
-                      Player of the Week
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 text-center">
-                    <Badge className="mb-4 bg-yellow-500/90 backdrop-blur-md text-black">{playerOfTheWeek.week}</Badge>
-                    <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">{playerOfTheWeek.name}</h3>
-                    <p className="text-lg text-white/90 mb-4 drop-shadow-md">{playerOfTheWeek.team}</p>
-                    <p className="text-white font-semibold drop-shadow-md">{playerOfTheWeek.stats}</p>
-                  </CardContent>
-                </Card>
-
-                {/* Team Performance Stats */}
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                  <CardHeader className="bg-gradient-to-r from-green-600/90 to-green-700/90 backdrop-blur-md text-white">
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Team Performance Stats
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="space-y-0">
-                      {teamStats.map((stat, index) => (
-                        <div
-                          key={index}
-                          className="p-4 border-b border-white/20 last:border-b-0 hover:bg-white/10 transition-all duration-300"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-semibold text-white drop-shadow-md">{stat.team}</p>
-                              <p className="text-sm text-white/80">{stat.stat}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-white drop-shadow-lg">{stat.value}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                </div>
               </div>
             </div>
 
-            {/* Additional Statistics */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                <CardHeader className="bg-blue-600/90 backdrop-blur-md text-white">
-                  <CardTitle className="text-center">Most Disciplined</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Phoenix United</h3>
-                  <p className="text-white/90 drop-shadow-md">Only 2 yellow cards</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                <CardHeader className="bg-yellow-500/90 backdrop-blur-md text-black">
-                  <CardTitle className="text-center">Best Goalkeeper</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Roberto Martinez</h3>
-                  <p className="text-white/90 drop-shadow-md">Thunder FC • 4 clean sheets</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                <CardHeader className="bg-green-600/90 backdrop-blur-md text-white">
-                  <CardTitle className="text-center">Most Assists</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Luis Garcia</h3>
-                  <p className="text-white/90 drop-shadow-md">Velocity FC • 8 assists</p>
-                </CardContent>
-              </Card>
+            {/* Specialty Awards */}
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                { title: "Most Disciplined", value: "Phoenix United", detail: "2 Yellow Cards", icon: Shield, color: "text-blue-400" },
+                { title: "Golden Glove", value: "Roberto Martinez", detail: "4 Clean Sheets", icon: Award, color: "text-yellow-400" },
+                { title: "Top Playmaker", value: "Luis Garcia", detail: "8 Assists", icon: Target, color: "text-lime-400" }
+              ].map((award, i) => (
+                <div key={i} className="glass rounded-[2rem] p-8 border border-white/5 text-center group hover:bg-white/5 transition-all">
+                  <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform ${award.color}`}>
+                    <award.icon size={24} />
+                  </div>
+                  <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">{award.title}</p>
+                  <h4 className="text-xl font-black text-white uppercase tracking-tight mb-1">{award.value}</h4>
+                  <p className="text-xs font-bold text-white/50">{award.detail}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Standings Tab */}
         {activeTab === 'standings' && (
-          <div className="space-y-8">
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Group Selection */}
             <div className="flex justify-center">
-              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
-                <Button
-                  variant={selectedGroup === "all" ? "default" : "ghost"}
-                  onClick={() => setSelectedGroup("all")}
-                  className={selectedGroup === "all" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  All Groups
-                </Button>
-                <Button
-                  variant={selectedGroup === "A" ? "default" : "ghost"}
-                  onClick={() => setSelectedGroup("A")}
-                  className={selectedGroup === "A" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  Group A
-                </Button>
-                <Button
-                  variant={selectedGroup === "B" ? "default" : "ghost"}
-                  onClick={() => setSelectedGroup("B")}
-                  className={selectedGroup === "B" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  Group B
-                </Button>
-                  </div>
+              <div className="glass-dark rounded-2xl p-1.5 flex gap-1 border border-white/10">
+                {(["all", "A", "B"] as const).map((group) => (
+                  <Button
+                    key={group}
+                    variant="ghost"
+                    onClick={() => setSelectedGroup(group)}
+                    className={`h-10 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${
+                      selectedGroup === group 
+                        ? "bg-lime-300 text-black shadow-lg" 
+                        : "text-white/40 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    {group === "all" ? "All Groups" : `Group ${group}`}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {/* Standings Tables */}
-            {selectedGroup === "all" && (
-            <div className="grid lg:grid-cols-2 gap-8">
-              <StandingsTable standings={groupAStandings} groupName="A" />
-              <StandingsTable standings={groupBStandings} groupName="B" />
-            </div>
+            {selectedGroup === "all" ? (
+              <div className="grid lg:grid-cols-2 gap-8">
+                <StandingsTable standings={groupAStandings} groupName="A" />
+                <StandingsTable standings={groupBStandings} groupName="B" />
+              </div>
+            ) : selectedGroup === "A" ? (
+              <div className="max-w-4xl mx-auto w-full">
+                <StandingsTable standings={groupAStandings} groupName="A" />
+              </div>
+            ) : (
+              <div className="max-w-4xl mx-auto w-full">
+                <StandingsTable standings={groupBStandings} groupName="B" />
+              </div>
             )}
-            {selectedGroup === "A" && <StandingsTable standings={groupAStandings} groupName="A" />}
-            {selectedGroup === "B" && <StandingsTable standings={groupBStandings} groupName="B" />}
-          </div>
-        )}
-
-        {/* Bracket Tab */}
-        {activeTab === 'bracket' && (
-          <div className="space-y-8">
-            {/* Knockout Stage */}
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">Knockout Stage</h2>
-              <p className="text-lg text-white/90 drop-shadow-xl">Tournament progression and results</p>
-              {(!activeSeason || knockoutMatches.quarterfinals.length === 0) && (
-                <Badge className="mt-2 bg-blue-500/20 text-blue-300 border-blue-500/30">
-                  Design Preview
-                </Badge>
-              )}
-            </div>
-
-            <Bracket 
-              knockoutMatches={knockoutMatches}
-              groupATeams={groupATeams}
-              groupBTeams={groupBTeams}
-              activeSeason={activeSeason}
-            />
           </div>
         )}
 
         {/* Fixtures Tab */}
         {activeTab === 'fixtures' && (
-          <div className="space-y-8">
-            {/* Fixture Type Selection */}
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Fixture Type Toggle */}
             <div className="flex justify-center">
-              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-1 shadow-2xl border border-white/20">
-                <Button
-                  variant={selectedFixtureTab === "upcoming" ? "default" : "ghost"}
-                  onClick={() => setSelectedFixtureTab("upcoming")}
-                  className={selectedFixtureTab === "upcoming" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  Upcoming Matches
-                </Button>
-                <Button
-                  variant={selectedFixtureTab === "results" ? "default" : "ghost"}
-                  onClick={() => setSelectedFixtureTab("results")}
-                  className={selectedFixtureTab === "results" ? "bg-blue-600/90 backdrop-blur-md text-white shadow-lg" : "text-white hover:bg-white/20 hover:text-white"}
-                >
-                  Past Results
-                </Button>
+              <div className="glass-dark rounded-2xl p-1.5 flex gap-1 border border-white/10">
+                {(["upcoming", "results"] as const).map((type) => (
+                  <Button
+                    key={type}
+                    variant="ghost"
+                    onClick={() => setSelectedFixtureTab(type)}
+                    className={`h-10 px-8 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${
+                      selectedFixtureTab === type 
+                        ? "bg-lime-300 text-black shadow-lg" 
+                        : "text-white/40 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    {type === "upcoming" ? "Upcoming Matches" : "Past Results"}
+                  </Button>
+                ))}
               </div>
             </div>
 
-
-            {/* Upcoming Matches */}
-            {selectedFixtureTab === "upcoming" && (
-              <div className="space-y-3">
-                {filteredUpcoming.map((match: any) => (
-                  <div 
-                    key={match.id} 
-                    className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-4 hover:bg-white/10 transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      {/* Teams with logos */}
-                      <div className="flex items-center gap-6 flex-1">
-                        {/* Team 1 */}
-                        <div className="flex items-center gap-3">
-                          {match.team1Logo ? (
-                            <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
-                              <img 
-                                src={match.team1Logo} 
-                                alt={`${match.team1} Logo`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
-                              <span className="text-sm font-bold text-white">
-                                {match.team1.substring(0, 2).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <div className="text-white font-semibold">
-                            {match.team1}
+            {selectedFixtureTab === "upcoming" ? (
+              <div className="grid md:grid-cols-2 gap-8">
+                {filteredUpcoming.length === 0 ? (
+                  <div className="col-span-full glass-dark rounded-[2.5rem] p-16 text-center border border-white/10 opacity-50">
+                    <Calendar className="h-12 w-12 text-white/20 mx-auto mb-4" />
+                    <p className="text-white/40 font-black uppercase tracking-widest text-sm">No upcoming matches scheduled</p>
+                  </div>
+                ) : (
+                  filteredUpcoming.map((match: any) => (
+                    <div key={match.id} className="glass-dark rounded-[2rem] p-8 border border-white/10 group hover:border-lime-300/30 transition-all duration-500 overflow-hidden relative">
+                      <div className="absolute top-0 right-0 p-4">
+                        <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/20 font-black uppercase tracking-widest text-[8px]">Group {match.group}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 mb-8">
+                        <div className="flex-1 text-center">
+                          <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                            {match.team1Logo ? (
+                              <img src={match.team1Logo} alt={match.team1} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-xl font-black text-white/20">{match.team1.substring(0, 2).toUpperCase()}</span>
+                            )}
                           </div>
+                          <p className="font-black text-white uppercase tracking-tight text-sm line-clamp-1">{match.team1}</p>
                         </div>
-                        
-                        {/* VS */}
-                        <div className="text-white/60 font-medium">vs</div>
-                        
-                        {/* Team 2 */}
-                        <div className="flex items-center gap-3">
-                          {match.team2Logo ? (
-                            <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
-                              <img 
-                                src={match.team2Logo} 
-                                alt={`${match.team2} Logo`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
-                              <span className="text-sm font-bold text-white">
-                                {match.team2.substring(0, 2).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <div className="text-white font-semibold">
-                            {match.team2}
+                        <div className="flex flex-col items-center">
+                           <div className="w-10 h-10 rounded-full bg-lime-300 flex items-center justify-center shadow-[0_0_20px_rgba(190,242,100,0.5)] z-10">
+                              <span className="text-black font-black italic text-xs">VS</span>
+                           </div>
+                        </div>
+                        <div className="flex-1 text-center">
+                          <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                            {match.team2Logo ? (
+                              <img src={match.team2Logo} alt={match.team2} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-xl font-black text-white/20">{match.team2.substring(0, 2).toUpperCase()}</span>
+                            )}
                           </div>
+                          <p className="font-black text-white uppercase tracking-tight text-sm line-clamp-1">{match.team2}</p>
                         </div>
                       </div>
-                      
-                      {/* Date, Time, Venue */}
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <div className="text-sm text-white/80">
-                            {new Date(match.date).toLocaleDateString('en-US', { 
-                              month: 'short',
-                              day: 'numeric' 
-                            })}
-                          </div>
-                          <div className="text-xs text-white/60 flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {match.time}
-                          </div>
+                      <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                        <div className="flex items-center gap-2 text-white/40">
+                          <Clock size={14} className="text-lime-300" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">{match.time} • {match.date}</span>
                         </div>
-                        
-                        <Badge 
-                          variant="outline"
-                          className="text-xs bg-white/10 backdrop-blur-sm text-white border-white/20 px-3 py-1"
-                        >
-                          {match.venue}
-                        </Badge>
+                        <div className="flex items-center gap-2 text-white/40">
+                          <MapPin size={14} className="text-lime-300" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">{match.venue}</span>
+                        </div>
                       </div>
                     </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-8">
+                {filteredResults.length === 0 ? (
+                  <div className="col-span-full glass-dark rounded-[2.5rem] p-16 text-center border border-white/10 opacity-50">
+                    <Award className="h-12 w-12 text-white/20 mx-auto mb-4" />
+                    <p className="text-white/40 font-black uppercase tracking-widest text-sm">No match results available yet</p>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Past Results */}
-            {selectedFixtureTab === "results" && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResults.map((match: any) => (
-                  <Card key={match.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
-                    <CardContent className="p-6">
-                      <div className="text-center mb-4">
-                        <Badge variant="outline" className="bg-white/20 backdrop-blur-sm border-white/30 text-white">
-                          {new Date(match.date).toLocaleDateString()}
-                        </Badge>
-                        <Badge className="mt-2 bg-blue-600/90 backdrop-blur-md text-white">Group {match.group}</Badge>
+                ) : (
+                  filteredResults.map((match: any) => (
+                    <div key={match.id} className="glass rounded-[2rem] p-8 border border-white/5 group hover:bg-white/5 transition-all duration-500 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4">
+                        <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">{match.date}</span>
                       </div>
-                      <div className="space-y-4">
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className="flex items-center justify-between gap-6">
+                        <div className="flex-1 flex items-center justify-end gap-4 text-right">
+                          <p className="font-black text-white uppercase tracking-tight text-sm hidden sm:block">{match.team1}</p>
+                          <div className="w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center shrink-0">
                             {match.team1Logo ? (
-                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
-                                <img 
-                                  src={match.team1Logo} 
-                                  alt={`${match.team1} Logo`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
+                              <img src={match.team1Logo} alt={match.team1} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                                <span className="text-xs font-bold text-white">
-                                  {match.team1.substring(0, 2).toUpperCase()}
-                                </span>
-                              </div>
+                              <span className="text-xs font-black text-white/20">{match.team1.substring(0, 2).toUpperCase()}</span>
                             )}
                           </div>
-                          <p className="font-semibold text-white drop-shadow-md">{match.team1}</p>
-                          <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score1}</p>
                         </div>
-                        <div className="text-center text-sm text-white/80 font-medium">VS</div>
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-2 mb-2">
+                        <div className="flex items-center gap-4 py-2 px-6 bg-white/5 rounded-2xl border border-white/10 group-hover:border-lime-300/30 transition-colors">
+                          <span className={`text-3xl font-black font-heading italic ${match.score1 > match.score2 ? "text-lime-300" : "text-white/40"}`}>{match.score1}</span>
+                          <span className="text-white/10 font-black">:</span>
+                          <span className={`text-3xl font-black font-heading italic ${match.score2 > match.score1 ? "text-lime-300" : "text-white/40"}`}>{match.score2}</span>
+                        </div>
+                        <div className="flex-1 flex items-center gap-4">
+                          <div className="w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center shrink-0">
                             {match.team2Logo ? (
-                              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20">
-                                <img 
-                                  src={match.team2Logo} 
-                                  alt={`${match.team2} Logo`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
+                              <img src={match.team2Logo} alt={match.team2} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full flex items-center justify-center border border-white/20">
-                                <span className="text-xs font-bold text-white">
-                                  {match.team2.substring(0, 2).toUpperCase()}
-                                </span>
-                              </div>
+                              <span className="text-xs font-black text-white/20">{match.team2.substring(0, 2).toUpperCase()}</span>
                             )}
                           </div>
-                          <p className="font-semibold text-white drop-shadow-md">{match.team2}</p>
-                          <p className="text-3xl font-bold text-white drop-shadow-lg">{match.score2}</p>
+                          <p className="font-black text-white uppercase tracking-tight text-sm hidden sm:block">{match.team2}</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    </div>
+                  ))
+                )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Bracket Tab */}
+        {activeTab === 'bracket' && (
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="text-center mb-16 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-lime-400/5 blur-[80px] rounded-full -z-10"></div>
+              <h2 className="text-4xl font-black text-white mb-4 font-heading italic uppercase tracking-tighter">Knockout <span className="text-lime-300">Phase</span></h2>
+              <p className="text-white/40 text-sm font-black uppercase tracking-[0.2em]">{activeSeason?.name || "Tournament Overview"}</p>
+            </div>
+            
+            <div className="max-w-6xl mx-auto overflow-x-auto pb-12">
+               <Bracket 
+                knockoutMatches={knockoutMatches}
+                groupATeams={groupATeams}
+                groupBTeams={groupBTeams}
+                activeSeason={activeSeason}
+               />
+            </div>
           </div>
         )}
 
