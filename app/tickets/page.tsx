@@ -223,7 +223,7 @@ export default function TicketsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0f0a] text-white selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen text-white selection:bg-lime-400 selection:text-black">
       <Navigation />
 
       {/* Decorative Background Elements */}
