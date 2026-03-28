@@ -111,55 +111,71 @@ export default function HomePage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative min-h-[800px] flex items-center" style={{
-        backgroundImage: 'url(/mainbg.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}>
+      <section className="relative h-[90vh] min-h-[700px] flex items-center overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-lime-400/20 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-green-600/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
         <div className="relative z-10 container mx-auto px-6">
-            <div className="max-w-2xl">
-              <Badge className="bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold mb-6">
-                Season 2025 • Coming Soon
-              </Badge>
-
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-2xl">Prime5 League</h1>
-
-            <p className="text-xl md:text-2xl text-white mb-8 leading-relaxed drop-shadow-xl">
-                The premier futsal competition featuring the region's top teams competing for ultimate glory.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                  <Link href="/register">Register Your Team</Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                className="border-white text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-                >
-                  <Link href="https://www.youtube.com/@Prime5League" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                    <Play className="w-5 h-5" />
-                    Watch Highlights
-                  </Link>
-                </Button>
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 glass-dark px-4 py-2 rounded-2xl mb-8 border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-lime-500"></span>
+              </span>
+              <span className="text-sm font-bold tracking-wider text-lime-400 uppercase">Season 2025 • Registrations Open</span>
             </div>
+
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-6 leading-[0.9] tracking-tighter font-heading italic uppercase animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150">
+              Where <span className="text-lime-300">Legends</span> <br /> Are Born.
+            </h1>
+
+            <p className="text-xl md:text-2xl text-white/70 mb-12 leading-relaxed max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+              The premier futsal competition featuring the region's top teams competing for ultimate glory and a share of the <span className="text-white font-bold">$50,000</span> prize pool.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-6 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-500">
+              <Button asChild size="lg" className="h-16 px-10 bg-lime-300 hover:bg-lime-400 text-black font-black text-lg rounded-2xl shadow-[0_0_40px_rgba(190,242,100,0.3)] hover:scale-105 transition-all duration-300 uppercase">
+                <Link href="/register">Register Your Team</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-16 px-10 border-white/10 text-white hover:bg-white/5 glass rounded-2xl font-bold text-lg hover:scale-105 transition-all duration-300 uppercase"
+              >
+                <Link href="https://www.youtube.com/@Prime5League" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <Play className="w-6 h-6 fill-current" />
+                  Watch Highlights
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+          <div className="w-6 h-10 rounded-full border-2 border-white flex justify-center p-1">
+            <div className="w-1 h-2 bg-white rounded-full"></div>
           </div>
         </div>
       </section>
 
       {/* Stats Bar */}
-      <section className="relative border-b">
-        <div className="container mx-auto px-6 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="relative -mt-20 z-20">
+        <div className="container mx-auto px-6">
+          <div className="glass rounded-[2.5rem] p-8 shadow-2xl border border-white/10 grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/5">
             {leagueStats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl mb-3 mx-auto border border-white/30 shadow-lg">
-                  <stat.icon className="w-8 h-8 text-white drop-shadow-lg" />
+              <div key={index} className="flex flex-col items-center justify-center px-4 group">
+                <div className="mb-4 p-3 bg-lime-400/10 rounded-2xl group-hover:scale-110 group-hover:bg-lime-400 group-hover:text-black transition-all duration-300">
+                  <stat.icon className="w-8 h-8 text-lime-400 transition-colors duration-300 group-hover:text-inherit" />
                 </div>
-                <div className="text-4xl font-bold text-white mb-1 drop-shadow-lg">{stat.value}</div>
-                <div className="text-sm text-white/90 font-medium drop-shadow-md">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-black text-white mb-1 font-heading tracking-tight italic">
+                  {stat.value}
+                </div>
+                <div className="text-xs font-bold text-white/50 uppercase tracking-[0.2em]">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
@@ -167,160 +183,131 @@ export default function HomePage() {
       </section>
 
       {/* Next Match Countdown */}
-      <section className="py-16 relative">
-        <div className="container mx-auto px-6">
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-green-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-12">
-            <Badge className="bg-red-100/90 backdrop-blur-sm text-red-800 px-4 py-2 rounded-full font-semibold mb-4 border border-red-200/50">Next Match Day</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Don't Miss the Action</h2>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto drop-shadow-md">
+            <div className="inline-block px-4 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-[0.3em] mb-4">
+              Next Match Day
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 font-heading italic uppercase tracking-tighter">
+              Don't Miss <span className="text-lime-300">The Action</span>
+            </h2>
+            <p className="text-lg text-white/50 max-w-2xl mx-auto uppercase font-bold tracking-widest">
               The next round of matches is approaching. Get your tickets now.
             </p>
           </div>
-          <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 border border-white/30 shadow-xl">
-            <CountdownTimer targetDate={new Date("2025-11-01T00:00:00")} />
+          <div className="glass-dark rounded-[3rem] p-12 border border-white/10 shadow-3xl">
+            <CountdownTimer targetDate={new Date("2026-11-01T00:00:00")} />
           </div>
         </div>
-      </section>
-
-      {/* Upcoming Matches */}
-      <section className="py-16 relative">
+      </section>      {/* Upcoming Matches */}
+      <section className="py-24 relative">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Coming up Games</h2>
-              <p className="text-lg text-white/90 drop-shadow-md">Last season fixtures</p>
+              <div className="text-lime-400 font-black uppercase tracking-[0.3em] text-xs mb-4">Live & Upcoming</div>
+              <h2 className="text-4xl md:text-6xl font-black text-white font-heading italic uppercase tracking-tighter">
+                Coming Up <span className="text-lime-300">Games</span>
+              </h2>
             </div>
-            <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md">
+            <Button asChild variant="outline" className="h-12 border-white/10 text-white hover:bg-white/5 glass rounded-xl font-bold uppercase tracking-wider">
               <Link href="/statistics">View All Fixtures</Link>
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {matchesLoading ? (
-              // Loading state
-              Array.from({ length: 3 }).map((_, index) => (
-                <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse">
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="h-6 bg-white/20 rounded w-16"></div>
-                        <div className="h-4 bg-white/20 rounded w-12"></div>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-white/20 rounded-full"></div>
-                          <div className="h-4 bg-white/20 rounded w-24"></div>
-                        </div>
-                        <div className="text-center">
-                          <div className="h-4 bg-white/20 rounded w-8 mx-auto"></div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-white/20 rounded-full"></div>
-                          <div className="h-4 bg-white/20 rounded w-24"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-[400px] glass-dark rounded-[2.5rem] animate-pulse"></div>
               ))
             ) : matchesError ? (
-              // Error state
-              <div className="col-span-full text-center py-12">
-                <div className="text-white/70 mb-4">Unable to load match data</div>
+              <div className="col-span-full text-center py-20 glass-dark rounded-[3rem]">
+                <div className="text-white/50 mb-6 font-bold uppercase tracking-widest">Unable to load match data</div>
                 <Button 
                   onClick={() => window.location.reload()} 
                   variant="outline" 
-                  className="border-white/20 text-white hover:bg-white/20"
+                  className="border-lime-300/50 text-lime-300 hover:bg-lime-300 hover:text-black rounded-xl px-8"
                 >
                   Try Again
                 </Button>
               </div>
             ) : upcomingMatches.length === 0 ? (
-              // No upcoming matches
-              <div className="col-span-full text-center py-12">
-                <div className="text-white/70 mb-4">No upcoming matches scheduled</div>
-                <p className="text-white/50">Check back for upcoming fixtures!</p>
+              <div className="col-span-full text-center py-20 glass-dark rounded-[3rem]">
+                <div className="text-white/50 mb-4 font-bold uppercase tracking-widest">No upcoming matches scheduled</div>
+                <p className="text-white/30 text-sm uppercase tracking-tighter">Check back for upcoming fixtures!</p>
               </div>
             ) : (
-              // Real match data - upcoming matches
               upcomingMatches.map((match: any, index: number) => (
-                <Card key={match.id || index} className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-[1.02] group overflow-hidden">
-                  <CardContent className="p-6">
-                    {/* Header with Date, Time, Location */}
-                    <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-white/20">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-500/20 rounded-lg">
-                          <Calendar className="w-4 h-4 text-blue-300" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-white">{match.date}</div>
-                          <div className="text-xs text-white/70 flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {match.time}
-                          </div>
-                        </div>
+                <div key={match.id || index} className="group relative glass-dark rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-lime-300/30 transition-all duration-500 hover:shadow-[0_0_50px_rgba(190,242,100,0.1)] hover:-translate-y-2">
+                  <div className="p-8 pb-32">
+                    {/* Compact Date/Time Header */}
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-lime-400" />
+                        <span className="text-xs font-black text-white/70 uppercase tracking-tighter">{match.date}</span>
                       </div>
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 rounded-lg border border-green-400/30">
-                        <MapPin className="w-4 h-4 text-green-300" />
-                        <span className="text-xs font-medium text-green-300">{match.venue}</span>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-lime-400" />
+                        <span className="text-xs font-black text-white/70 uppercase tracking-tighter">{match.time}</span>
                       </div>
                     </div>
 
-                    {/* Teams Matchup */}
-                    <div className="flex items-center justify-between gap-4">
+                    {/* Matchup Layout */}
+                    <div className="flex flex-col items-center gap-6 relative">
                       {/* Team 1 */}
-                      <div className="flex items-center gap-3 flex-1 justify-end">
-                        {/* <div className="text-right"> */}
-                          {/* <div className="font-bold text-white text-lg drop-shadow-md mb-1">{match.team1}</div> */}
-                          {/* <div className="text-xs text-white/60">Home</div>
-                        </div> */}
-                        {match.team1Logo ? (
-                          <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg group-hover:shadow-xl transition-all">
-                            <img 
-                              src={match.team1Logo} 
-                              alt={`${match.team1} Logo`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500/30 to-green-500/30 rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg">
-                            <span className="text-xl font-bold text-white">
-                              {match.team1.substring(0, 2).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
+                      <div className="flex flex-col items-center gap-3 transition-transform duration-500 group-hover:-translate-y-2">
+                        <div className="w-20 h-20 relative">
+                          <div className="absolute inset-0 bg-lime-400/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          {match.team1Logo ? (
+                            <img src={match.team1Logo} alt={match.team1} className="w-full h-full object-contain relative z-10 drop-shadow-2xl" />
+                          ) : (
+                            <div className="w-full h-full glass rounded-2xl flex items-center justify-center relative z-10 border-white/10">
+                              <span className="text-2xl font-black text-white">{match.team1.substring(0, 2).toUpperCase()}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm font-black text-white text-center uppercase tracking-tighter line-clamp-1">{match.team1}</span>
                       </div>
 
-                      {/* VS Badge */}
-                      <div className="px-4 py-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full border-2 border-yellow-400/30 shadow-lg">
-                        <span className="text-xs font-bold text-yellow-300 drop-shadow-lg">VS</span>
+                      {/* VS Divider */}
+                      <div className="relative">
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-lime-300 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                        <div className="w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center relative z-10 shadow-xl group-hover:scale-110 transition-transform">
+                          <span className="text-[10px] font-black text-lime-300">VS</span>
+                        </div>
                       </div>
 
                       {/* Team 2 */}
-                      <div className="flex items-center gap-3 flex-1 justify-start">
-                        {match.team2Logo ? (
-                          <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg group-hover:shadow-xl transition-all">
-                            <img 
-                              src={match.team2Logo} 
-                              alt={`${match.team2} Logo`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-14 h-14 bg-gradient-to-br from-blue-500/30 to-green-500/30 rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg">
-                            <span className="text-xl font-bold text-white">
-                              {match.team2.substring(0, 2).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                        {/* <div className="text-left">
-                          <div className="font-bold text-white text-lg drop-shadow-md mb-1">{match.team2}</div>
-                          <div className="text-xs text-white/60">Away</div>
-                        </div> */}
+                      <div className="flex flex-col items-center gap-3 transition-transform duration-500 group-hover:translate-y-2">
+                        <div className="w-20 h-20 relative">
+                          <div className="absolute inset-0 bg-lime-400/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          {match.team2Logo ? (
+                            <img src={match.team2Logo} alt={match.team2} className="w-full h-full object-contain relative z-10 drop-shadow-2xl" />
+                          ) : (
+                            <div className="w-full h-full glass rounded-2xl flex items-center justify-center relative z-10 border-white/10">
+                              <span className="text-2xl font-black text-white">{match.team2.substring(0, 2).toUpperCase()}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm font-black text-white text-center uppercase tracking-tighter line-clamp-1">{match.team2}</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+
+                  {/* Bottom Ticket Info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 glass border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-lime-400" />
+                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">{match.venue}</span>
+                      </div>
+                      <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase tracking-[0.2em] text-lime-300 hover:text-white hover:bg-white/5 rounded-lg px-3">
+                        Tickets <ArrowRight className="w-3 h-3 ml-2" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))
             )}
           </div>
@@ -384,26 +371,25 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section> */}
-
-      {/* Sponsors */}
-      <section className="py-16 relative">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Our Partners</h2>
-            <p className="text-lg text-white/90 drop-shadow-md">Proudly supported by leading brands</p>
+      </section> */}      {/* Sponsors */}
+      <section className="py-24 relative">
+        <div className="container mx-auto px-6 text-center">
+          <div className="inline-block px-4 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+            Global Partners
           </div>
-
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-16 font-heading italic uppercase tracking-tighter">
+            Supported By <span className="text-lime-300">The Best</span>
+          </h2>
+ 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
             {sponsors.map((sponsor, index) => (
-              <div key={index} className="text-center">
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border border-white/30">
-                  <Image
+              <div key={index} className="group relative">
+                <div className="glass rounded-3xl p-8 h-32 flex items-center justify-center border border-white/5 hover:border-lime-300/20 hover:bg-white/5 transition-all duration-500 overflow-hidden">
+                  <div className="absolute inset-0 bg-lime-400/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <img
                     src={sponsor.logo || "/placeholder.svg"}
                     alt={sponsor.name}
-                    width={120}
-                    height={60}
-                    className="mx-auto opacity-90 hover:opacity-100 transition-opacity drop-shadow-lg"
+                    className="max-w-[140px] max-h-[60px] object-contain opacity-40 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500 relative z-10"
                   />
                 </div>
               </div>
@@ -411,18 +397,31 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+ 
       {/* CTA Section */}
-      <section className="py-16 relative">
-        <div className="container mx-auto px-6 text-center">
-          <div className="bg-green-600/20 backdrop-blur-xl rounded-2xl p-12 border border-green-500/20 shadow-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Ready to Join Prime5 League?</h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-md">
-            Register your team today and compete against the best in the region.
-          </p>
-            <Button asChild size="lg" className="bg-yellow-500/90 backdrop-blur-md hover:bg-yellow-600/90 text-black font-semibold px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-yellow-400/30">
-            <Link href="/register">Register Your Team</Link>
-          </Button>
+      <section className="py-24 relative px-6">
+        <div className="container mx-auto">
+          <div className="relative glass-dark rounded-[3.5rem] p-12 md:p-24 overflow-hidden border border-white/10 shadow-3xl text-center">
+            {/* Background Glows */}
+            <div className="absolute -top-20 -left-20 w-80 h-80 bg-lime-400/20 blur-[100px] rounded-full"></div>
+            <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-green-500/20 blur-[100px] rounded-full"></div>
+            
+            <div className="relative z-10 max-w-3xl mx-auto">
+              <h2 className="text-5xl md:text-7xl font-black text-white mb-8 font-heading italic uppercase tracking-tighter leading-tight">
+                Ready to <span className="text-lime-300">Join The</span> <br /> Prime5 League?
+              </h2>
+              <p className="text-xl text-white/50 mb-12 uppercase font-bold tracking-widest max-w-xl mx-auto">
+                Register your team today and compete against the best in the region for the ultimate prize.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Button asChild size="lg" className="h-16 px-12 bg-lime-300 hover:bg-lime-400 text-black font-black text-lg rounded-2xl shadow-[0_0_40px_rgba(190,242,100,0.2)] hover:scale-105 transition-all duration-300 uppercase">
+                  <Link href="/register">Join the League</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="h-16 px-12 border-white/10 text-white hover:bg-white/5 glass rounded-2xl font-bold text-lg hover:scale-105 transition-all duration-300 uppercase">
+                  <Link href="/about">Learn More</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>

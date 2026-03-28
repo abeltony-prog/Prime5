@@ -5,6 +5,12 @@ import './globals.css'
 import { ApolloWrapper } from '@/components/apollo-provider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { Toaster } from 'sonner'
+import { Outfit } from 'next/font/google'
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+})
 
 export const metadata: Metadata = {
   title: 'Prime5 League - Professional Futsal',
@@ -43,7 +49,7 @@ html {
         `}</style>
       </head>
       <body 
-        className="relative"
+        className={`${GeistSans.variable} ${GeistMono.variable} ${outfit.variable} font-sans antialiased selection:bg-lime-300 selection:text-black`}
         style={{
           backgroundImage: 'url(/mainbg.jpg)',
           backgroundSize: 'cover',
@@ -51,8 +57,10 @@ html {
           backgroundAttachment: 'fixed'
         }}
       >
-        {/* Background overlay for better readability */}
-        <div className="absolute inset-0 bg-black/20"></div>
+        {/* Advanced Background overlay with gradient for depth */}
+        <div className="fixed inset-0 bg-gradient-to-br from-black/80 via-black/40 to-black/80 pointer-events-none"></div>
+        <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
+        
         <ApolloWrapper>
           <AuthProvider>
             <div className="relative z-10">
