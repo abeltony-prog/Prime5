@@ -1,11 +1,30 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Trophy, Users, Star, ArrowRight, Play, Clock, MapPin, Ticket, CreditCard, Shield, CheckCircle, X, Gift, User, Phone, Mail, MessageCircle, QrCode } from "lucide-react"
+import { 
+  Calendar, 
+  Trophy, 
+  Users, 
+  Star, 
+  Clock, 
+  MapPin, 
+  Ticket, 
+  CreditCard, 
+  Shield, 
+  CheckCircle, 
+  MessageCircle, 
+  QrCode,
+  Gift,
+  User,
+  Phone,
+  Mail,
+  ArrowRight,
+  TrendingUp,
+  Award,
+  ChevronRight
+} from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { useState } from "react"
 import { useQuery, useMutation } from '@apollo/client'
@@ -28,10 +47,8 @@ export default function TicketsPage() {
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null)
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null)
   
-  // Mutation to add fan to database
-  const [addFan, { loading: isAddingFan }] = useMutation(ADD_FAN_DETAILS)
+  const [addFan] = useMutation(ADD_FAN_DETAILS)
 
-  // Function to generate QR code for modal display
   const generateQRCode = async (ticketData: TicketData): Promise<string> => {
     try {
       const QRCode = await import('qrcode')
@@ -44,66 +61,28 @@ export default function TicketsPage() {
       })
       
       const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
-        width: 200,
+        width: 300,
         margin: 2,
         color: {
-          dark: '#1f2937',
+          dark: '#000000',
           light: '#FFFFFF'
         }
       })
       
       return qrCodeDataURL
     } catch (error) {
-      console.error('Error generating QR code for modal:', error)
+      console.error('Error generating QR code:', error)
       return ''
     }
   }
 
-  // Test function to verify PDF generation
-  const testPDFGeneration = async () => {
-    try {
-      const testTicketData: TicketData = {
-        id: 'TEST-123',
-        name: 'Test User',
-        phone: '+250788123456',
-        email: 'test@example.com',
-        ticketType: 'free',
-        matches: [
-          {
-            id: '1',
-            team1: 'Team A',
-            team2: 'Team B',
-            date: 'Nov 15, 2025',
-            time: '7:00 PM',
-            venue: 'Prime Arena'
-          }
-        ],
-        generatedAt: new Date().toLocaleString(),
-        validUntil: getValidUntilDate('free')
-      }
-      
-      const pdfUrl = await generateTicketPDF(testTicketData)
-      const qrUrl = await generateQRCode(testTicketData)
-      setGeneratedTicketData(testTicketData)
-      setPdfDataUrl(pdfUrl)
-      setQrCodeDataUrl(qrUrl)
-      setTicketGenerated(true)
-    } catch (error) {
-      console.error('Test PDF generation failed:', error)
-    }
-  }
+  const { data: matchesData } = useQuery(GET_MATCH_SCHEDULES)
 
-  // Fetch real match data from database
-  const { data: matchesData, loading: matchesLoading, error: matchesError } = useQuery(GET_MATCH_SCHEDULES)
-
-  // Process all upcoming matches (not just current week)
   const upcomingMatches = matchesData?.matches
     ?.filter((match: any) => {
       const matchDate = new Date(match.dateAndtime)
       const now = new Date()
-      // Include matches with status 'scheduled' or 'Pending' that haven't happened yet
-      // Consider match as passed only if it's more than 2 hours after the scheduled time
-      const matchEndTime = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000) // Add 2 hours to match time
+      const matchEndTime = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000)
       return (match.status === 'scheduled' || match.status === 'Pending') && now < matchEndTime && match.status !== 'completed'
     })
     ?.sort((a: any, b: any) => new Date(a.dateAndtime).getTime() - new Date(b.dateAndtime).getTime())
@@ -113,55 +92,46 @@ export default function TicketsPage() {
         id: match.id,
         team1: match.Team1?.name || match.team1 || "Unknown Team",
         team2: match.Team2?.name || match.team2 || "Unknown Team",
-        team1Logo: match.Team1?.logo || "/placeholder.svg",
-        team2Logo: match.Team2?.logo || "/placeholder.svg",
-        date: matchDate.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric' 
-        }),
-        time: matchDate.toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
+        team1Logo: match.Team1?.logo || null,
+        team2Logo: match.Team2?.logo || null,
+        date: matchDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+        time: matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         venue: match.location || "Prime Arena",
-        fullDate: matchDate,
-        price: 2000 // Single match ticket price
+        price: 2000
       }
     }) || []
 
   const ticketTypes = [
     {
       id: "free",
-      name: "Kigal Universe Pass",
+      name: "Kigal Universe",
+      tagline: "Unlimited Access",
       price: 0,
-      originalPrice: null,
       icon: Gift,
-      color: "green-dark",
+      color: "lime",
       features: [
-        "Kigal Universe Specific",
-        "Registration to enter universe",
-        "Access to all matches",
-        "General seating",
-        "Prime Arena access",
-        "Match program included"
+        "Registration Entry",
+        "Access to All Matches",
+        "General Seating",
+        "Prime Arena Access",
+        "Digital Program"
       ],
-      popular: false,
+      popular: true,
       isFree: true,
       soldOut: false
     },
     {
       id: "single",
       name: "Single Match",
+      tagline: "One Day Pass",
       price: 2000,
-      originalPrice: null,
       icon: Ticket,
-      color: "green",
+      color: "white",
       features: [
-        "Access to one match",
-        "Secure seating",
-        "Prime Arena access",
-        "Match program included"
+        "Access to One Match",
+        "Standard Seating",
+        "Prime Arena Access",
+        "Digital Program"
       ],
       popular: false,
       soldOut: true
@@ -169,60 +139,54 @@ export default function TicketsPage() {
     {
       id: "season",
       name: "Season Pass",
+      tagline: "Ultimate Experience",
       price: 15000,
       originalPrice: 24000,
-      icon: Trophy,
-      color: "yellow",
+      icon: Award,
+      color: "lime-glow",
       features: [
-        "Access to all matches",
-        "VIP seating priority",
-        "Exclusive merchandise",
-        "Playoff access included",
-        "Free parking",
-        "Meet & greet opportunities"
+        "All Season Matches",
+        "VIP Seating Priority",
+        "Exclusive Merchandise",
+        "Playoff Access",
+        "Free Parking",
+        "Meet & Greets"
       ],
-      popular: true,
+      popular: false,
       soldOut: true
     },
     {
       id: "group",
-      name: "Group Package",
+      name: "Group Pack",
+      tagline: "Team Spirit",
       price: 8000,
       originalPrice: 10000,
       icon: Users,
-      color: "blue",
+      color: "white",
       features: [
-        "Access to all matches",
-        "Group seating together",
-        "Special group discounts",
-        "Flexible scheduling",
-        "Group photo opportunity"
+        "Access for 5 People",
+        "Group Seating",
+        "Special Discounts",
+        "Photo Opportunity"
       ],
       popular: false,
-      minPeople: 5,
       soldOut: true
     }
   ]
 
-
   const handleFreeRegistration = async () => {
-    if (!freeFormData.name || !freeFormData.phone || !freeFormData.email) {
-      return
-    }
+    if (!freeFormData.name || !freeFormData.phone || !freeFormData.email) return
 
     setIsGeneratingTicket(true)
-    
     try {
-      // Generate ticket data
       const ticketId = generateTicketId()
-      
       const ticketData: TicketData = {
         id: ticketId,
         name: freeFormData.name,
         phone: freeFormData.phone,
         email: freeFormData.email,
         ticketType: 'free',
-        matches: upcomingMatches.map((match: any) => ({
+        matches: upcomingMatches.slice(0, 5).map((match: any) => ({
           id: match.id,
           team1: match.team1,
           team2: match.team2,
@@ -230,17 +194,10 @@ export default function TicketsPage() {
           time: match.time,
           venue: match.venue
         })),
-        generatedAt: new Date().toLocaleString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
+        generatedAt: new Date().toLocaleString(),
         validUntil: getValidUntilDate('free')
       }
 
-      // Add fan to database first
       await addFan({
         variables: {
           fullname: freeFormData.name,
@@ -250,20 +207,14 @@ export default function TicketsPage() {
         }
       })
 
-      // Generate PDF data URL
       const pdfUrl = await generateTicketPDF(ticketData)
-      
-      // Generate QR code for modal display
       const qrUrl = await generateQRCode(ticketData)
       
-      // Store the generated data
       setGeneratedTicketData(ticketData)
       setPdfDataUrl(pdfUrl)
       setQrCodeDataUrl(qrUrl)
       setTicketGenerated(true)
       setShowFreeForm(false)
-      setFreeFormData({name: '', phone: '', email: ''})
-      
     } catch (error) {
       console.error('Error generating ticket:', error)
     } finally {
@@ -271,440 +222,334 @@ export default function TicketsPage() {
     }
   }
 
-  const getColorClasses = (color: string) => {
-    const colors = {
-      green: {
-        bg: "bg-green-600/20",
-        text: "text-green-400",
-        button: "bg-green-600/90 hover:bg-green-700/90",
-        border: "border-green-400/50"
-      },
-      "green-dark": {
-        bg: "bg-green-800/20",
-        text: "text-green-300",
-        button: "bg-green-800/90 hover:bg-green-900/90",
-        border: "border-green-600/50"
-      },
-      yellow: {
-        bg: "bg-yellow-600/20",
-        text: "text-yellow-400",
-        button: "bg-yellow-600/90 hover:bg-yellow-700/90",
-        border: "border-yellow-400/50"
-      },
-      blue: {
-        bg: "bg-blue-600/20",
-        text: "text-blue-400",
-        button: "bg-blue-600/90 hover:bg-blue-700/90",
-        border: "border-blue-400/50"
-      },
-      purple: {
-        bg: "bg-purple-600/20",
-        text: "text-purple-400",
-        button: "bg-purple-600/90 hover:bg-purple-700/90",
-        border: "border-purple-400/50"
-      }
-    }
-    return colors[color as keyof typeof colors] || colors.green
-  }
-
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen bg-[#0a0f0a] text-white selection:bg-lime-400 selection:text-black">
       <Navigation />
 
-      <div className="relative z-10 container mx-auto px-4 py-16">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <div className="flex justify-center gap-4 mb-6">
-            <Badge className="bg-green-100/90 backdrop-blur-sm text-green-800 px-4 py-2 rounded-full font-semibold border border-green-200/50">
-              Get Your Tickets
+      {/* Decorative Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-lime-400/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-lime-400/5 blur-[120px] rounded-full"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 pt-32 pb-24">
+        {/* Hero Section */}
+        <div className="max-w-4xl mb-24">
+          <div className="flex flex-wrap items-center gap-4 mb-8 animate-in fade-in slide-in-from-left-4 duration-700">
+            <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/20 px-4 py-1 font-black uppercase tracking-[0.2em] text-[10px]">
+              Available Now
             </Badge>
             <Link href="/tickets/scan">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20 bg-white/10 backdrop-blur-md">
-                <QrCode className="h-4 w-4 mr-2" />
-                Scan QR Code
-              </Button>
+               <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-lime-300 transition-colors">
+                 <QrCode size={14} className="text-lime-300" />
+                 Scan QR Code
+               </button>
             </Link>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
-            Prime5 League Tickets
+          <h1 className="text-6xl md:text-8xl font-black font-heading italic uppercase tracking-tighter mb-8 animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
+            Secure Your <span className="text-lime-300">Territory.</span>
           </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto drop-shadow-xl">
-            Experience the most exciting futsal action in Rwanda. Choose your ticket package and secure your spot for an unforgettable season.
+          <p className="text-xl text-white/40 uppercase font-bold tracking-widest max-w-2xl animate-in fade-in slide-in-from-left-4 duration-700 delay-200">
+            Experience the most high-octane futsal league in Rwanda. 
+            Choose your path to the Prime5 Arena.
           </p>
-          
         </div>
 
-        {/* Ticket Packages */}
-        <div className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12 drop-shadow-lg">
-            Choose Your Package
-          </h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {ticketTypes.filter((ticket) => !ticket.soldOut).map((ticket) => {
-              const colors = getColorClasses(ticket.color)
-              const IconComponent = ticket.icon
-              
-              return (
-                <Card 
-                  key={ticket.id}
-                  className={`bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 ${
-                    ticket.popular ? `border-2 ${colors.border} relative` : ''
-                  } ${selectedTicket === ticket.id ? 'ring-2 ring-white/50' : ''} ${ticket.soldOut ? 'opacity-60' : ''}`}
-                  onClick={() => !ticket.soldOut && setSelectedTicket(ticket.id)}
-                >
-                  {ticket.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-yellow-500 text-black px-4 py-1 font-bold">Most Popular</Badge>
-                    </div>
+        {/* Ticket Grid */}
+        <div className="grid lg:grid-cols-4 gap-8 mb-32">
+          {ticketTypes.map((ticket, index) => (
+            <div 
+              key={ticket.id}
+              onClick={() => !ticket.soldOut && setSelectedTicket(ticket.id)}
+              className={`group relative glass-dark rounded-[2.5rem] p-8 border transition-all duration-500 cursor-pointer animate-in fade-in slide-in-from-bottom-4 duration-700 ${
+                selectedTicket === ticket.id ? "border-lime-300 shadow-[0_0_30px_rgba(190,242,100,0.1)]" : "border-white/10 hover:border-white/20"
+              } ${ticket.soldOut ? "opacity-40 grayscale pointer-events-none" : ""}`}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <ticket.icon size={80} />
+              </div>
+
+              {ticket.popular && (
+                <div className="absolute -top-3 left-8">
+                  <Badge className="bg-lime-300 text-black px-4 py-1 font-black uppercase tracking-widest text-[8px] italic shadow-lg">
+                    Recommended
+                  </Badge>
+                </div>
+              )}
+
+              {ticket.soldOut && (
+                <div className="absolute -top-3 left-8">
+                  <Badge className="bg-white/10 text-white/40 border-white/5 px-4 py-1 font-black uppercase tracking-widest text-[8px]">
+                    Sold Out
+                  </Badge>
+                </div>
+              )}
+
+              <div className="mb-12 relative z-10">
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{ticket.tagline}</p>
+                <h3 className="text-3xl font-black font-heading italic uppercase tracking-tight mb-2 group-hover:text-lime-300 transition-colors">
+                  {ticket.name}
+                </h3>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-white font-heading italic">
+                    {ticket.isFree ? "Free" : `RWF ${ticket.price.toLocaleString()}`}
+                  </span>
+                  {ticket.originalPrice && (
+                    <span className="text-sm text-white/20 line-through font-bold">
+                      {ticket.originalPrice.toLocaleString()}
+                    </span>
                   )}
-                  {ticket.soldOut && (
-                    <div className="absolute -top-3 right-3">
-                      <Badge className="bg-red-600 text-white px-4 py-1 font-bold">Sold Out</Badge>
-                    </div>
-                  )}
-                  
-                  <CardHeader className="text-center pb-4">
-                    <div className={`mx-auto mb-4 p-3 ${colors.bg} rounded-full w-fit`}>
-                      <IconComponent className={`h-8 w-8 ${colors.text}`} />
-                    </div>
-                    <CardTitle className="text-2xl text-white">{ticket.name}</CardTitle>
-                    <div className="flex items-center justify-center gap-2 mt-2">
-                      <div className={`text-4xl font-bold ${colors.text}`}>
-                        {ticket.isFree ? 'FREE' : `RWF ${ticket.price.toLocaleString()}`}
-                      </div>
-                      {ticket.originalPrice && (
-                        <div className="text-lg text-white/50 line-through">
-                          RWF {ticket.originalPrice.toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-white/70 text-sm">
-                      {ticket.isFree ? 'registration required' : (ticket.minPeople ? `per person (min ${ticket.minPeople} people)` : 'per person')}
-                    </p>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-3">
-                      {ticket.features.map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-white/90">
-                          <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    <Button 
-                      className={`w-full ${colors.button} shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${
-                        ticket.color === 'yellow' ? 'text-black font-bold' : ''
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (ticket.isFree) {
-                          setShowFreeForm(true)
-                        } else {
-                          setSelectedTicket(ticket.id)
-                        }
-                      }}
-                      disabled={ticket.soldOut}
-                    >
-                      {ticket.soldOut ? 'Sold Out' : (ticket.isFree ? 'Register for Free' : (selectedTicket === ticket.id ? 'Selected' : 'Select Package'))}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )
-            })}
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-12 relative z-10">
+                {ticket.features.map((feature, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <CheckCircle size={14} className="text-lime-400/50" />
+                    <span className="text-xs font-bold text-white/60 uppercase tracking-widest leading-none">{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (ticket.isFree) setShowFreeForm(true)
+                  else setSelectedTicket(ticket.id)
+                }}
+                className={`w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all duration-500 overflow-hidden relative group/btn ${
+                  ticket.isFree ? "bg-lime-300 text-black hover:bg-white" : "bg-white/5 text-white hover:bg-white/10"
+                }`}
+              >
+                <span className="relative z-10">{ticket.isFree ? "Register Now" : "Select Pass"}</span>
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        {/* Info Grid */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="glass-dark rounded-[2.5rem] p-10 border border-white/10 group hover:border-lime-300/30 transition-all duration-500">
+            <div className="w-14 h-14 bg-lime-400/10 rounded-2xl flex items-center justify-center mb-8 border border-lime-400/20 group-hover:scale-110 transition-transform">
+              <Shield className="text-lime-400" size={24} />
+            </div>
+            <h4 className="text-xl font-black uppercase tracking-tight mb-4">Secure Access</h4>
+            <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
+              Every digital ticket is encrypted with a unique QR code for verified arena entry.
+            </p>
           </div>
 
-          {/* Quantity Selector */}
-          {selectedTicket && (
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl max-w-md mx-auto mb-8">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-white mb-4 text-center">Select Quantity</h3>
-                <div className="flex items-center justify-center gap-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="border-white/20 text-white hover:bg-white/20"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <span className="text-2xl font-bold text-white min-w-[3rem] text-center">{quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="border-white/20 text-white hover:bg-white/20"
-                  >
-                    +
-                  </Button>
-                </div>
-                <div className="text-center mt-4">
-                  <p className="text-white/70">
-                    Total: RWF {(ticketTypes.find(t => t.id === selectedTicket)?.price || 0) * quantity}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Free Registration Form Modal */}
-          {showFreeForm && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl max-w-md w-full">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-green-800/20 rounded-full w-fit">
-                    <Gift className="h-8 w-8 text-green-300" />
-                  </div>
-                  <CardTitle className="text-2xl text-white drop-shadow-lg">Get Your Free Pass</CardTitle>
-                  <p className="text-white/90 drop-shadow-md">Register to watch all games for free!</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2 drop-shadow-md">
-                        <User className="h-4 w-4 inline mr-2" />
-                        Full Name
-                      </label>
-                      <input
-                        type="text"
-                        value={freeFormData.name}
-                        onChange={(e) => setFreeFormData({...freeFormData, name: e.target.value})}
-                        className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2 drop-shadow-md">
-                        <Phone className="h-4 w-4 inline mr-2" />
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        value={freeFormData.phone}
-                        onChange={(e) => setFreeFormData({...freeFormData, phone: e.target.value})}
-                        className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
-                        placeholder="+250 788 123 456"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2 drop-shadow-md">
-                        <Mail className="h-4 w-4 inline mr-2" />
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={freeFormData.email}
-                        onChange={(e) => setFreeFormData({...freeFormData, email: e.target.value})}
-                        className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
-                        placeholder="your.email@example.com"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-white/30 text-white hover:bg-white/20 bg-white/10 backdrop-blur-sm"
-                      onClick={() => {
-                        setShowFreeForm(false)
-                        setFreeFormData({name: '', phone: '', email: ''})
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="flex-1 bg-green-800/90 backdrop-blur-md hover:bg-green-900/90 shadow-lg hover:shadow-xl transition-all duration-300"
-                      onClick={handleFreeRegistration}
-                      disabled={isGeneratingTicket}
-                    >
-                      {isGeneratingTicket ? 'Generating Ticket...' : 'Register for Free'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="glass-dark rounded-[2.5rem] p-10 border border-white/10 group hover:border-lime-300/30 transition-all duration-500">
+            <div className="w-14 h-14 bg-blue-400/10 rounded-2xl flex items-center justify-center mb-8 border border-blue-400/20 group-hover:scale-110 transition-transform">
+              <CreditCard className="text-blue-400" size={24} />
             </div>
-          )}
+            <h4 className="text-xl font-black uppercase tracking-tight mb-4">Payment Methods</h4>
+            <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
+              Accepting Mobile Money, Bank Transfers, and secure card payments.
+            </p>
+          </div>
 
-          {/* Ticket Generated Success Message */}
-          {ticketGenerated && generatedTicketData && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <Card className="bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl max-w-2xl w-full">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-green-600/20 rounded-full w-fit">
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                  <CardTitle className="text-2xl text-gray-800">Ticket Generated Successfully!</CardTitle>
-                  <p className="text-gray-600">Your free pass is ready. Download the PDF below.</p>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Ticket Card Preview */}
-                  <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden shadow-lg">
-                    {/* Ticket Header */}
-                    <div className="bg-gray-800 text-white p-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-bold">Prime5 League</h3>
-                        <span className="text-sm">ID: {generatedTicketData.id}</span>
-                      </div>
-                    </div>
-                    
-                    {/* Ticket Body */}
-                    <div className="p-4">
-                      <div className="flex justify-between items-start">
-                        {/* Left side - Details */}
-                        <div className="flex-1 pr-4">
-                          <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold mb-3 inline-block">
-                            {generatedTicketData.ticketType.toUpperCase()}
-                          </div>
-                          
-                          <div className="space-y-2 text-sm">
-                            <div>
-                              <span className="font-semibold text-gray-600">Name:</span>
-                              <p className="text-gray-800">{generatedTicketData.name}</p>
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-600">Phone:</span>
-                              <p className="text-gray-800">{generatedTicketData.phone}</p>
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-600">Valid Until:</span>
-                              <p className="text-gray-800">{generatedTicketData.validUntil}</p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Right side - QR Code */}
-                        <div className="bg-gray-50 p-3 rounded-lg text-center">
-                          {qrCodeDataUrl ? (
-                            <div className="mb-2">
-                              <img 
-                                src={qrCodeDataUrl} 
-                                alt="QR Code" 
-                                className="w-20 h-20 mx-auto rounded"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center mb-2">
-                              <div className="text-xs text-gray-500 text-center">
-                                QR<br/>CODE
-                              </div>
-                            </div>
-                          )}
-                          <p className="text-xs text-gray-600 font-semibold">SCAN FOR</p>
-                          <p className="text-xs text-gray-600 font-semibold">VERIFICATION</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Ticket Footer */}
-                    <div className="bg-gray-800 text-white p-2 text-center">
-                      <p className="text-xs">Present this ticket at entrance • Non-transferable</p>
-                    </div>
-                  </div>
-                  
-                  {/* Download Button */}
-                  <div className="flex gap-3">
-                    <Button
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                      onClick={() => {
-                        const link = document.createElement('a')
-                        link.href = pdfDataUrl || ''
-                        link.download = `prime5-ticket-${generatedTicketData.id}.pdf`
-                        document.body.appendChild(link)
-                        link.click()
-                        document.body.removeChild(link)
-                      }}
-                    >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Download PDF Ticket
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => {
-                        setTicketGenerated(false)
-                        setGeneratedTicketData(null)
-                        setPdfDataUrl(null)
-                      }}
-                    >
-                      Close
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="glass-dark rounded-[2.5rem] p-10 border border-white/10 group hover:border-lime-300/30 transition-all duration-500">
+            <div className="w-14 h-14 bg-purple-400/10 rounded-2xl flex items-center justify-center mb-8 border border-purple-400/20 group-hover:scale-110 transition-transform">
+              <MessageCircle className="text-purple-400" size={24} />
             </div>
-          )}
-
-          {/* Purchase Button */}
-          {selectedTicket && (
-            <div className="text-center">
-              <Button 
-                size="lg" 
-                className="bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 px-8 py-4 text-lg"
-              >
-                <CreditCard className="h-5 w-5 mr-2" />
-                Proceed to Payment
-              </Button>
-            </div>
-          )}
+            <h4 className="text-xl font-black uppercase tracking-tight mb-4">Live Support</h4>
+            <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
+              Need help? Our team is available on WhatsApp 24/7 for ticketing assistance.
+            </p>
+          </div>
         </div>
 
-        {/* Payment Methods */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-          <CardContent className="p-8 text-center">
-            <h3 className="text-2xl font-bold text-white mb-6 drop-shadow-lg">Secure Payment Methods</h3>
-            <div className="flex justify-center items-center gap-8 flex-wrap mb-6">
-              <div className="flex items-center gap-2 text-white/90">
-                <CreditCard className="h-6 w-6 text-green-400" />
-                <span>Mobile Money</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/90">
-                <CreditCard className="h-6 w-6 text-blue-400" />
-                <span>Bank Transfer</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/90">
-                <CreditCard className="h-6 w-6 text-purple-400" />
-                <span>Cash on Arrival</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
-              <Shield className="h-4 w-4" />
-              <span>All payments are secure and encrypted</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Contact Section */}
-        <Card className="bg-gradient-to-r from-green-800/90 to-green-900/90 backdrop-blur-xl text-white shadow-2xl hover:shadow-3xl transition-all duration-300 border border-green-600/50 mt-12">
-          <CardContent className="p-12 text-center">
-            <h2 className="text-3xl font-bold mb-4 drop-shadow-2xl">Need Help?</h2>
-            <p className="text-xl mb-8 text-white/90 drop-shadow-xl">
-              Contact our support team for assistance with ticket purchases
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-white/50 text-white hover:bg-white/20 hover:text-white bg-white/10 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                <Link href="tel:+250788829084">Call Now</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                className="bg-green-500/90 backdrop-blur-md hover:bg-green-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                <Link href="https://chat.whatsapp.com/BI9CD8copL59aQnpCTrRtz?text=Hi%20Prime5%20support%2C%20I%20need%20help%20with%20tickets" target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  WhatsApp Support
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* CTA Section */}
+        <div className="mt-32 glass rounded-[3rem] p-12 md:p-24 border border-white/5 relative overflow-hidden text-center group">
+          <div className="absolute top-0 right-0 p-12 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+            <Trophy size={400} />
+          </div>
+          <h2 className="text-4xl md:text-6xl font-black font-heading italic uppercase tracking-tighter mb-8 relative z-10">
+            Ready for <span className="text-lime-300">Next Level?</span>
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
+            <Button asChild size="lg" className="h-16 px-10 bg-lime-300 text-black hover:bg-white font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl hover:shadow-lime-400/20">
+              <Link href="https://chat.whatsapp.com/BI9CD8copL59aQnpCTrRtz" target="_blank">WhatsApp Support</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-16 px-10 border-white/10 text-white hover:bg-white/5 font-black uppercase tracking-widest text-xs rounded-2xl transition-all backdrop-blur-md">
+              <Link href="tel:+250788829084">Call Direct</Link>
+            </Button>
+          </div>
+        </div>
       </div>
+
+      {/* Free Registration Modal */}
+      {showFreeForm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowFreeForm(false)}></div>
+          <div className="relative w-full max-w-xl glass-dark rounded-[3rem] border border-white/10 p-12 shadow-3xl overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Gift size={120} />
+            </div>
+            
+            <div className="text-center mb-12">
+              <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/20 px-4 py-1 font-black uppercase tracking-[0.2em] text-[10px] mb-6">
+                Universe Pass
+              </Badge>
+              <h3 className="text-4xl font-black font-heading italic uppercase tracking-tighter mb-4 text-white">Free Registration</h3>
+              <p className="text-white/40 text-xs font-black uppercase tracking-widest">Access granted to the Prime5 Universe.</p>
+            </div>
+
+            <div className="space-y-6 mb-12">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-4">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-6 top-1/2 -translate-y-1/2 text-lime-300" size={18} />
+                  <input
+                    type="text"
+                    value={freeFormData.name}
+                    onChange={(e) => setFreeFormData({...freeFormData, name: e.target.value})}
+                    placeholder="Enter your name"
+                    className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-16 pr-6 text-white font-black uppercase tracking-widest text-xs focus:border-lime-300/50 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-4">Phone Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-lime-300" size={18} />
+                  <input
+                    type="tel"
+                    value={freeFormData.phone}
+                    onChange={(e) => setFreeFormData({...freeFormData, phone: e.target.value})}
+                    placeholder="+250 788 000 000"
+                    className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-16 pr-6 text-white font-black uppercase tracking-widest text-xs focus:border-lime-300/50 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-4">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-lime-300" size={18} />
+                  <input
+                    type="email"
+                    value={freeFormData.email}
+                    onChange={(e) => setFreeFormData({...freeFormData, email: e.target.value})}
+                    placeholder="name@prime5.com"
+                    className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-16 pr-6 text-white font-black uppercase tracking-widest text-xs focus:border-lime-300/50 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => setShowFreeForm(false)}
+                className="h-16 rounded-2xl font-black uppercase tracking-widest text-xs text-white/40 hover:text-white hover:bg-white/5"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={isGeneratingTicket}
+                onClick={handleFreeRegistration}
+                className="h-16 rounded-2xl bg-lime-300 text-black hover:bg-white font-black uppercase tracking-widest text-xs transition-all shadow-xl hover:shadow-lime-400/20"
+              >
+                {isGeneratingTicket ? "Generating..." : "Get Free Pass"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ticket Success Modal */}
+      {ticketGenerated && generatedTicketData && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 animate-in zoom-in duration-500">
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setTicketGenerated(false)}></div>
+          <div className="relative w-full max-w-4xl">
+            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-lime-300/20 blur-[100px] rounded-full"></div>
+            
+            <div className="text-center mb-12 relative z-10">
+              <div className="w-20 h-20 bg-lime-400/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-lime-400/20">
+                <CheckCircle className="h-10 w-10 text-lime-400" />
+              </div>
+              <h3 className="text-5xl font-black font-heading italic uppercase tracking-tighter mb-4 text-white">Success Unleashed!</h3>
+              <p className="text-white/40 text-xs font-black uppercase tracking-widest">Your Prime5 Digital Identity has been forged.</p>
+            </div>
+
+            {/* Premium Ticket Card */}
+            <div className="glass shadow-3xl rounded-[3rem] overflow-hidden border border-white/10 relative group mb-12">
+              <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                <Trophy size={160} />
+              </div>
+              
+              <div className="flex flex-col md:flex-row">
+                <div className="flex-1 p-12 border-b md:border-b-0 md:border-r border-white/10">
+                  <div className="flex items-center gap-4 mb-12">
+                     <div className="bg-lime-300 text-black text-[9px] font-black italic px-3 py-1 rounded-full uppercase tracking-widest">
+                       {generatedTicketData.ticketType} Pass
+                     </div>
+                     <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">#{generatedTicketData.id}</span>
+                  </div>
+                  
+                  <div className="space-y-12">
+                    <div>
+                      <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">Ticket Holder</p>
+                      <h4 className="text-3xl font-black font-heading italic uppercase tracking-tight text-white">{generatedTicketData.name}</h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-8">
+                       <div>
+                         <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Validity</p>
+                         <p className="font-black text-sm uppercase tracking-widest text-white/60">{generatedTicketData.validUntil}</p>
+                       </div>
+                       <div>
+                         <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Arena Entry</p>
+                         <p className="font-black text-sm uppercase tracking-widest text-lime-300">All Matches</p>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full md:w-80 bg-white/5 p-12 flex flex-col items-center justify-center text-center">
+                  {qrCodeDataUrl && (
+                    <div className="p-4 bg-white rounded-3xl mb-6 shadow-2xl">
+                       <img src={qrCodeDataUrl} alt="Ticket QR" className="w-32 h-32" />
+                    </div>
+                  )}
+                  <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">Scan for Entry</p>
+                  <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">Verified Digital Asset</p>
+                </div>
+              </div>
+
+              <div className="bg-white/5 py-4 px-12 border-t border-white/10">
+                 <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] text-center">Non-Transferable • Primary Entry Only • Prime Arena Kigali</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+               <Button
+                onClick={() => {
+                  const link = document.createElement('a')
+                  link.href = pdfDataUrl || ''
+                  link.download = `prime5-ticket-${generatedTicketData.id}.pdf`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                }}
+                className="h-16 px-12 bg-white text-black hover:bg-lime-300 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-2xl"
+              >
+                <CreditCard className="mr-2" size={16} />
+                Download PDF Ticket
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setTicketGenerated(false)}
+                className="h-16 px-12 text-white/40 hover:text-white font-black uppercase tracking-widest text-xs rounded-2xl transition-all"
+              >
+                Close Portal
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
