@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -13,13 +12,16 @@ import {
   Star,
   Heart,
   Search,
-  Filter,
   Plus,
   Minus,
   ShoppingBag,
   Truck,
   Shield,
   RefreshCw,
+  TrendingUp,
+  Award,
+  Zap,
+  ArrowRight
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -37,73 +39,76 @@ export default function PublicStorePage() {
       id: 1,
       name: "Prime5 Home Jersey",
       category: "Jerseys",
-      price: 45.00,
-      originalPrice: 55.00,
-      image: "/placeholder.svg?height=300&width=300&text=Home+Jersey",
+      price: 45000,
+      originalPrice: 55000,
+      image: "/placeholder.svg?height=600&width=600&text=Home+Jersey",
       rating: 4.8,
       reviews: 124,
-      description: "Official Prime5 League home jersey with premium quality fabric and team colors.",
+      description: "Official Prime5 League home jersey with premium moisture-wicking fabric and high-impact lime accents.",
       inStock: true,
-      featured: true
+      featured: true,
+      tag: "NEW"
     },
     {
       id: 2,
       name: "Prime5 Away Jersey",
       category: "Jerseys",
-      price: 45.00,
-      originalPrice: 55.00,
-      image: "/placeholder.svg?height=300&width=300&text=Away+Jersey",
+      price: 45000,
+      originalPrice: 55000,
+      image: "/placeholder.svg?height=600&width=600&text=Away+Jersey",
       rating: 4.7,
       reviews: 98,
-      description: "Official Prime5 League away jersey with modern design and comfortable fit.",
+      description: "Stealth charcoal away jersey with forest green details. Engineered for maximum performance.",
       inStock: true,
-      featured: true
+      featured: true,
+      tag: "HOT"
     },
     {
       id: 3,
-      name: "Team Cap",
+      name: "Tactical Team Cap",
       category: "Accessories",
-      price: 25.00,
-      image: "/placeholder.svg?height=300&width=300&text=Team+Cap",
+      price: 25000,
+      image: "/placeholder.svg?height=600&width=600&text=Team+Cap",
       rating: 4.5,
       reviews: 67,
-      description: "Stylish team cap with embroidered Prime5 League logo.",
+      description: "Premium embroidered cap with adjustable strap and 3D Prime5 logo.",
       inStock: true,
       featured: false
     },
     {
       id: 4,
-      name: "Match Ball",
+      name: "Pro Elite Match Ball",
       category: "Equipment",
-      price: 35.00,
-      image: "/placeholder.svg?height=300&width=300&text=Match+Ball",
+      price: 35000,
+      image: "/placeholder.svg?height=600&width=600&text=Match+Ball",
       rating: 4.9,
       reviews: 89,
-      description: "Official match ball used in Prime5 League games.",
+      description: "FIFA-pro standard futsal ball. Low-rebound engineering for precision and power.",
       inStock: true,
-      featured: true
+      featured: true,
+      tag: "PRO"
     },
     {
       id: 5,
-      name: "Training Shorts",
+      name: "Performance Shorts",
       category: "Apparel",
-      price: 30.00,
-      image: "/placeholder.svg?height=300&width=300&text=Training+Shorts",
+      price: 30000,
+      image: "/placeholder.svg?height=600&width=600&text=Training+Shorts",
       rating: 4.6,
       reviews: 45,
-      description: "Comfortable training shorts for practice sessions.",
+      description: "Breathable training shorts with reinforced stitching and elasticated waistband.",
       inStock: true,
       featured: false
     },
     {
       id: 6,
-      name: "Team Scarf",
+      name: "Prime5 Supporters Scarf",
       category: "Accessories",
-      price: 20.00,
-      image: "/placeholder.svg?height=300&width=300&text=Team+Scarf",
+      price: 20000,
+      image: "/placeholder.svg?height=600&width=600&text=Team+Scarf",
       rating: 4.4,
       reviews: 32,
-      description: "Warm team scarf perfect for supporting your team in any weather.",
+      description: "Heavy-knit supporters scarf. Perfect for showing your colors in the arena.",
       inStock: false,
       featured: false
     }
@@ -147,45 +152,71 @@ export default function PublicStorePage() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen bg-[#0a0f0a] text-white selection:bg-lime-400 selection:text-black">
       <Navigation />
-      
-      {/* Hero Section */}
-      <section className="relative py-16" style={{
-        backgroundImage: 'url(/mainbg.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}>
-        <div className="relative z-10 container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
-              Prime5 Store
+
+      {/* Decorative Blur Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-lime-400/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-lime-400/5 blur-[120px] rounded-full"></div>
+      </div>
+
+      <div className="relative z-10 pt-32 pb-24">
+        {/* Hero Section */}
+        <section className="container mx-auto px-4 mb-24">
+          <div className="max-w-4xl">
+            <div className="flex flex-wrap items-center gap-4 mb-8 animate-in fade-in slide-in-from-left-4 duration-700">
+              <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/20 px-4 py-1 font-black uppercase tracking-[0.2em] text-[10px]">
+                Drop One Available
+              </Badge>
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                <TrendingUp size={14} className="text-lime-300" />
+                Trending Now
+              </div>
+            </div>
+            <h1 className="text-6xl md:text-9xl font-black font-heading italic uppercase tracking-tighter mb-8 animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
+               Gear for the <span className="text-lime-300">Universe.</span>
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto drop-shadow-xl">
-              Official merchandise and gear from the Premier Futsal League
+            <p className="text-xl text-white/40 uppercase font-bold tracking-widest max-w-2xl animate-in fade-in slide-in-from-left-4 duration-700 delay-200">
+              Official Prime5 League Armour. Engineered for the Elite.
             </p>
           </div>
+        </section>
 
-          {/* Search and Filter Bar */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+        {/* Filters & Tabs Section */}
+        <section className="container mx-auto px-4 mb-16">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
+              <TabsList className="flex w-full overflow-x-auto bg-white/5 p-1 rounded-2xl border border-white/5 scrollbar-hide">
+                {["all", "featured", "jerseys", "accessories"].map((tab) => (
+                  <TabsTrigger 
+                    key={tab}
+                    value={tab} 
+                    className="flex-1 lg:px-8 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all data-[state=active]:bg-lime-300 data-[state=active]:text-black text-white/40 hover:text-white"
+                  >
+                    {tab}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+
+            <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-4">
+              <div className="relative flex-1 lg:w-80 group">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-lime-300 transition-colors" size={18} />
                 <Input
-                  placeholder="Search products..."
+                  placeholder="SEARCH THE ARMOURY"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:border-white/40"
+                  className="w-full h-14 bg-white/5 border-white/10 rounded-2xl pl-16 pr-6 text-white font-black uppercase tracking-widest text-[10px] focus:border-lime-300/50 outline-none transition-all"
                 />
               </div>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full md:w-48 bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder="Category" />
+                <SelectTrigger className="w-full sm:w-56 h-14 bg-white/5 border-white/10 rounded-2xl px-6 text-white font-black uppercase tracking-widest text-[10px] focus:border-lime-300/50 shadow-none">
+                  <SelectValue placeholder="CATEGORY" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#0f150f] border-white/10 rounded-2xl">
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="capitalize">
+                    <SelectItem key={category} value={category} className="text-white focus:bg-lime-300 focus:text-black font-black uppercase tracking-widest text-[10px]">
                       {category}
                     </SelectItem>
                   ))}
@@ -193,219 +224,201 @@ export default function PublicStorePage() {
               </Select>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Main Content Section */}
-      <section className="relative" style={{
-        backgroundImage: 'url(/mainbg.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}>
-        <div className="relative z-10 container mx-auto px-6 pb-16">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit lg:grid-cols-4 bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-            <TabsTrigger 
-              value="all" 
-              className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
-            >
-              All Products
-            </TabsTrigger>
-            <TabsTrigger 
-              value="featured" 
-              className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
-            >
-              Featured
-            </TabsTrigger>
-            <TabsTrigger 
-              value="jerseys" 
-              className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
-            >
-              Jerseys
-            </TabsTrigger>
-            <TabsTrigger 
-              value="accessories" 
-              className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-300 data-[state=active]:backdrop-blur-md text-white hover:bg-white/20 hover:text-white"
-            >
-              Accessories
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className="space-y-8">
-            {filteredProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 text-white/50 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No products found</h3>
-                <p className="text-white/70">Try adjusting your search or filter criteria</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredProducts.map((product) => (
-                  <Card key={product.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 overflow-hidden">
-                    <div className="relative">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        width={300}
-                        height={300}
-                        className="w-full h-64 object-cover"
-                      />
-                      {product.featured && (
-                        <Badge className="absolute top-4 left-4 bg-yellow-500/90 text-black font-bold">
-                          Featured
-                        </Badge>
-                      )}
-                      {!product.inStock && (
-                        <Badge className="absolute top-4 right-4 bg-red-500/90 text-white">
-                          Out of Stock
-                        </Badge>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="absolute top-4 right-4 bg-white/20 border-white/30 text-white hover:bg-white/30"
-                      >
-                        <Heart className="w-4 h-4" />
-                      </Button>
-                    </div>
+          {/* Product Grid */}
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-32 glass-dark rounded-[3rem] border border-white/5 animate-pulse">
+              <Package className="w-16 h-16 text-white/10 mx-auto mb-6" />
+              <h3 className="text-xl font-black uppercase tracking-widest text-white/40 mb-2">Armoury Empty</h3>
+              <p className="text-white/20 text-xs font-bold uppercase tracking-widest">Adjust your filters to reveal hidden gear</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+              {filteredProducts.map((product, index) => (
+                <div 
+                  key={product.id} 
+                  className="group relative glass-dark rounded-[3rem] border border-white/10 hover:border-lime-300/30 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="aspect-square relative overflow-hidden bg-white/5">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f0a]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
-                    <CardContent className="p-6">
-                      <div className="mb-4">
-                        <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
-                        <p className="text-white/80 text-sm mb-3">{product.description}</p>
-                        
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < Math.floor(product.rating)
-                                    ? "text-yellow-400 fill-current"
-                                    : "text-white/30"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-white/70 text-sm">
-                            {product.rating} ({product.reviews} reviews)
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold text-white">${product.price}</span>
-                          {product.originalPrice && (
-                            <span className="text-lg text-white/50 line-through">
-                              ${product.originalPrice}
-                            </span>
-                          )}
-                        </div>
-                        <Badge variant="outline" className="border-white/30 text-white/90">
-                          {product.category}
+                    {product.tag && (
+                      <Badge className="absolute top-8 left-8 bg-lime-300 text-black px-4 py-1 font-black uppercase tracking-widest text-[8px] italic shadow-lg">
+                        {product.tag}
+                      </Badge>
+                    )}
+                    
+                    {!product.inStock && (
+                      <div className="absolute inset-x-0 bottom-8 px-8">
+                        <Badge className="w-full bg-white/10 backdrop-blur-md text-white/40 border-white/5 px-4 py-3 font-black uppercase tracking-widest text-[10px] justify-center">
+                          Sold Out
                         </Badge>
                       </div>
+                    )}
 
+                    <button className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/40 hover:text-red-400 hover:bg-white/10 transition-all group/btn">
+                      <Heart size={20} className="group-hover/btn:fill-red-400 group-hover/btn:scale-110 transition-all" />
+                    </button>
+                  </div>
+                  
+                  <div className="p-10">
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">{product.category}</p>
+                        <h3 className="text-2xl font-black font-heading italic uppercase tracking-tight text-white mb-2 group-hover:text-lime-300 transition-colors">
+                          {product.name}
+                        </h3>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[22px] font-black text-white font-heading italic">
+                           RWF {product.price.toLocaleString()}
+                        </div>
+                        {product.originalPrice && (
+                          <div className="text-[10px] text-white/20 line-through font-bold uppercase tracking-widest">
+                            RWF {product.originalPrice.toLocaleString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-white/40 text-xs font-bold uppercase tracking-widest leading-relaxed mb-10">
+                      {product.description}
+                    </p>
+
+                    <div className="flex items-center gap-4">
                       {product.inStock ? (
-                        <div className="flex items-center gap-2">
+                        <>
                           {cart[product.id] ? (
-                            <div className="flex items-center gap-2 flex-1">
+                            <div className="flex items-center gap-2 flex-1 bg-white/5 rounded-2xl p-1 border border-white/10">
                               <Button
-                                size="sm"
-                                variant="outline"
+                                size="icon"
+                                variant="ghost"
                                 onClick={() => removeFromCart(product.id)}
-                                className="border-white/30 text-white hover:bg-white/20"
+                                className="w-10 h-10 rounded-xl hover:bg-white/5 text-white/60"
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus size={16} />
                               </Button>
-                              <span className="text-white font-medium px-3">
+                              <span className="flex-1 text-center font-black text-[10px] tracking-widest">
                                 {cart[product.id]}
                               </span>
                               <Button
-                                size="sm"
-                                variant="outline"
+                                size="icon"
+                                variant="ghost"
                                 onClick={() => addToCart(product.id)}
-                                className="border-white/30 text-white hover:bg-white/20"
+                                className="w-10 h-10 rounded-xl hover:bg-white/5 text-white/60"
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus size={16} />
                               </Button>
                             </div>
                           ) : (
                             <Button
                               onClick={() => addToCart(product.id)}
-                              className="flex-1 bg-green-600/90 hover:bg-green-700/90 text-white"
+                              className="flex-1 h-12 bg-lime-300 text-black hover:bg-white rounded-2xl font-black uppercase tracking-widest text-[9px] transition-all"
                             >
-                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              <ShoppingCart size={14} className="mr-2" />
                               Add to Cart
                             </Button>
                           )}
-                        </div>
+                        </>
                       ) : (
                         <Button
                           disabled
-                          className="w-full bg-white/10 text-white/50 cursor-not-allowed"
+                          className="flex-1 h-12 bg-white/5 text-white/20 rounded-2xl font-black uppercase tracking-widest text-[9px] border border-white/5"
                         >
                           Out of Stock
                         </Button>
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
+                      
+                      <Button variant="ghost" size="icon" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 text-white/40 hover:text-white">
+                        <Star size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Features/Info Section */}
+        <section className="container mx-auto px-4 mt-16">
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="glass-dark rounded-[2.5rem] p-10 border border-white/10 group hover:border-lime-300/30 transition-all duration-500">
+              <div className="w-14 h-14 bg-blue-400/10 rounded-2xl flex items-center justify-center mb-8 border border-blue-400/20 group-hover:scale-110 transition-transform">
+                <Truck className="text-blue-400" size={24} />
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              <h4 className="text-xl font-black uppercase tracking-tight mb-4">Express Delivery</h4>
+              <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
+                Fast and secure shipping across Rwanda on all official league merchandise.
+              </p>
+            </div>
 
-        {/* Features Section */}
-        <section className="mt-16">
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Truck className="h-8 w-8 text-blue-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Free Shipping</h3>
-                <p className="text-white/80">Free shipping on orders over $50</p>
-              </CardContent>
-            </Card>
+            <div className="glass-dark rounded-[2.5rem] p-10 border border-white/10 group hover:border-lime-300/30 transition-all duration-500">
+              <div className="w-14 h-14 bg-lime-400/10 rounded-2xl flex items-center justify-center mb-8 border border-lime-400/20 group-hover:scale-110 transition-transform">
+                <Shield className="text-lime-400" size={24} />
+              </div>
+              <h4 className="text-xl font-black uppercase tracking-tight mb-4">Secure Gateway</h4>
+              <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
+                Premium payment processing with full encryption. Momo and card support.
+              </p>
+            </div>
 
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-green-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Secure Payment</h3>
-                <p className="text-white/80">Safe and secure payment processing</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <RefreshCw className="h-8 w-8 text-purple-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Easy Returns</h3>
-                <p className="text-white/80">30-day return policy on all items</p>
-              </CardContent>
-            </Card>
+            <div className="glass-dark rounded-[2.5rem] p-10 border border-white/10 group hover:border-lime-300/30 transition-all duration-500">
+              <div className="w-14 h-14 bg-purple-400/10 rounded-2xl flex items-center justify-center mb-8 border border-purple-400/20 group-hover:scale-110 transition-transform">
+                <RefreshCw className="text-purple-400" size={24} />
+              </div>
+              <h4 className="text-xl font-black uppercase tracking-tight mb-4">Elite Service</h4>
+              <p className="text-white/40 text-sm font-bold uppercase tracking-widest leading-relaxed">
+                30-day exchange policy on all gear. Quality guaranteed by Prime5.
+              </p>
+            </div>
           </div>
         </section>
-        </div>
-      </section>
 
-      {/* Cart Button */}
+        {/* Promo CTA Section */}
+        <section className="container mx-auto px-4 mt-32">
+          <div className="glass rounded-[3rem] p-12 md:p-24 border border-white/5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-12 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
+              <Zap size={400} />
+            </div>
+            <div className="max-w-2xl relative z-10">
+               <Badge className="bg-lime-400/10 text-lime-400 border-lime-400/20 px-4 py-1 font-black uppercase tracking-[0.2em] text-[10px] mb-8">
+                Limited Edition
+              </Badge>
+              <h2 className="text-4xl md:text-7xl font-black font-heading italic uppercase tracking-tighter mb-8 group-hover:text-lime-300 transition-colors">
+                The Universe <span className="block italic">Collection.</span>
+              </h2>
+              <p className="text-lg text-white/40 font-black uppercase tracking-widest mb-12">
+                Exclusive drop for the first Prime5 season. Own a piece of futsal history.
+              </p>
+              <Button className="h-16 px-12 bg-lime-300 text-black hover:bg-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-xl hover:shadow-lime-400/20">
+                Register for early access <ArrowRight size={16} className="ml-2" />
+              </Button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Floating Cart Button */}
       {getCartCount() > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-10 right-10 z-50">
           <Button
             size="lg"
-            className="bg-green-600/90 hover:bg-green-700/90 text-white shadow-2xl rounded-full w-16 h-16"
+            className="w-20 h-20 rounded-[2rem] bg-lime-300 text-black hover:bg-white shadow-[0_20px_40px_rgba(190,242,100,0.3)] border-4 border-[#0a0f0a] transition-all hover:scale-110 active:scale-95 group"
           >
-            <ShoppingBag className="w-6 h-6" />
-            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
-              {getCartCount()}
-            </Badge>
+            <div className="relative">
+              <ShoppingBag className="w-8 h-8 group-hover:scale-110 transition-transform" />
+              <div className="absolute -top-4 -right-4 w-8 h-8 bg-black rounded-full flex items-center justify-center border-2 border-lime-300">
+                <span className="text-[10px] font-black text-lime-300">{getCartCount()}</span>
+              </div>
+            </div>
           </Button>
         </div>
       )}
