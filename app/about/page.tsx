@@ -272,8 +272,8 @@ export default function AboutPage() {
             <Rocket className="w-10 h-10 text-lime-400" />
           </div>
           <h2 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-12">
-            Shaping <br />
-            <span className="text-lime-300 underline underline-offset-[12px] decoration-lime-300/30">The Future.</span>
+            New Era <br />
+            <span className="text-lime-300 underline underline-offset-[12px] decoration-lime-300/30">Of Football.</span>
           </h2>
           <p className="text-2xl text-white font-bold leading-relaxed italic">
             "We’re building something that will shape the future of the game — creating a platform where raw talent meets opportunity."
