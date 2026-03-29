@@ -44,10 +44,10 @@ export function Overview() {
   // Loading state
   if (teamsLoading || matchesLoading || managersLoading || teamStatsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 text-white/60 animate-spin mx-auto mb-4" />
-          <p className="text-white/60 text-lg">Loading dashboard data...</p>
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center flex flex-col items-center">
+          <div className="w-20 h-20 border-4 border-lime-400/20 border-t-lime-400 rounded-full animate-spin mb-8"></div>
+          <p className="text-white/40 font-black tracking-widest uppercase text-sm">Accessing Mainframe Data...</p>
         </div>
       </div>
     )
@@ -56,13 +56,14 @@ export function Overview() {
   // Error state
   if (teamsError || matchesError || managersError || teamStatsError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <XCircle className="w-8 h-8 text-red-400" />
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center p-12 glass-dark border border-red-500/20 max-w-xl mx-auto">
+          <div className="w-24 h-24 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+            <XCircle className="w-12 h-12 text-red-500" />
           </div>
-          <p className="text-white/60 text-lg">Error loading dashboard data</p>
-          <p className="text-white/40 text-sm">Please try again later</p>
+          <h3 className="text-3xl font-black italic uppercase text-red-400 mb-4">Connection Failed</h3>
+          <p className="text-white/60 font-bold mb-4">Could not decrypt the requested dashboard logs.</p>
+          <p className="text-red-400/60 text-xs font-mono">Please retry initialization sequence.</p>
         </div>
       </div>
     )
@@ -464,97 +465,97 @@ export function Overview() {
   // KPI data
   const kpiData = [
     {
-      title: "Total Teams",
+      title: "Total Squads",
       value: kpis.totalTeams.toString(),
       change: `+${kpis.approvedTeams}`,
       trend: "up" as const,
       icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-lime-400",
+      bgColor: "bg-lime-400/10 border-lime-400/20 text-lime-400",
     },
     {
-      title: "Matches Played",
+      title: "Clashes Logged",
       value: kpis.completedMatches.toString(),
       change: `+${kpis.totalMatches - kpis.completedMatches}`,
       trend: "up" as const,
       icon: Trophy,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
     },
     {
-      title: "Total Goals",
+      title: "Total Points Scored",
       value: kpis.totalGoals.toString(),
-      change: `+${Math.floor(kpis.totalGoals / kpis.completedMatches)}`,
+      change: `+${Math.floor(kpis.totalGoals / Math.max(kpis.completedMatches, 1))}`,
       trend: "up" as const,
       icon: Target,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-cyan-400",
+      bgColor: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
     },
     {
-      title: "Avg Goals/Match",
+      title: "Strike Rate (Avg)",
       value: kpis.avgGoalsPerMatch,
       change: "0.0",
       trend: "up" as const,
-      icon: Target,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      icon: TrendingUp,
+      color: "text-yellow-400",
+      bgColor: "bg-yellow-500/10 border-yellow-500/20 text-yellow-400",
     },
   ]
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "success":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
+        return <CheckCircle className="h-4 w-4 text-lime-400" />
       case "pending":
-        return <Clock className="h-4 w-4 text-yellow-500" />
+        return <Clock className="h-4 w-4 text-yellow-400" />
       case "info":
-        return <Award className="h-4 w-4 text-blue-500" />
+        return <Award className="h-4 w-4 text-blue-400" />
       case "warning":
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />
+        return <AlertTriangle className="h-4 w-4 text-red-400" />
       default:
-        return <CheckCircle className="h-4 w-4 text-gray-500" />
+        return <CheckCircle className="h-4 w-4 text-white/50" />
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "success":
-        return "bg-green-50 text-green-700 border-green-200"
+        return "bg-lime-400/10 text-lime-300 border-lime-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none"
       case "pending":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200"
+        return "bg-yellow-400/10 text-yellow-300 border-yellow-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none"
       case "info":
-        return "bg-blue-50 text-blue-700 border-blue-200"
+        return "bg-blue-400/10 text-blue-300 border-blue-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none"
       case "warning":
-        return "bg-orange-50 text-orange-700 border-orange-200"
+        return "bg-red-400/10 text-red-300 border-red-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none"
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200"
+        return "bg-white/5 text-white/70 border-white/20 font-bold uppercase tracking-widest text-[10px] rounded-none"
     }
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiData.map((kpi, index) => (
-          <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card key={index} className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(190,242,100,0.05)] hover:border-lime-400/30 group transition-all duration-500 rounded-none bg-black/40 backdrop-blur-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white/80">{kpi.title}</p>
-                  <p className="text-2xl font-bold text-white mt-1">{kpi.value}</p>
-                  <div className="flex items-center mt-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{kpi.title}</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-white mt-1 drop-shadow-md">{kpi.value}</p>
+                  <div className="flex items-center mt-3">
                     {kpi.trend === "up" ? (
-                      <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                      <TrendingUp className="h-4 w-4 text-lime-400 mr-2" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
+                      <TrendingDown className="h-4 w-4 text-red-500 mr-2" />
                     )}
-                    <span className={`text-sm font-medium ${kpi.trend === "up" ? "text-green-300" : "text-red-300"}`}>
+                    <span className={`text-[10px] font-black tracking-widest uppercase ${kpi.trend === "up" ? "text-lime-300" : "text-red-400"}`}>
                       {kpi.change}
                     </span>
                   </div>
                 </div>
-                <div className={`w-12 h-12 ${kpi.bgColor} rounded-lg flex items-center justify-center`}>
-                  <kpi.icon className={`h-6 w-6 ${kpi.color}`} />
+                <div className={`w-14 h-14 border ${kpi.bgColor} rounded-none flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(255,255,255,0.05)]`}>
+                  <kpi.icon className="h-6 w-6" />
                 </div>
               </div>
             </CardContent>
@@ -565,32 +566,32 @@ export function Overview() {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Matches & Goals Chart */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Trophy className="h-5 w-5" />
-              Weekly Matches & Goals Trend
+        <Card className="glass-dark border border-white/10 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+          <CardHeader className="border-b border-white/5 bg-black/40 p-6">
+            <CardTitle className="flex items-center gap-3 text-xl font-black italic uppercase tracking-widest text-lime-300 drop-shadow-sm">
+              <Trophy className="h-6 w-6 text-lime-400" />
+              Clash & Score Velocity
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="w-full h-[300px]">
+          <CardContent className="p-6 bg-[#061B14]/60">
+            <div className="w-full h-[350px]">
               {matchesTrendData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                                  <LineChart data={matchesTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="week" stroke="rgba(255,255,255,0.7)" />
-                  <YAxis stroke="rgba(255,255,255,0.7)" />
-                  <ChartTooltip />
-                  <Line type="monotone" dataKey="matches" stroke="#3b82f6" strokeWidth={2} />
-                  <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={2} />
+                <LineChart data={matchesTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="week" stroke="rgba(255,255,255,0.3)" tick={{fill: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold'}} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" tick={{fill: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold'}} />
+                  <ChartTooltip contentStyle={{backgroundColor: '#061B14', border: '1px solid rgba(190,242,100,0.2)', borderRadius: 0, color: 'white'}} />
+                  <Line type="monotone" dataKey="matches" stroke="#a3e635" strokeWidth={3} dot={{r: 4, fill: '#a3e635'}} activeDot={{r: 6, fill: '#BEF264', stroke: '#061B14', strokeWidth: 2}} />
+                  <Line type="monotone" dataKey="goals" stroke="#10b981" strokeWidth={3} dot={{r: 4, fill: '#10b981'}} activeDot={{r: 6, fill: '#34d399', stroke: '#061B14', strokeWidth: 2}} />
                 </LineChart>
               </ResponsiveContainer>
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
-                    <Trophy className="w-12 h-12 text-white/40 mx-auto mb-4" />
-                    <p className="text-white/60 text-lg">No match data available</p>
-                    <p className="text-white/40 text-sm">Matches will appear here once scheduled</p>
+                    <Trophy className="w-16 h-16 text-white/10 mx-auto mb-4" />
+                    <p className="text-white/40 font-black tracking-widest uppercase text-sm">Awaiting Datastream</p>
+                    <p className="text-white/20 text-xs mt-2 uppercase">Zero clash records located</p>
                   </div>
                 </div>
               )}
@@ -599,22 +600,22 @@ export function Overview() {
         </Card>
 
         {/* Team Performance Chart */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Users className="h-5 w-5" />
-              Team Performance
+        <Card className="glass-dark border border-white/10 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+          <CardHeader className="border-b border-white/5 bg-black/40 p-6">
+            <CardTitle className="flex items-center gap-3 text-xl font-black italic uppercase tracking-widest text-lime-300 drop-shadow-sm">
+              <Users className="h-6 w-6 text-lime-400" />
+              Squad Combat Ratings
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="w-full h-[300px]">
+          <CardContent className="p-6 bg-[#061B14]/60">
+            <div className="w-full h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={teamPerformanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.7)" />
-                  <YAxis stroke="rgba(255,255,255,0.7)" />
-                  <ChartTooltip />
-                  <Bar dataKey="points" fill="#3b82f6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" tick={{fill: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold'}} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" tick={{fill: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold'}} />
+                  <ChartTooltip contentStyle={{backgroundColor: '#061B14', border: '1px solid rgba(190,242,100,0.2)', borderRadius: 0, color: 'white'}} cursor={{fill: 'rgba(255,255,255,0.05)'}} />
+                  <Bar dataKey="points" fill="#a3e635" radius={[0, 0, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -625,32 +626,34 @@ export function Overview() {
       {/* Registration Status & Recent Activity */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Registration Status */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Target className="h-5 w-5" />
-              Registration Status
+        <Card className="glass-dark border border-white/10 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+          <CardHeader className="border-b border-white/5 bg-black/40 p-6">
+            <CardTitle className="flex items-center gap-3 text-xl font-black italic uppercase tracking-widest text-lime-300 drop-shadow-sm">
+              <Target className="h-6 w-6 text-lime-400" />
+              Squad Onboarding
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="w-full h-[300px]">
+          <CardContent className="p-6 bg-[#061B14]/60">
+            <div className="w-full h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={registrationStatusData}
+                    data={registrationStatusData.map(d => ({ ...d, color: d.name === "Approved" ? "#a3e635" : "#eab308" }))}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent ? (percent * 100).toFixed(0) : 0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
+                    outerRadius={100}
+                    innerRadius={60}
+                    stroke="rgba(0,0,0,0.5)"
+                    strokeWidth={2}
                     dataKey="value"
                   >
                     {registrationStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={entry.name === "Approved" ? "#a3e635" : "#eab308"} />
                     ))}
                   </Pie>
-                  <ChartTooltip />
+                  <ChartTooltip contentStyle={{backgroundColor: '#061B14', border: '1px solid rgba(190,242,100,0.2)', borderRadius: 0, color: 'white'}} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -658,30 +661,35 @@ export function Overview() {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Clock className="h-5 w-5" />
-              Recent Activity
+        <Card className="glass-dark border border-white/10 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col">
+          <CardHeader className="border-b border-white/5 bg-black/40 p-6">
+            <CardTitle className="flex items-center gap-3 text-xl font-black italic uppercase tracking-widest text-lime-300 drop-shadow-sm">
+              <Clock className="h-6 w-6 text-lime-400" />
+              Global Telemetry Stream
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 bg-[#061B14]/60 flex-1 flex flex-col justify-between">
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/10">
-                  <div className="mt-1">{getStatusIcon(activity.status)}</div>
+                <div key={index} className="flex items-start gap-4 p-4 border-l-2 border-transparent hover:border-lime-400 hover:bg-white/5 transition-all duration-300">
+                  <div className="mt-1 bg-black/40 p-2 rounded-none border border-white/5">{getStatusIcon(activity.status)}</div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">{activity.description}</p>
-                    <p className="text-xs text-white/70 mt-1">{activity.time}</p>
+                    <p className="text-sm font-bold text-white uppercase tracking-wider">{activity.description}</p>
+                    <p className="text-[10px] text-lime-300/60 mt-2 font-mono uppercase">{activity.time}</p>
                   </div>
                   <Badge variant="outline" className={getStatusColor(activity.status)}>
                     {activity.type}
                   </Badge>
                 </div>
               ))}
+              {recentActivity.length === 0 && (
+                <div className="text-center py-10">
+                  <p className="text-white/40 font-black tracking-widest uppercase text-sm">No recent telemetry nodes identified.</p>
+                </div>
+              )}
             </div>
-            <Button variant="outline" className="w-full mt-4 bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
-              View All Activity
+            <Button variant="outline" className="w-full mt-6 bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-black italic uppercase tracking-widest h-14 rounded-none transition-all">
+              Initialize Full Log sequence
             </Button>
           </CardContent>
         </Card>
