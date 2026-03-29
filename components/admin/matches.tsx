@@ -392,10 +392,10 @@ export function Matches() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center text-white">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-300 mx-auto mb-4"></div>
-            <p>Loading matches from database...</p>
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center flex flex-col items-center">
+            <div className="w-20 h-20 border-4 border-lime-400/20 border-t-lime-400 rounded-full animate-spin mb-8"></div>
+            <p className="text-white/40 font-black tracking-widest uppercase text-sm">Accessing Satellite Link...</p>
           </div>
         </div>
       </div>
@@ -406,18 +406,21 @@ export function Matches() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center text-red-300">
-            <AlertCircle className="h-12 w-12 mx-auto mb-4" />
-            <p className="text-red-300 font-medium">Error loading matches from database</p>
-            <p className="text-white/70 mt-2">{error.message}</p>
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center p-12 glass-dark border border-red-500/20 max-w-xl mx-auto backdrop-blur-xl bg-black/40 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+            <div className="w-24 h-24 bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-8 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+              <span className="text-5xl text-red-500 drop-shadow-md">⚠️</span>
+            </div>
+            <h3 className="text-3xl font-black italic uppercase text-white drop-shadow-lg mb-4">CONNECTION <span className="text-red-500">FAILED</span></h3>
+            <p className="text-white/60 font-bold mb-4">Could not decrypt the requested match logs.</p>
+            <p className="text-red-400/60 text-xs font-mono mb-8 border border-red-500/10 bg-red-500/5 p-4">{error.message}</p>
             <Button 
               onClick={() => refetch()} 
               variant="outline" 
-              className="mt-4 bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+              className="w-full h-12 bg-white/5 border border-red-500/30 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-white font-bold uppercase tracking-widest text-xs rounded-none transition-all shadow-[0_0_15px_rgba(239,68,68,0.1)] hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Try Again
+              Re-Establish Link
             </Button>
           </div>
         </div>
@@ -426,141 +429,139 @@ export function Matches() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Match Management</h2>
-          <p className="text-white/80">Schedule and manage all league matches</p>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant="outline" className="text-xs text-white/70">
-              {matches.length} total matches
+          <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg">Match <span className="text-lime-400">Chronicle</span></h2>
+          <p className="text-white/40 font-bold tracking-widest uppercase text-xs mt-1">Schedule and monitor active engagements</p>
+          <div className="flex items-center gap-3 mt-3">
+            <Badge variant="outline" className="text-[10px] bg-lime-400/10 text-lime-300 border-lime-400/30 uppercase tracking-widest font-black rounded-none">
+              {matches.length} Total Logs
             </Badge>
-            <Badge variant="outline" className="text-xs text-green-300">
-              ✓ Live Database
-            </Badge>
+            <span className="text-[10px] text-lime-300/60 font-mono uppercase tracking-widest animate-pulse border-l border-white/20 pl-3">Live Feed Online</span>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <Button 
             variant="outline" 
             onClick={() => refetch()}
             disabled={loading}
-            className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+            className="bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all"
           >
             {loading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-300 mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
             )}
-            {loading ? 'Refreshing...' : 'Refresh'}
+            {loading ? 'SYNCING...' : 'SYNC FEED'}
           </Button>
           <Button 
             variant="outline" 
             onClick={exportSeasonCalendar}
-            className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+            className="bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all"
             disabled={matches.length === 0 || isExporting}
           >
             {isExporting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Exporting...
+                DUMPING...
               </>
             ) : (
               <>
                 <Download className="h-4 w-4 mr-2" />
-                Export Calendar
+                DUMP CHRONICLE
               </>
             )}
           </Button>
           <Link href="/admin/season-scheduler">
-            <Button variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
+            <Button variant="outline" className="bg-lime-400/10 text-lime-300 border border-lime-400/30 hover:bg-lime-400/20 hover:text-lime-200 font-black italic uppercase tracking-widest text-[10px] rounded-none transition-all shadow-[0_0_15px_rgba(190,242,100,0.1)]">
               <Trophy className="h-4 w-4 mr-2" />
-              Season Scheduler
+              SEASON MASTER
             </Button>
           </Link>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-lime-400/20 text-lime-300 border border-lime-400/50 hover:bg-lime-400 hover:text-black font-black italic uppercase tracking-widest text-[10px] rounded-none transition-all shadow-[0_0_20px_rgba(190,242,100,0.2)]">
             <Plus className="h-4 w-4 mr-2" />
-            Schedule Match
+            INITIALIZE MATCH
           </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+      <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
               <Input
-                placeholder="Search matches..."
+                placeholder="Scan logs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-black/40 border-white/10 text-white placeholder-white/40 focus-visible:ring-0 focus-visible:border-lime-400/50 rounded-none h-12 font-mono text-sm"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+              <SelectTrigger className="bg-black/40 border-white/10 text-white focus:ring-0 rounded-none h-12 font-bold tracking-widest uppercase text-[10px]">
+                <SelectValue placeholder="STATUS MODIFIER" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectContent className="bg-[#061B14] border-white/10 rounded-none">
+                <SelectItem value="all" className="text-white hover:bg-lime-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ALL STATES</SelectItem>
+                <SelectItem value="scheduled" className="text-blue-300 hover:bg-blue-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">QUEUED</SelectItem>
+                <SelectItem value="in_progress" className="text-yellow-300 hover:bg-yellow-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ACTIVE</SelectItem>
+                <SelectItem value="completed" className="text-lime-300 hover:bg-lime-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ARCHIVED</SelectItem>
+                <SelectItem value="cancelled" className="text-red-400 hover:bg-red-500/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ABORTED</SelectItem>
               </SelectContent>
             </Select>
             <Select value={groupFilter} onValueChange={setGroupFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by group" />
+              <SelectTrigger className="bg-black/40 border-white/10 text-white focus:ring-0 rounded-none h-12 font-bold tracking-widest uppercase text-[10px]">
+                <SelectValue placeholder="DIV FILTERS" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Groups</SelectItem>
-                <SelectItem value="A">Group A</SelectItem>
-                <SelectItem value="B">Group B</SelectItem>
+              <SelectContent className="bg-[#061B14] border-white/10 rounded-none">
+                <SelectItem value="all" className="text-white hover:bg-lime-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ALL DIVISIONS</SelectItem>
+                <SelectItem value="A" className="text-cyan-400 hover:bg-cyan-500/20 font-bold uppercase tracking-widest text-[10px] rounded-none">DIVISION A</SelectItem>
+                <SelectItem value="B" className="text-purple-400 hover:bg-purple-500/20 font-bold uppercase tracking-widest text-[10px] rounded-none">DIVISION B</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="h-12 bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Clear Filters
+              PURGE FILTERS
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Matches Table */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Calendar className="h-5 w-5" />
-            Matches ({filteredMatches.length})
+      <Card className="glass-dark border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-none overflow-hidden">
+        <CardHeader className="border-b border-white/5 bg-black/40 p-6">
+          <CardTitle className="flex items-center gap-3 text-xl font-black italic uppercase tracking-widest text-lime-300 drop-shadow-sm">
+            <Calendar className="h-6 w-6 text-lime-400" />
+            Live Chronicle ({filteredMatches.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 bg-[#061B14]/60">
           {filteredMatches.length === 0 ? (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-white/50 mx-auto mb-4" />
-              <p className="text-white/80">No matches found</p>
-              <p className="text-sm text-white/60 mt-1">
+            <div className="text-center py-16">
+              <Calendar className="h-16 w-16 text-white/10 mx-auto mb-4" />
+              <p className="text-white/60 font-black italic uppercase tracking-widest">No matching logs detected</p>
+              <p className="text-[10px] text-lime-300/40 mt-3 font-mono uppercase tracking-widest">
                 {searchTerm || statusFilter !== "all" || groupFilter !== "all" 
-                  ? "Try adjusting your filters" 
-                  : "Create your first match to get started"}
+                  ? ">> Adjust filter directives to locate records" 
+                  : ">> Initialize a new match to begin logging"}
               </p>
             </div>
           ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
-                <TableRow>
-                    <TableHead className="text-white/90">Date & Time</TableHead>
-                    <TableHead className="text-white/90">Teams</TableHead>
-                    <TableHead className="text-white/90">Score</TableHead>
-                    <TableHead className="text-white/90">Location</TableHead>
-                    <TableHead className="text-white/90">Season</TableHead>
-                    <TableHead className="text-white/90">Status</TableHead>
-                    <TableHead className="text-white/90">Created</TableHead>
-                    <TableHead className="text-white/90">Actions</TableHead>
+              <TableHeader className="bg-black/40">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Data / T-Minus</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Versus Target</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70 text-center">Score Log</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Coordinates</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Campaign</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Current State</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Registered</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70 text-right">Overrides</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -570,95 +571,99 @@ export function Matches() {
                     const team2Name = match.Team2?.name || match.team2 || "Unknown Team"
                     
                     return (
-                      <TableRow key={match.id} className="hover:bg-white/10">
-                        <TableCell>
+                      <TableRow key={match.id} className="border-white/5 hover:bg-white/5 transition-colors group">
+                        <TableCell className="px-6 py-4">
                           <div>
-                            <div className="font-medium text-white">{date}</div>
-                            <div className="text-sm text-white/70 flex items-center gap-1">
+                            <div className="font-bold text-white tracking-widest uppercase">{date}</div>
+                            <div className="text-[10px] text-lime-300 flex items-center gap-1 mt-1 font-mono">
                               <Clock className="h-3 w-3" />
                               {time}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="font-medium">
-                            <div className="text-white">{team1Name}</div>
-                            <div className="text-white/70">vs</div>
-                            <div className="text-white">{team2Name}</div>
+                        <TableCell className="px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            <div className="font-bold text-white uppercase tracking-wider text-sm">{team1Name}</div>
+                            <div className="text-[9px] font-black text-lime-400/50 uppercase italic px-2 py-0.5 bg-lime-400/10 self-start border border-lime-400/20">VS</div>
+                            <div className="font-bold text-white uppercase tracking-wider text-sm">{team2Name}</div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="text-center">
+                        <TableCell className="px-6 py-4">
+                          <div className="text-center flex items-center justify-center">
                             {match.team1Goals !== undefined && match.team2Goals !== undefined ? (
-                              <div className="font-bold text-white">
-                                {match.team1Goals} - {match.team2Goals}
+                              <div className="font-black itertools text-2xl tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                                {match.team1Goals} <span className="text-lime-400 mx-2 text-xl">-</span> {match.team2Goals}
                               </div>
                             ) : (
-                              <span className="text-white/50">TBD</span>
+                              <span className="text-white/30 font-mono text-xs uppercase tracking-widest border border-dashed border-white/20 px-3 py-1">TBD</span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-white/80">
-                            <MapPin className="h-3 w-3" />
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-xs font-mono text-cyan-200 bg-cyan-950/40 border border-cyan-500/20 px-3 py-1.5 rounded-none max-w-max">
+                            <MapPin className="h-3 w-3 text-cyan-400" />
                             {match.location || "TBD"}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="font-medium">
-                            {match.season_id ? `Season ${match.season_id.substring(0, 8)}...` : "No Season"}
+                        <TableCell className="px-6 py-4">
+                          <Badge variant="outline" className="font-bold tracking-widest uppercase text-[9px] bg-purple-500/10 text-purple-400 border-purple-500/30 rounded-none">
+                            {match.season_id ? `S-${match.season_id.substring(0, 4)}...` : "NO SEASON"}
                           </Badge>
                         </TableCell>
 
-                        <TableCell>
-                          <Badge className={getStatusColor("scheduled")}>
-                            scheduled
+                        <TableCell className="px-6 py-4">
+                          <Badge className="font-bold uppercase tracking-widest text-[9px] bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded-none">
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="w-3 h-3" />
+                              QUEUED
+                            </div>
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="text-sm text-white/70">
+                        <TableCell className="px-6 py-4">
+                          <div className="text-[10px] text-white/40 font-mono pt-1">
                             {formatCreatedAt(match.created_at)}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-6 py-4 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="icon" className="text-white hover:bg-lime-400/20 hover:text-lime-300 rounded-none transition-colors border border-transparent hover:border-lime-400/50">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="bg-[#061B14] border-white/10 rounded-none shadow-[0_10px_40px_rgba(0,0,0,0.8)] min-w-[200px] p-0">
                               <DropdownMenuItem
                                 onClick={() => exportMatchPlayers(match)}
                                 disabled={exportingMatchId === match.id || loadingTeam1Players || loadingTeam2Players}
+                                className="text-[10px] font-bold uppercase tracking-widest text-lime-300 hover:bg-lime-500/10 hover:text-lime-200 rounded-none p-4 border-b border-white/5 cursor-pointer"
                               >
                                 {exportingMatchId === match.id ? (
                                   <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                                    Exporting...
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-3"></div>
+                                    EXPORTING...
                                   </>
                                 ) : (
                                   <>
-                                    <Users className="h-4 w-4 mr-2" />
-                                    Export Players List
+                                    <Users className="h-4 w-4 mr-3" />
+                                    Dump Player Logs
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
+                              <DropdownMenuItem className="text-[10px] font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:text-white rounded-none p-4 border-b border-white/5 cursor-pointer">
+                                <Eye className="h-4 w-4 mr-3 text-white/50" />
+                                Inspect Log
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Match
+                              <DropdownMenuItem className="text-[10px] font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:text-white rounded-none p-4 border-b border-white/5 cursor-pointer">
+                                <Edit className="h-4 w-4 mr-3 text-white/50" />
+                                Modify Matrix
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Play className="h-4 w-4 mr-2" />
-                                Start Match
+                              <DropdownMenuItem className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 hover:bg-cyan-950 hover:text-cyan-300 rounded-none p-4 border-b border-white/5 cursor-pointer">
+                                <Play className="h-4 w-4 mr-3" />
+                                Initiate Combat
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Match
+                              <DropdownMenuItem className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-950 hover:text-red-400 rounded-none p-4 cursor-pointer focus:bg-red-950 focus:text-red-400">
+                                <Trash2 className="h-4 w-4 mr-3" />
+                                Abort & Purge
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
