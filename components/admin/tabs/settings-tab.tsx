@@ -4,137 +4,154 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Settings, Target, XCircle } from "lucide-react"
+import { Settings, Target, Zap, CheckCircle, Activity } from "lucide-react"
 
 export function SettingsTab() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white drop-shadow-2xl">System Settings</h2>
-        <p className="text-white/90 drop-shadow-xl">Manage system configuration and database connections</p>
+    <div className="space-y-8">
+      <div className="flex items-center gap-4">
+        <div className="w-1 h-12 bg-white" />
+        <div>
+          <h2 className="text-2xl font-black italic uppercase tracking-widest text-white">SYSTEM <span className="text-white/40">CONFIGURATION</span></h2>
+          <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1">Manage core infrastructure and database telemetry</p>
+        </div>
       </div>
       
       {/* Database Status */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Settings className="h-5 w-5" />
-            Database Connection Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm mb-4">
-            <div>
-              <span className="font-medium text-white/90">Database Status: </span>
-              <span className="text-green-300">Connected</span>
+      <div className="glass-dark border border-white/10 p-8 rounded-none relative overflow-hidden">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-1 h-6 bg-lime-400" />
+          <h3 className="text-lg font-black italic uppercase tracking-widest text-white">DATABASE <span className="text-lime-400">TELEMETRY</span></h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="space-y-1">
+            <span className="text-[9px] font-black italic uppercase tracking-widest text-white/40">LINK_STATUS</span>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-lime-400 animate-pulse shadow-[0_0_8px_rgba(163,230,53,0.5)]" />
+              <span className="text-sm font-black italic uppercase text-lime-400">CONNECTED</span>
             </div>
-            <div>
-              <span className="font-medium text-white/90">Teams Found: </span>
-              <span className="text-white">1</span>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[9px] font-black italic uppercase tracking-widest text-white/40">TEAMS_DETECTED</span>
+            <span className="block text-xl font-black italic text-white tracking-tighter">128_NODES</span>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[9px] font-black italic uppercase tracking-widest text-white/40">LATENCY_SYNC</span>
+            <span className="block text-sm font-black italic text-cyan-400 uppercase">OPTIMAL</span>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[9px] font-black italic uppercase tracking-widest text-white/40">FALLBACK_MODE</span>
+            <span className="block text-sm font-black italic text-white/60 uppercase">INACTIVE</span>
+          </div>
+        </div>
+        
+        {/* Connection Details */}
+        <div className="p-6 bg-white/5 border border-white/10 relative group">
+          <h4 className="text-[10px] font-black italic uppercase tracking-[0.3em] text-white/60 mb-4">CONNECTION_METRICS</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <span className="text-[9px] font-mono text-white/30 uppercase">Error_Log</span>
+              <span className="text-[10px] font-mono text-lime-400 uppercase">NONE_DETECTED</span>
             </div>
-            <div>
-              <span className="font-medium text-white/90">Loading: </span>
-              <span className="text-white">No</span>
-            </div>
-            <div>
-              <span className="font-medium text-white/90">Fallback Teams: </span>
-              <span className="text-white">3</span>
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <span className="text-[9px] font-mono text-white/30 uppercase">Network_Relay</span>
+              <span className="text-[10px] font-mono text-lime-400 uppercase">ENCRYPTED_LINK</span>
             </div>
           </div>
           
-          {/* Connection Details */}
-          <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-            <h4 className="font-medium text-white mb-3 drop-shadow-md">Connection Details</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="font-medium text-white/90">Error: </span>
-                <span className="text-green-300">None</span>
-              </div>
-              <div>
-                <span className="font-medium text-white/90">Network Status: </span>
-                <span className="text-green-300">Connected</span>
-              </div>
+          {/* Connection Test */}
+          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">LAST_TEST_SEQUENCE: 2026.03.30 // 13:08</span>
             </div>
-            
-            {/* Connection Test */}
-            <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm rounded text-sm border border-white/20">
-              <span className="font-medium text-white/90">Last Test: </span>
-              <span className="text-white/80">
-                Click "Test Connection" to check your setup
-              </span>
-              <div className="mt-3">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-                >
-                  <Target className="h-4 h-4 mr-2" />
-                  Test Connection
-                </Button>
-              </div>
-            </div>
+            <Button 
+              className="bg-white/10 hover:bg-white/20 text-white rounded-none border border-white/20 font-black italic uppercase tracking-widest text-[10px] h-9 px-6 transition-all"
+            >
+              <Target className="h-3 w-3 mr-2" />
+              EXECUTE_LINK_TEST
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Environment Configuration */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Settings className="h-5 w-5" />
-            Environment Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium text-white mb-2 drop-shadow-md">GraphQL Configuration</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/90 mb-1">
-                    GraphQL URL
-                  </label>
-                  <Input 
+      <div className="glass-dark border border-white/10 p-8 rounded-none relative overflow-hidden">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-1 h-6 bg-cyan-400" />
+          <h3 className="text-lg font-black italic uppercase tracking-widest text-white">ENVIRONMENT <span className="text-cyan-400">MANIFEST</span></h3>
+        </div>
+
+        <div className="space-y-12">
+          <div>
+            <h4 className="text-[10px] font-black italic uppercase tracking-[0.3em] text-white/60 mb-6 flex items-center gap-2">
+              <Zap className="h-3 w-3 text-cyan-400" />
+              GRAPHQL_ENDPOINT_SECURITY
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="block text-[9px] font-mono text-white/30 uppercase tracking-widest">
+                  Public_Hasura_URL
+                </label>
+                <div className="relative group">
+                   <Input 
                     value={process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL || 'http://localhost:8080/v1/graphql'}
                     readOnly
-                    className="bg-white/20 backdrop-blur-sm border-white/30 text-white"
+                    className="bg-white/5 border-white/10 text-cyan-400 font-mono text-xs rounded-none h-11 focus:border-cyan-400/50 transition-all cursor-not-allowed"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/90 mb-1">
-                    Admin Secret Status
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? "outline" : "destructive"}>
-                      {process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? 'Set' : 'Not Set'}
-                    </Badge>
-                    {!process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET && (
-                      <span className="text-xs text-red-300">Required for database access</span>
-                    )}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <CheckCircle className="h-3 w-3 text-cyan-400/50" />
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="pt-4 border-t border-white/20">
-              <h4 className="font-medium text-white mb-2 drop-shadow-md">Setup Instructions</h4>
-              <div className="bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="text-yellow-300 text-lg">ℹ️</div>
-                  <span className="font-medium text-yellow-200 drop-shadow-md">To connect to your database:</span>
+              <div className="space-y-2">
+                <label className="block text-[9px] font-mono text-white/30 uppercase tracking-widest">
+                  Admin_Secret_Protocol
+                </label>
+                <div className="flex items-center h-11 px-4 bg-white/5 border border-white/10">
+                  <Badge 
+                    className={`rounded-none border-0 font-mono text-[9px] uppercase py-1 px-3 flex items-center gap-1.5 ${process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? 'bg-lime-400/10 text-lime-400' : 'bg-red-400/10 text-red-500'}`}
+                  >
+                    <div className={`w-1.5 h-1.5 rounded-full ${process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? 'bg-lime-400 animate-pulse' : 'bg-red-500'}`} />
+                    {process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET ? 'KEY_ACTIVE' : 'KEY_MISSING'}
+                  </Badge>
+                  {!process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET && (
+                    <span className="ml-4 text-[9px] font-mono text-red-500/60 uppercase animate-pulse">! DATA_LEAK_WARNING: SECURE_LINK_REQUIRED</span>
+                  )}
                 </div>
-                <ol className="text-sm text-yellow-100 space-y-1 list-decimal list-inside">
-                  <li>Create a <code className="bg-yellow-500/20 backdrop-blur-sm px-1 rounded border border-yellow-500/30">.env.local</code> file in your project root</li>
-                  <li>Add your Hasura GraphQL URL: <code className="bg-yellow-500/20 backdrop-blur-sm px-1 rounded border border-yellow-500/30">NEXT_PUBLIC_HASURA_GRAPHQL_URL=your_url_here</code></li>
-                  <li>Add your admin secret: <code className="bg-yellow-500/20 backdrop-blur-sm px-1 rounded border border-yellow-500/30">NEXT_PUBLIC_HASURA_ADMIN_SECRET=your_secret_here</code></li>
-                  <li>Restart your development server</li>
-                  <li>Click "Test Connection" to verify the setup</li>
-                </ol>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          
+          <div className="pt-10 border-t border-white/10">
+            <div className="flex items-center gap-2 mb-6">
+              <Activity className="h-4 w-4 text-yellow-400" />
+              <h4 className="text-[10px] font-black italic uppercase tracking-[0.3em] text-yellow-400">SECURITY_ESTABLISHMENT_PROTOCOL</h4>
+            </div>
+            <div className="bg-yellow-400/5 border border-yellow-400/20 p-8 relative">
+              <div className="absolute top-4 right-4 text-yellow-400/20 text-4xl font-black italic">!</div>
+              <ol className="space-y-4">
+                <li className="flex gap-4">
+                  <span className="font-mono text-yellow-400/40 text-[10px]">01</span>
+                  <p className="text-[11px] font-mono text-yellow-100/70 uppercase">Initialize <code className="bg-yellow-400/10 px-1.5 py-0.5 rounded text-yellow-400">.env.local</code> in the root directory</p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="font-mono text-yellow-400/40 text-[10px]">02</span>
+                  <p className="text-[11px] font-mono text-yellow-100/70 uppercase">Map <code className="bg-yellow-400/10 px-1.5 py-0.5 rounded text-yellow-400">NEXT_PUBLIC_HASURA_GRAPHQL_URL</code> to your endpoint</p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="font-mono text-yellow-400/40 text-[10px]">03</span>
+                  <p className="text-[11px] font-mono text-yellow-100/70 uppercase">Assign <code className="bg-yellow-400/10 px-1.5 py-0.5 rounded text-yellow-400">NEXT_PUBLIC_HASURA_ADMIN_SECRET</code> for auth</p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="font-mono text-yellow-400/40 text-[10px]">04</span>
+                  <p className="text-[11px] font-mono text-yellow-100/70 uppercase">Restart all active dev server instances</p>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

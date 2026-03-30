@@ -7,27 +7,27 @@ import Link from "next/link"
 
 export function SeasonsTab() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       <div>
-        <h2 className="text-2xl font-bold text-white drop-shadow-2xl">Season Management</h2>
-        <p className="text-white/90 drop-shadow-xl">Create and manage league seasons</p>
+        <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg">Season <span className="text-lime-400">Master</span></h2>
+        <p className="text-white/40 font-bold tracking-widest uppercase text-xs mt-1">Initialize and govern league campaigns</p>
       </div>
       
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardContent className="p-6">
-          <div className="text-center">
-            <Trophy className="h-16 w-16 text-white/50 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2 drop-shadow-lg">Season Scheduler</h3>
-            <p className="text-white/80 mb-4 drop-shadow-md">
-              Use the dedicated Season Scheduler to create seasons, invite teams, and plan your league.
-            </p>
-            <Link href="/admin/season-scheduler">
-              <Button className="bg-green-600/90 backdrop-blur-md hover:bg-green-700/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                <Trophy className="h-4 h-4 mr-2" />
-                Open Season Scheduler
-              </Button>
-            </Link>
+      <Card className="glass-dark border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl">
+        <CardContent className="p-16 flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 bg-lime-400/10 border border-lime-400/20 shadow-[0_0_30px_rgba(190,242,100,0.1)] flex items-center justify-center rounded-none mb-8">
+            <Trophy className="h-10 w-10 text-lime-400 drop-shadow-md" />
           </div>
+          <h3 className="text-3xl font-black italic uppercase tracking-widest text-white mb-2">Campaign Architecture</h3>
+          <p className="text-white/60 font-bold max-w-lg mb-8 mx-auto">
+            ACCESS THE DEDICATED SEASON MASTER TERMINAL TO FORGE NEW LEAGUE CAMPAIGNS, ENLIST SQUADS, AND PROGAM THE DIRECTORY GRID.
+          </p>
+          <Link href="/admin/season-scheduler">
+            <Button className="h-14 px-8 bg-lime-400/20 text-lime-300 border border-lime-400/50 hover:bg-lime-400 hover:text-black font-black italic uppercase tracking-widest text-sm rounded-none transition-all duration-300 shadow-[0_0_20px_rgba(190,242,100,0.2)] hover:shadow-[0_0_30px_rgba(190,242,100,0.4)]">
+              <Trophy className="h-5 w-5 mr-3" />
+              Initialize Season Master
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>

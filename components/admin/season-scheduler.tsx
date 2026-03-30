@@ -303,95 +303,97 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg">Season Management</h2>
-          <p className="text-white/80">Create and manage league seasons</p>
+          <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg">Campaign <span className="text-lime-400">Master</span></h2>
+          <p className="text-white/40 font-bold tracking-widest uppercase text-xs mt-1">Initialize and govern league seasons</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" className="bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all">
             <Download className="h-4 w-4 mr-2" />
-            Export
-                </Button>
-                <Button 
+            DUMP CHRONICLE
+          </Button>
+          <Button 
             onClick={() => setIsCreateDialogOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                    <Plus className="h-4 w-4 mr-2" />
-                  Create Season
-                </Button>
+            className="bg-lime-400/20 text-lime-300 border border-lime-400/50 hover:bg-lime-400 hover:text-black font-black italic uppercase tracking-widest text-[10px] rounded-none transition-all shadow-[0_0_20px_rgba(190,242,100,0.2)]"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            INITIALIZE CAMPAIGN
+          </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+      <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
               <Input
-                placeholder="Search seasons..."
+                placeholder="Scan campaigns..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-black/40 border-white/10 text-white placeholder-white/40 focus-visible:ring-0 focus-visible:border-lime-400/50 rounded-none h-12 font-mono text-sm"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+              <SelectTrigger className="bg-black/40 border-white/10 text-white focus:ring-0 rounded-none h-12 font-bold tracking-widest uppercase text-[10px]">
+                <SelectValue placeholder="STATUS MODIFIER" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
+              <SelectContent className="bg-[#061B14] border-white/10 rounded-none">
+                <SelectItem value="all" className="text-white hover:bg-lime-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ALL STATES</SelectItem>
+                <SelectItem value="upcoming" className="text-cyan-300 hover:bg-cyan-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">AWAITING COMMENCEMENT</SelectItem>
+                <SelectItem value="active" className="text-yellow-300 hover:bg-yellow-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ACTIVE ENGAGEMENT</SelectItem>
+                <SelectItem value="completed" className="text-lime-300 hover:bg-lime-400/20 font-bold uppercase tracking-widest text-[10px] rounded-none">ARCHIVED</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="h-12 bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Clear Filters
+              PURGE FILTERS
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Seasons Table */}
-      <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-            <Trophy className="h-5 w-5" />
-            Seasons ({filteredSeasons.length})
+      <Card className="glass-dark border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-none overflow-hidden">
+        <CardHeader className="border-b border-white/5 bg-black/40 p-6">
+          <CardTitle className="flex items-center gap-3 text-xl font-black italic uppercase tracking-widest text-lime-300 drop-shadow-sm">
+            <Trophy className="h-6 w-6 text-lime-400" />
+            Campaign Feed ({filteredSeasons.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 bg-[#061B14]/60 min-h-[400px]">
           {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300"></div>
+            <div className="flex flex-col items-center justify-center h-64">
+              <div className="w-16 h-16 border-4 border-lime-400/20 border-t-lime-400 rounded-full animate-spin mb-6"></div>
+              <p className="text-lime-400 font-mono uppercase tracking-widest text-sm animate-pulse">Syncing Matrix...</p>
             </div>
           ) : error ? (
-            <div className="text-center text-red-300 p-8">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4" />
-              <p>Error loading seasons: {error.message}</p>
+            <div className="text-center p-12 glass-dark border border-red-500/20 m-6">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <p className="text-red-400 font-black italic uppercase tracking-widest mb-2">Decryption Failed</p>
+              <p className="text-white/60 font-mono text-xs">{error.message}</p>
             </div>
           ) : filteredSeasons.length === 0 ? (
-            <div className="text-center text-white/60 p-8">
-              <Trophy className="h-12 w-12 mx-auto mb-4" />
-              <p>No seasons found</p>
-              <p className="text-sm">Create your first season to get started</p>
+            <div className="text-center py-20">
+              <Trophy className="h-16 w-16 text-white/10 mx-auto mb-4" />
+              <p className="text-white/60 font-black italic uppercase tracking-widest">No campaigns detected</p>
+              <p className="text-[10px] text-lime-300/40 mt-3 font-mono uppercase tracking-widest">{">"} Initialize a new campaign to populate the grid</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-white/90">Season</TableHead>
-                    <TableHead className="text-white/90">Duration</TableHead>
-                    <TableHead className="text-white/90">Teams</TableHead>
-                    <TableHead className="text-white/90">Status</TableHead>
-                    <TableHead className="text-white/90">Created</TableHead>
-                    <TableHead className="text-white/90">Actions</TableHead>
+                <TableHeader className="bg-black/40">
+                  <TableRow className="border-white/10 hover:bg-transparent">
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Campaign Identity</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Operation Window</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Enlisted Squads</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Current State</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70">Initiated</TableHead>
+                    <TableHead className="py-4 px-6 text-[10px] font-black italic uppercase tracking-widest text-lime-300/70 text-right">Overrides</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -399,68 +401,75 @@ export function SeasonScheduler({ onSeasonCreated }: SeasonSchedulerProps) {
                     const status = getSeasonStatus(season)
                     const teamNames = getTeamNames(season.teams)
                     
+                    const statusStyles: Record<string, string> = {
+                      'upcoming': 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30',
+                      'active': 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30',
+                      'completed': 'bg-lime-500/10 text-lime-300 border-lime-500/30'
+                    }
+                    const activeStyle = statusStyles[status.status] || 'bg-white/10 text-white border-white/30'
+                    
                     return (
-                      <TableRow key={season.id} className="hover:bg-white/10">
-                        <TableCell>
+                      <TableRow key={season.id} className="border-white/5 hover:bg-white/5 transition-colors group">
+                        <TableCell className="px-6 py-4">
                           <div>
-                            <div className="font-medium text-white">{season.name}</div>
-                            <div className="text-sm text-white/70">ID: {season.id}</div>
+                            <div className="font-bold text-white uppercase tracking-wider">{season.name}</div>
+                            <div className="text-[10px] text-lime-400/50 font-mono mt-1">ID: {season.id}</div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            <div className="flex items-center gap-1">
-                              <CalendarDays className="h-3 w-3" />
-                              {formatDate(season.startDate)}
+                        <TableCell className="px-6 py-4">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-[10px] font-mono text-cyan-200 bg-cyan-950/40 border border-cyan-500/20 px-2 py-1 max-w-max rounded-none">
+                              <CalendarDays className="h-3 w-3 text-cyan-400" />
+                              <span className="opacity-50">START:</span> {formatDate(season.startDate)}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Target className="h-3 w-3" />
-                              {formatDate(season.EndDate)}
+                            <div className="flex items-center gap-2 text-[10px] font-mono text-purple-200 bg-purple-950/40 border border-purple-500/20 px-2 py-1 max-w-max rounded-none">
+                              <Target className="h-3 w-3 text-purple-400" />
+                              <span className="opacity-50">END:</span> {formatDate(season.EndDate)}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <Badge variant="outline" className="font-medium">
-                              {Object.keys(season.teams || {}).length} teams
+                        <TableCell className="px-6 py-4">
+                          <div className="space-y-2">
+                            <Badge variant="outline" className="font-black tracking-widest uppercase text-[9px] bg-white/5 text-white border-white/20 rounded-none">
+                              {Object.keys(season.teams || {}).length} SQUADS ASSIGNED
                             </Badge>
                             {teamNames.length > 0 && (
-                              <div className="text-xs text-white/70">
-                                {teamNames.slice(0, 2).join(', ')}
-                                {teamNames.length > 2 && ` +${teamNames.length - 2} more`}
+                              <div className="text-[10px] font-mono text-lime-300/50 border-l border-white/10 pl-2">
+                                {teamNames.slice(0, 2).map(n => n.toUpperCase()).join(', ')}
+                                {teamNames.length > 2 && <span className="text-white/30"> +{teamNames.length - 2} OTHERS</span>}
                               </div>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge className={status.color}>
+                        <TableCell className="px-6 py-4">
+                          <Badge variant="outline" className={`font-bold uppercase tracking-widest text-[9px] border rounded-none ${activeStyle}`}>
                             {status.text}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-white/70">
+                        <TableCell className="px-6 py-4 text-[10px] text-white/40 font-mono">
                           {formatDate(new Date().toISOString())}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-6 py-4 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="icon" className="text-white hover:bg-lime-400/20 hover:text-lime-300 rounded-none transition-colors border border-transparent hover:border-lime-400/50">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="bg-[#061B14] border-white/10 rounded-none shadow-[0_10px_40px_rgba(0,0,0,0.8)] min-w-[200px] p-0">
                               <DropdownMenuItem asChild>
-                                <Link href={`/admin/season-scheduler/${season.id}`}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
+                                <Link href={`/admin/season-scheduler/${season.id}`} className="flex w-full text-[10px] font-bold uppercase tracking-widest text-lime-300 hover:bg-lime-500/10 hover:text-lime-200 rounded-none p-4 border-b border-white/5 cursor-pointer">
+                                  <Eye className="h-4 w-4 mr-3" />
+                                  Inspect Matrix
                                 </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openEditDialog(season)}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Season
+                              <DropdownMenuItem onClick={() => openEditDialog(season)} className="text-[10px] font-bold uppercase tracking-widest text-white hover:bg-white/10 hover:text-white rounded-none p-4 border-b border-white/5 cursor-pointer">
+                                <Edit className="h-4 w-4 mr-3 text-white/50" />
+                                Modify Config
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteSeason(season.id)}>
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Season
+                              <DropdownMenuItem onClick={() => handleDeleteSeason(season.id)} className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-950 hover:text-red-400 rounded-none p-4 cursor-pointer focus:bg-red-950 focus:text-red-400">
+                                <Trash2 className="h-4 w-4 mr-3" />
+                                Abort & Purge
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

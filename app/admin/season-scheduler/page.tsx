@@ -46,42 +46,47 @@ export default function SeasonSchedulerPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative font-['Outfit'] bg-transparent overflow-x-hidden">
+      {/* Tactical Overlays */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 -left-20 w-96 h-96 bg-lime-400/10 rounded-full blur-[120px] animate-pulse" />
+      </div>
+
       {/* Header */}
-      <div className="bg-white/10 backdrop-blur-xl shadow-2xl border-b border-white/20">
+      <div className="glass-dark border-b border-white/5 relative z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <Link href="/admin">
-                <Button variant="outline" size="sm" className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
+                <Button variant="outline" size="sm" className="bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Admin
+                  RETURN TO BASE
                 </Button>
               </Link>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-black/40 border border-lime-500/30 rounded-none flex items-center justify-center shadow-[0_0_15px_rgba(163,230,53,0.2)]">
+                <Trophy className="w-6 h-6 text-lime-400 drop-shadow-[0_0_10px_rgba(163,230,53,0.8)]" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white drop-shadow-lg">Season Scheduler</h1>
-                <p className="text-sm text-white/80">Plan and manage league seasons</p>
+                <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg">Campaign <span className="text-lime-400">Master</span> Node</h1>
+                <p className="text-white/40 font-bold tracking-widest uppercase text-xs mt-1">Global League Overview & Strategic Planning</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 relative z-10">
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-lime-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-lime-400/10 group-hover:border-lime-400/30 transition-all">
+                  <Trophy className="h-5 w-5 text-white/60 group-hover:text-lime-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80">Total Seasons</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1">Total Campaigns</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                     {loading ? "..." : totalSeasons}
                   </p>
                 </div>
@@ -89,15 +94,15 @@ export default function SeasonSchedulerPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-cyan-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-green-600" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-cyan-400/10 group-hover:border-cyan-400/30 transition-all">
+                  <Calendar className="h-5 w-5 text-white/60 group-hover:text-cyan-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80">Active Seasons</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1">Active Engagements</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                     {loading ? "..." : activeSeasons}
                   </p>
                 </div>
@@ -105,15 +110,15 @@ export default function SeasonSchedulerPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-purple-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="h-5 w-5 text-purple-600" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-purple-400/10 group-hover:border-purple-400/30 transition-all">
+                  <Users className="h-5 w-5 text-white/60 group-hover:text-purple-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80">Teams Participating</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1">Enlisted Squadrons</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                     {loading ? "..." : totalTeams}
                   </p>
                 </div>
@@ -121,15 +126,15 @@ export default function SeasonSchedulerPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-yellow-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Target className="h-5 w-5 text-orange-600" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-yellow-400/10 group-hover:border-yellow-400/30 transition-all">
+                  <Target className="h-5 w-5 text-white/60 group-hover:text-yellow-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80">Upcoming Seasons</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1">Awaiting Initialization</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                     {loading ? "..." : upcomingSeasons}
                   </p>
                 </div>
@@ -140,14 +145,14 @@ export default function SeasonSchedulerPage() {
 
         {/* Debug Info */}
         {error && (
-          <Card className="border-red-200 bg-red-50 mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <div className="text-red-600 text-lg">❌</div>
-                <div>
-                  <h3 className="text-red-800 font-medium">Error Loading Seasons</h3>
-                  <p className="text-red-700 text-sm">{error.message}</p>
-                </div>
+          <Card className="glass-dark border border-red-500/20 bg-black/40 mb-6 rounded-none">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="w-10 h-10 bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                <span className="text-xl text-red-500 drop-shadow-md">⚠️</span>
+              </div>
+              <div>
+                <h3 className="text-red-400 font-black italic uppercase tracking-widest text-sm">Decryption Failed</h3>
+                <p className="text-white/60 font-mono text-xs mt-1">{error.message}</p>
               </div>
             </CardContent>
           </Card>
@@ -155,11 +160,11 @@ export default function SeasonSchedulerPage() {
 
         {/* Loading State */}
         {loading && (
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-center text-white">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300 mr-3"></div>
-                <span>Loading seasons...</span>
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 mb-6">
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center justify-center text-white">
+                <div className="w-12 h-12 border-4 border-lime-400/20 border-t-lime-400 rounded-full animate-spin mb-4"></div>
+                <span className="text-lime-400 font-mono uppercase tracking-widest text-xs animate-pulse">Syncing Global Matrices...</span>
               </div>
             </CardContent>
           </Card>
@@ -169,101 +174,109 @@ export default function SeasonSchedulerPage() {
         <SeasonScheduler />
 
         {/* Season Matches Section */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white drop-shadow-lg">All Season Matches</h2>
+        <div className="mt-8 mb-12">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+            <h2 className="text-2xl font-black italic uppercase tracking-widest text-lime-400 drop-shadow-sm flex items-center gap-3">
+              <span className="w-8 h-8 bg-lime-400/10 flex items-center justify-center border border-lime-400/30">
+                <Target className="w-4 h-4 text-lime-400" />
+              </span>
+              Global Match Ledger
+            </h2>
             <Button 
               onClick={() => refetchMatches()}
               variant="outline"
               size="sm"
-              className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+              className="bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
+              <RefreshCw className="h-3 w-3 mr-2" />
+              SYNC LOGS
             </Button>
           </div>
 
           {matchesLoading ? (
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-center text-white">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300 mr-3"></div>
-                  <span>Loading matches...</span>
+            <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40">
+              <CardContent className="p-12">
+                <div className="flex flex-col items-center justify-center text-white">
+                  <div className="w-12 h-12 border-4 border-cyan-400/20 border-t-cyan-400 rounded-full animate-spin mb-4"></div>
+                  <span className="text-cyan-400 font-mono uppercase tracking-widest text-xs animate-pulse">Downloading Match Data...</span>
                 </div>
               </CardContent>
             </Card>
           ) : matchesError ? (
-            <Card className="bg-red-50 border-red-200 mb-6">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <div className="text-red-600 text-lg">❌</div>
+            <Card className="glass-dark border border-red-500/20 bg-black/40 mb-6 rounded-none">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                    <span className="text-xl text-red-500 drop-shadow-md">⚠️</span>
+                  </div>
                   <div>
-                    <h3 className="text-red-800 font-medium">Error Loading Matches</h3>
-                    <p className="text-red-700 text-sm">{matchesError.message}</p>
+                    <h3 className="text-red-400 font-black italic uppercase tracking-widest text-sm">Match Data Corrupted</h3>
+                    <p className="text-white/60 font-mono text-xs mt-1">{matchesError.message}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ) : matches.length === 0 ? (
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <CardContent className="p-6">
+            <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40">
+              <CardContent className="p-16">
                 <div className="text-center py-8">
-                  <Calendar className="h-8 w-8 text-white/50 mx-auto mb-2" />
-                  <p className="text-white/80">No matches found</p>
-                  <p className="text-sm text-white/60 mt-1">
-                    Create matches in the season scheduler above
+                  <Calendar className="h-12 w-12 text-white/10 mx-auto mb-4" />
+                  <p className="text-white/60 font-black italic uppercase tracking-widest">No match telemetry found</p>
+                  <p className="text-[10px] text-lime-300/40 mt-3 font-mono uppercase tracking-widest">
+                    {">"} INITIATE SCHEDULER ABOVE TO GENERATE FIXTURES
                   </p>
                 </div>
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {matches.map((match: any) => {
-                    const { date, time } = formatDateTime(match.dateAndtime)
-                    const team1Name = match.Team1?.name || match.team1 || "Unknown Team"
-                    const team2Name = match.Team2?.name || match.team2 || "Unknown Team"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {matches.map((match: any) => {
+                const { date, time } = formatDateTime(match.dateAndtime)
+                const team1Name = match.Team1?.name || match.team1 || "Unknown Team"
+                const team2Name = match.Team2?.name || match.team2 || "Unknown Team"
+                
+                return (
+                  <div key={match.id} className="group relative overflow-hidden bg-black/40 glass-dark border border-white/10 hover:border-lime-500/50 rounded-none transition-all p-5 flex flex-col justify-between h-full min-h-[220px]">
+                    {/* Glowing Accent Top Bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-lime-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     
-                    return (
-                      <div key={match.id} className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                        <div className="text-center space-y-3">
-                          <div>
-                            <div className="text-sm text-white/70">Date</div>
-                            <div className="font-medium text-white">{date}</div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-white/70">Time</div>
-                            <div className="font-medium text-white flex items-center justify-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {time}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-white/70">Teams</div>
-                            <div className="font-medium text-white text-sm">
-                              {team1Name} vs {team2Name}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-white/70">Location</div>
-                            <div className="font-medium text-white flex items-center justify-center gap-1 text-sm">
-                              <MapPin className="h-3 w-3" />
-                              {match.location || "TBD"}
-                            </div>
-                          </div>
-                          <div>
-                            <Badge variant="outline" className="font-medium text-xs">
-                              {match.season_id ? `Season ${match.season_id.substring(0, 8)}...` : "No Season"}
-                            </Badge>
-                          </div>
+                    <div className="space-y-4 relative z-10 w-full">
+                      {/* Sub ID / Date Row */}
+                      <div className="flex justify-between items-start w-full">
+                        <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-widest bg-white/5 text-white/50 border-white/10 rounded-none px-2 py-0.5">
+                          {match.season_id ? `SZ-${match.season_id.substring(0, 4)}` : "STANDALONE"}
+                        </Badge>
+                        <div className="text-right">
+                          <div className="text-[10px] text-lime-400/70 font-mono tracking-widest">{date}</div>
+                          <div className="text-lg font-black tracking-tighter text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{time}</div>
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+
+                      {/* vs Block */}
+                      <div className="py-4 flex flex-col items-center justify-center gap-2 border-y border-white/5 my-2 w-full">
+                        <div className="text-center w-full">
+                          <span className="block font-black uppercase text-sm text-white tracking-widest truncate">{team1Name}</span>
+                        </div>
+                        <div className="mx-auto w-6 h-6 flex items-center justify-center bg-lime-400/10 border border-lime-400/30 text-[9px] font-black text-lime-400 rotate-45">
+                          <span className="-rotate-45 block">VS</span>
+                        </div>
+                        <div className="text-center w-full">
+                          <span className="block font-black uppercase text-sm text-white/70 tracking-widest truncate">{team2Name}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Location Footer */}
+                    <div className="mt-auto pt-3 flex items-center justify-between opacity-50 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-cyan-200 uppercase tracking-widest">
+                        <MapPin className="h-3 w-3 text-cyan-400" />
+                        <span className="truncate max-w-[150px]">{match.location || "TBD VENUE"}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
       </div>

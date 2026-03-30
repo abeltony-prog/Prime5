@@ -91,96 +91,118 @@ export function EditSeasonModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Edit className="h-5 w-5" />
-            Edit Season
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/80 backdrop-blur-2xl border border-white/10 rounded-none shadow-[0_0_50px_rgba(0,0,0,0.8)] text-white p-8">
+        <DialogHeader className="mb-6">
+          <DialogTitle className="flex items-center gap-3 text-2xl font-black italic uppercase tracking-widest text-white drop-shadow-sm">
+            <Edit className="h-6 w-6 text-lime-400 drop-shadow-[0_0_10px_rgba(163,230,53,0.5)]" />
+            RECONFIGURE <span className="text-lime-400">CAMPAIGN NODE</span>
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="editSeasonName" className="text-white">Season Name *</Label>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="editSeasonName" className="text-[10px] font-black uppercase tracking-widest text-white/50">CAMPAIGN IDENTITY *</Label>
             <Input
               id="editSeasonName"
-              placeholder="e.g., Prime5 League 2024"
+              placeholder="E.G., PRIME5 LEAGUE S4"
               value={seasonName}
-              onChange={(e) => setSeasonName(e.target.value)}
-              className="bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
+              onChange={(e) => setSeasonName(e.target.value.toUpperCase())}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-none focus:border-lime-400/50 focus:ring-0 font-mono text-sm h-12 transition-all"
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="editStartDate" className="text-white">Start Date *</Label>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="editStartDate" className="text-[10px] font-black uppercase tracking-widest text-white/50">COMMENCEMENT DATE *</Label>
               <Input
                 id="editStartDate"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                className="bg-white/5 border-white/10 text-white rounded-none focus:border-lime-400/50 focus:ring-0 font-mono text-sm h-12 [color-scheme:dark]"
               />
             </div>
-            <div>
-              <Label htmlFor="editEndDate" className="text-white">End Date *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="editEndDate" className="text-[10px] font-black uppercase tracking-widest text-white/50">TERMINATION DATE *</Label>
               <Input
                 id="editEndDate"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                className="bg-white/5 border-white/10 text-white rounded-none focus:border-lime-400/50 focus:ring-0 font-mono text-sm h-12 [color-scheme:dark]"
               />
             </div>
           </div>
           
-          <div>
-            <Label className="text-white">Invite Teams</Label>
-            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border border-white/20 rounded-md p-3 bg-white/5">
-              {teams?.filter((team: any) => team.approved === true).map((team: any) => (
-                <div key={team.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`edit-team-${team.id}`}
-                    checked={selectedTeams.includes(team.id)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedTeams([...selectedTeams, team.id])
-                      } else {
-                        setSelectedTeams(selectedTeams.filter(id => id !== team.id))
-                      }
-                    }}
-                  />
-                  <Label htmlFor={`edit-team-${team.id}`} className="text-sm text-white">
-                    {team.name} ({team.shortname})
-                  </Label>
-                </div>
-              ))}
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50">ENLIST SQUADRONS</Label>
+            <div className="mt-2 space-y-1 max-h-48 overflow-y-auto border border-white/10 rounded-none p-4 bg-black/40 backdrop-blur-xl custom-scrollbar scrollbar-none">
+              {teams?.filter((team: any) => team.approved === true).map((team: any) => {
+                const isSelected = selectedTeams.includes(team.id)
+                
+                return (
+                  <label 
+                    key={team.id} 
+                    className={`flex items-center p-3 cursor-pointer transition-all border-l-2 ${isSelected ? 'bg-lime-400/10 border-lime-400' : 'hover:bg-white/5 border-transparent'}`}
+                  >
+                    <Checkbox
+                      id={`edit-team-${team.id}`}
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedTeams([...selectedTeams, team.id])
+                        } else {
+                          setSelectedTeams(selectedTeams.filter(id => id !== team.id))
+                        }
+                      }}
+                      className="border-white/20 data-[state=checked]:bg-lime-400 data-[state=checked]:text-black rounded-none"
+                    />
+                    <div className="ml-4 flex-1">
+                      <span className={`text-xs font-black uppercase tracking-widest ${isSelected ? 'text-lime-400' : 'text-white/70'}`}>
+                        {team.name}
+                      </span>
+                      <span className="ml-2 text-[9px] font-mono text-white/30">
+                        [{team.shortname}]
+                      </span>
+                    </div>
+                  </label>
+                )
+              })}
             </div>
-            <p className="text-xs text-white/70 mt-1">
-              {selectedTeams.length} team(s) selected
-            </p>
+            <div className="flex justify-between items-center mt-2 px-1">
+              <p className="text-[9px] font-black uppercase tracking-tighter text-lime-400/60 transition-all">
+                {selectedTeams.length} SQUAD{selectedTeams.length !== 1 ? 'S' : ''} ACTIVE IN MATRIX
+              </p>
+              {selectedTeams.length > 0 && (
+                 <button 
+                  onClick={() => setSelectedTeams([])} 
+                  className="text-[9px] font-black uppercase tracking-widest text-red-400/60 hover:text-red-400"
+                >
+                  PURGE SELECTION
+                 </button>
+              )}
+            </div>
           </div>
         </div>
         
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
           <Button 
             variant="outline" 
             onClick={onClose} 
-            className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+            className="bg-transparent border-white/10 text-white/50 hover:bg-white/5 hover:text-white rounded-none tracking-[0.2em] uppercase font-bold text-[10px] h-11 px-8 transition-all"
           >
-            Cancel
+            ABORT
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={isLoading}
-            className="bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white border-blue-400/30"
+            disabled={isLoading || !seasonName || !startDate || !endDate}
+            className="bg-lime-400 text-black hover:bg-lime-500 rounded-none tracking-[0.2em] uppercase font-black italic text-[10px] h-11 px-10 shadow-[0_0_30px_rgba(163,230,53,0.2)] hover:shadow-[0_0_40px_rgba(163,230,53,0.4)] transition-all disabled:opacity-50 disabled:bg-white/10 disabled:text-white/30"
           >
             {isLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
             ) : (
-              <Edit className="h-4 w-4 mr-2" />
+              "COMMIT OVERRIDE"
             )}
-            Update Season
           </Button>
         </div>
       </DialogContent>

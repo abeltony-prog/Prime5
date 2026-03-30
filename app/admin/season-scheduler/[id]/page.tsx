@@ -23,7 +23,12 @@ import {
   X,
   RefreshCw,
   AlertCircle,
-  ArrowRightLeft as Swap
+  LayoutGrid,
+  ArrowRightLeft as Swap,
+  Shield,
+  User,
+  Mail,
+  Phone
 } from "lucide-react"
 import { useSeasons, useSeason, useUpdateSeason, useSeasonGroups, useSeasonTeamStatistics, useCreateGroup, useCreateTeamStatistics, useAddMatchScheduler, useMatchSchedules, useTeamsByIds, useDeleteTeamStatisticsForSeason, useDeleteGroupsForSeason } from '@/hooks/use-seasons'
 import { useTeams } from "@/hooks/use-teams"
@@ -2339,44 +2344,39 @@ export default function SeasonDetailsPage() {
   const teamNames = getTeamNames(season.teams)
 
   return (
-    <div 
-      className="min-h-screen relative"
-      style={{
-        backgroundImage: 'url(/mainbg.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Background overlay for better readability */}
-      <div className="absolute inset-0 bg-black/20"></div>
+    <div className="min-h-screen relative font-['Outfit'] bg-transparent overflow-x-hidden">
+      {/* Tactical Overlays */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 -left-20 w-96 h-96 bg-lime-400/10 rounded-full blur-[120px] animate-pulse" />
+      </div>
+
       {/* Header */}
-      <div className="relative z-10 bg-white/10 backdrop-blur-xl shadow-2xl border-b border-white/20 rounded-b-3xl">
+      <div className="glass-dark border-b border-white/5 relative z-10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
               <Link href="/admin/season-scheduler">
-                <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+                <Button variant="outline" size="sm" className="bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 hover:text-lime-300 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Seasons
+                  RETURN TO BASE
                 </Button>
               </Link>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-400/80 to-green-600/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                <Trophy className="w-6 h-6 text-white drop-shadow-lg" />
+              <div className="w-12 h-12 bg-black/40 border border-lime-500/30 rounded-none flex items-center justify-center shadow-[0_0_15px_rgba(163,230,53,0.2)]">
+                <Trophy className="w-6 h-6 text-lime-400 drop-shadow-[0_0_10px_rgba(163,230,53,0.8)]" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white drop-shadow-lg">{season.name}</h1>
-                <p className="text-sm text-white/80 drop-shadow-md">Season Details & Management</p>
+                <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg">{season.name}</h1>
+                <p className="text-white/40 font-bold tracking-widest uppercase text-xs mt-1">Campaign Node Management</p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(true)} className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => setIsEditDialogOpen(true)} className="bg-lime-400/20 text-lime-300 border border-lime-400/50 hover:bg-lime-400 hover:text-black font-black italic uppercase tracking-widest text-[10px] rounded-none transition-all shadow-[0_0_20px_rgba(190,242,100,0.2)]">
                 <Edit className="w-4 h-4 mr-2" />
-                Edit Season
+                MODIFY CONFIG
               </Button>
-              <Button variant="outline" className="bg-red-500/20 backdrop-blur-sm border-red-400/30 text-red-300 hover:bg-red-500/30">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Season
+              <Button variant="outline" className="h-10 bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-white font-bold uppercase tracking-widest text-[10px] rounded-none transition-all flex items-center gap-2">
+                <Trash2 className="w-4 h-4 mr-2 text-red-500" />
+                ABORT CAMPAIGN
               </Button>
             </div>
           </div>
@@ -2386,15 +2386,15 @@ export default function SeasonDetailsPage() {
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Season Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-lime-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100/20 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-blue-300" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-lime-400/10 group-hover:border-lime-400/30 transition-all">
+                  <Trophy className="h-5 w-5 text-white/60 group-hover:text-lime-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80 font-medium">Season Status</p>
-                  <Badge className={status.color}>
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-2">Campaign Status</p>
+                  <Badge variant="outline" className={`font-bold uppercase tracking-widest text-[9px] border rounded-none ${status.color}`}>
                     {status.text}
                   </Badge>
                 </div>
@@ -2402,15 +2402,15 @@ export default function SeasonDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-cyan-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100/20 rounded-lg flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-green-300" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-cyan-400/10 group-hover:border-cyan-400/30 transition-all">
+                  <Calendar className="h-5 w-5 text-white/60 group-hover:text-cyan-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80 font-medium">Duration</p>
-                  <p className="text-lg font-semibold text-white">
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1">Operation Window</p>
+                  <p className="text-sm font-mono tracking-widest text-cyan-200 bg-cyan-950/40 border border-cyan-500/20 px-2 flex items-center h-6 max-w-max rounded-none">
                     {formatDate(season.startDate)} - {formatDate(season.EndDate)}
                   </p>
                 </div>
@@ -2418,25 +2418,25 @@ export default function SeasonDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-purple-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100/20 rounded-lg flex items-center justify-center">
-                  <Users className="h-5 w-5 text-purple-300" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-purple-400/10 group-hover:border-purple-400/30 transition-all">
+                  <Users className="h-5 w-5 text-white/60 group-hover:text-purple-400 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/80 font-medium">Teams Participating</p>
-                  <p className="text-2xl font-bold text-white">{totalTeams}</p>
+                  <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1">Enlisted Squads</p>
+                  <p className="text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{totalTeams}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <Card className="glass-dark border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] rounded-none bg-black/40 backdrop-blur-xl group hover:border-yellow-400/30 transition-all">
             <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100/20 rounded-lg flex items-center justify-center">
-                  <Target className="h-5 w-5 text-orange-300" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:bg-yellow-400/10 group-hover:border-yellow-400/30 transition-all">
+                  <Target className="h-5 w-5 text-white/60 group-hover:text-yellow-400 transition-colors" />
                 </div>
                 <div>
                   <p className="text-sm text-white/80 font-medium">Days Remaining</p>
@@ -2450,127 +2450,169 @@ export default function SeasonDetailsPage() {
         </div>
 
         {/* Season Information */}
-        <Card className="mb-8 bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Trophy className="h-5 w-5" />
-              Season Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold text-white mb-3">Basic Details</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Season ID:</span>
-                    <span className="font-medium text-white">#{season.id}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="glass-dark border border-white/10 rounded-none overflow-hidden relative group">
+              <div className="absolute top-0 left-0 w-1 bg-lime-400 h-full opacity-50 shadow-[0_0_15px_rgba(163,230,53,0.5)]" />
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-10 h-10 bg-lime-400/10 border border-lime-400/30 flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-lime-400" />
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Name:</span>
-                    <span className="font-medium text-white">{season.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Status:</span>
-                    <Badge className={status.color}>
-                      {status.text}
-                    </Badge>
-                  </div>
+                  <h3 className="text-xl font-black italic uppercase tracking-widest text-white">INTELLIGENCE <span className="text-lime-400">REPORT</span></h3>
                 </div>
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-3">Timeline</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-green-300" />
-                    <span className="text-white/70">Start Date:</span>
-                    <span className="font-medium text-white">{formatDate(season.startDate)}</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-6">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">OPERATIONAL ID</span>
+                      <span className="font-mono text-sm text-lime-300 bg-lime-400/5 border border-lime-400/10 px-3 py-1 self-start">#{season.id}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">CODENAME</span>
+                      <span className="font-black italic uppercase text-lg text-white tracking-widest">{season.name}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-red-300" />
-                    <span className="text-white/70">End Date:</span>
-                    <span className="font-medium text-white">{formatDate(season.EndDate)}</span>
+
+                  <div className="space-y-6">
+                    <div className="flex flex-col gap-2">
+                       <span className="text-[10px] font-black uppercase tracking-widest text-white/30">DEPLOYMENT WINDOW</span>
+                       <div className="flex items-center gap-3">
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-bold text-white/40 uppercase">INITIATION</span>
+                          <span className="font-mono text-xs text-white">{formatDate(season.startDate)}</span>
+                        </div>
+                        <div className="w-8 h-px bg-white/10" />
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-bold text-white/40 uppercase">TERMINATION</span>
+                          <span className="font-mono text-xs text-white">{formatDate(season.EndDate)}</span>
+                        </div>
+                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Quick Actions Integration */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-24 flex-col bg-white/5 border border-white/10 hover:border-lime-400/50 hover:bg-lime-400/10 text-white rounded-none transition-all group"
+                onClick={() => setIsInviteTeamsModalOpen(true)}
+                disabled={availableTeamsToInvite.length === 0}
+              >
+                <Plus className="h-5 w-5 mb-2 text-lime-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">ENLIST SQUADRONS</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="h-24 flex-col bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-white rounded-none transition-all group"
+                onClick={() => setIsScheduleMatchesModalOpen(true)}
+              >
+                <Target className="h-5 w-5 mb-2 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">GENERATE FIXTURES</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="h-24 flex-col bg-white/5 border border-white/10 hover:border-purple-400/50 hover:bg-purple-400/10 text-white rounded-none transition-all group"
+                onClick={() => seasonGroups.length > 0 ? setIsViewGroupsModalOpen(true) : setIsCreateGroupModalOpen(true)}
+              >
+                <Users className="h-5 w-5 mb-2 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{seasonGroups.length > 0 ? 'VIEW PROTOCOLS' : 'INIT GROUPS'}</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Side Metrics */}
+          <div className="space-y-6">
+            <div className="glass-dark border border-white/10 p-6 flex flex-col items-center justify-center text-center rounded-none aspect-square">
+              <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-none flex items-center justify-center mb-4">
+                <Users className="h-8 w-8 text-white/20" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">OPERATIONAL SQUADS</span>
+              <span className="text-5xl font-black italic tracking-tighter text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">{seasonTeams.length}</span>
+            </div>
+          </div>
+        </div>
 
         {/* Teams Section */}
-        <Card className="mb-8 bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Users className="h-5 w-5" />
-              Participating Teams ({seasonTeams.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+               <div className="w-10 h-10 bg-lime-400/10 border border-lime-400/30 flex items-center justify-center">
+                <Users className="h-5 w-5 text-lime-400" />
+              </div>
+              <h3 className="text-xl font-black italic uppercase tracking-widest text-white">ACTIVE <span className="text-lime-400">ENLISTMENTS</span></h3>
+            </div>
+            <div className="h-px flex-1 bg-white/5 mx-8 hidden md:block" />
+            <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-white/10 text-white/50 px-4 py-2 rounded-none">{seasonTeams.length} SQUADS DETECTED</Badge>
+          </div>
+
+          <div className="glass-dark border border-white/10 rounded-none overflow-hidden">
             {seasonTeams.length === 0 ? (
-              <div className="text-center text-white/60 py-8">
-                <Users className="h-12 w-12 mx-auto mb-4 text-white/30" />
-                <p>No teams have been invited to this season yet.</p>
-                <Button 
-                  className="mt-4" 
-                  variant="outline"
-                  onClick={() => setIsInviteTeamsModalOpen(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Invite Teams
-                </Button>
+              <div className="p-20 text-center">
+                <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                  <Users className="h-10 w-10 text-white/10" />
+                </div>
+                <p className="text-white/40 font-black italic uppercase tracking-widest text-sm">No squad telemetry found on this node</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-white/90">Team</TableHead>
-                      <TableHead className="text-white/90">Manager</TableHead>
-                      <TableHead className="text-white/90">Players</TableHead>
-                      <TableHead className="text-white/90">Invitation Token</TableHead>
-                      <TableHead className="text-white/90">Actions</TableHead>
+                  <TableHeader className="bg-white/5">
+                    <TableRow className="border-white/10 hover:bg-transparent">
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/40 h-14">SQUADRON</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/40 h-14">COMMANDER</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/40 h-14 text-center">ASSETS</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/40 h-14">INVITATION TOKEN</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/40 h-14 text-right">PROTOCOLS</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {seasonTeams.map((team: any) => {
-                      // Only use the actual id field from GraphQL response
                       const teamId = team.id
                       if (!teamId) return null
                       const invitationToken = season?.teams?.[teamId] || 'N/A'
                       
                       return (
-                        <TableRow key={teamId} className="hover:bg-white/10">
-                          <TableCell>
-                            <div>
-                              <div className="font-medium text-white">
-                                {team.name || team.team_name || `Team ${teamId}`}
+                        <TableRow key={teamId} className="border-white/5 hover:bg-white/5 transition-colors group">
+                          <TableCell className="py-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-lime-400/30 transition-all">
+                                <span className="text-[10px] font-black text-white/40 group-hover:text-lime-400">{(team.name || "UN").substring(0,2).toUpperCase()}</span>
                               </div>
-                              <div className="text-sm text-white/70">
-                                {team.shortname || team.short_name || 'N/A'}
+                              <div>
+                                <div className="font-black italic uppercase text-sm text-white tracking-widest group-hover:text-lime-400 transition-colors">
+                                  {team.name || team.team_name || `Team ${teamId}`}
+                                </div>
+                                <div className="text-[9px] font-mono text-white/30 uppercase tracking-widest">
+                                  TAG: {team.shortname || team.short_name || 'N/A'}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm">
-                              <div className="font-medium text-white">
+                            <div className="space-y-1">
+                              <div className="font-bold text-xs text-white/80 group-hover:text-white transition-colors">
                                 {team.manager?.name || 'N/A'}
                               </div>
-                              <div className="text-white/70">
+                              <div className="text-[9px] font-mono text-white/20">
                                 {team.manager?.email || 'N/A'}
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {team.players?.length || 0} players
-                            </Badge>
+                          <TableCell className="text-center">
+                            <span className="font-mono text-xs text-lime-400/60">{team.players?.length || 0}</span>
                           </TableCell>
                           <TableCell>
-                            <div className="text-xs font-mono bg-white/10 p-2 rounded text-white/80">
+                            <div className="font-mono text-[10px] bg-cyan-400/5 px-3 py-1.5 border border-cyan-400/20 text-cyan-400 font-bold shadow-[0_0_10px_rgba(34,211,238,0.05)] tracking-wider">
                               {invitationToken}
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-right">
                             <Button 
                               variant="ghost" 
                               size="sm"
@@ -2578,9 +2620,10 @@ export default function SeasonDetailsPage() {
                                 setSelectedTeam(team)
                                 setIsTeamModalOpen(true)
                               }}
+                              className="text-white/40 hover:text-lime-400 hover:bg-lime-400/10 rounded-none font-black uppercase text-[9px] tracking-widest"
                             >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Team
+                              <Eye className="h-3 w-3 mr-2" />
+                              INSPECT
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -2590,339 +2633,289 @@ export default function SeasonDetailsPage() {
                 </Table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Matches Section */}
-        <Card className="mb-8 bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white drop-shadow-lg">
-              <Target className="h-5 w-5" />
-              Season Matches
-            </CardTitle>
+        {/* Season Matches Section */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+               <div className="w-10 h-10 bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center">
+                <Target className="h-5 w-5 text-cyan-400" />
+              </div>
+              <h3 className="text-xl font-black italic uppercase tracking-widest text-white">STRATEGIC <span className="text-cyan-400">FIXTURES</span></h3>
+            </div>
+            <div className="h-px flex-1 bg-white/5 mx-8 hidden md:block" />
             <Button 
               onClick={() => refetchMatchSchedules()}
               variant="outline"
               size="sm"
               disabled={matchSchedulesLoading}
-              className="ml-auto bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
+              className="bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-400/10 hover:text-cyan-300 text-white font-black italic uppercase tracking-widest text-[10px] rounded-none h-10 px-6 transition-all"
             >
               {matchSchedulesLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-300 mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-400/50 border-t-cyan-400"></div>
               ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <>
+                  <RefreshCw className="h-3 w-3 mr-2" />
+                  RE-SYNC LOGS
+                </>
               )}
-              Refresh
             </Button>
-          </CardHeader>
-          <CardContent>
-            {matchSchedulesLoading ? (
-              <div className="text-center py-8 text-white">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300 mx-auto"></div>
-                <p className="text-white/80 mt-2">Loading season matches...</p>
-              </div>
-            ) : matchSchedulesError ? (
-              <div className="text-center py-8">
-                <AlertCircle className="h-8 w-8 text-red-300 mx-auto" />
-                <p className="text-red-300 mt-2">Error loading matches: {matchSchedulesError.message}</p>
-              </div>
-            ) : matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 ? (
-              <div className="text-center text-white/60 py-8">
-                <Target className="h-12 w-12 mx-auto mb-4 text-white/30" />
-                <p>No matches have been scheduled for this season yet.</p>
-                <Button 
-                  className="mt-4 bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white" 
-                  variant="outline"
-                  onClick={() => setIsScheduleMatchesModalOpen(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Schedule Matches
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {matchSchedules
-                  .filter((match: any) => match.season_id === seasonId)
-                  .map((match: any) => (
-                    <div 
-                      key={match.id} 
-                      className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-4 hover:bg-white/10 transition-all duration-200"
-                    >
-                      <div className="flex items-center justify-between">
-                        {/* Teams with logos */}
-                        <div className="flex items-center gap-6 flex-1">
-                          {/* Team 1 */}
-                          <div className="flex items-center gap-3">
-                            {match.Team1?.logo ? (
-                              <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
-                                <img
-                                  src={match.Team1.logo}
-                                  alt={`${match.Team1.name} Logo`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
-                                <span className="text-sm font-bold text-white">
-                                  {match.Team1?.name?.substring(0, 2).toUpperCase() || 'T1'}
-                                </span>
-                              </div>
-                            )}
-                            <div className="text-white font-semibold">
-                              {match.Team1?.name || `Team ${match.team1}`}
-                            </div>
+          </div>
+
+          {matchSchedulesLoading ? (
+             <div className="glass-dark border border-white/10 p-20 text-center rounded-none">
+              <div className="w-12 h-12 border-4 border-cyan-400/20 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-cyan-400 font-black italic uppercase tracking-widest text-xs">Accessing Match Data...</p>
+            </div>
+          ) : matchSchedulesError ? (
+            <div className="glass-dark border border-red-500/20 p-12 text-center rounded-none">
+              <p className="text-red-400 font-black italic uppercase tracking-widest text-sm mb-2">TELEMETRY ERROR</p>
+              <p className="text-white/40 font-mono text-xs">{matchSchedulesError.message}</p>
+            </div>
+          ) : matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 ? (
+            <div className="glass-dark border border-white/10 p-20 text-center rounded-none">
+              <Calendar className="h-12 w-12 text-white/5 mx-auto mb-6" />
+              <p className="text-white/30 font-black italic uppercase tracking-widest text-sm mb-8">No scheduled engagements detected</p>
+              <Button 
+                className="bg-cyan-400 text-black hover:bg-cyan-500 rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-8"
+                onClick={() => setIsScheduleMatchesModalOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                INITIATE SCHEDULER
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {matchSchedules
+                .filter((match: any) => match.season_id === seasonId)
+                .map((match: any) => (
+                  <div key={match.id} className="group relative glass-dark border border-white/10 hover:border-cyan-400/40 transition-all p-6 rounded-none flex flex-col justify-between h-full bg-black/40 overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <div className="space-y-4 relative z-10">
+                      <div className="flex justify-between items-start">
+                        <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-widest bg-white/5 text-white/40 border-white/10 rounded-none">
+                          REF: {match.id.substring(0, 8)}
+                        </Badge>
+                        <div className="text-right">
+                          <div className="text-[10px] text-cyan-400 font-mono tracking-widest leading-none mb-1">
+                            {new Date(match.dateAndtime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}
                           </div>
-                          
-                          {/* VS */}
-                          <div className="text-white/60 font-medium">vs</div>
-                          
-                          {/* Team 2 */}
-                          <div className="flex items-center gap-3">
-                            {match.Team2?.logo ? (
-                              <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
-                                <img
-                                  src={match.Team2.logo}
-                                  alt={`${match.Team2.name} Logo`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-lg flex items-center justify-center border-2 border-white/20 shadow-lg flex-shrink-0">
-                                <span className="text-sm font-bold text-white">
-                                  {match.Team2?.name?.substring(0, 2).toUpperCase() || 'T2'}
-                                </span>
-                              </div>
-                            )}
-                            <div className="text-white font-semibold">
-                              {match.Team2?.name || `Team ${match.team2}`}
-                            </div>
+                          <div className="text-xl font-black italic tracking-tighter text-white">
+                            {new Date(match.dateAndtime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                        </div>
-                        
-                        {/* Date, Time, Venue */}
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <div className="text-sm text-white/80">
-                              {new Date(match.dateAndtime).toLocaleDateString('en-US', { 
-                                month: 'short',
-                                day: 'numeric' 
-                              })}
-                            </div>
-                            <div className="text-xs text-white/60 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {new Date(match.dateAndtime).toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
-                            </div>
-                          </div>
-                          
-                          <Badge 
-                            variant="outline"
-                            className="text-xs bg-white/10 backdrop-blur-sm text-white border-white/20 px-3 py-1"
-                          >
-                            {match.location}
-                          </Badge>
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditMatch(match)}
-                            className="bg-orange-600/80 hover:bg-orange-700/80 text-white border-orange-400/30"
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Quick Actions */}
-        <Card className="bg-white/5 backdrop-blur-2xl border-white/10 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="text-white drop-shadow-lg">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
-                variant="outline" 
-                className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-                onClick={() => setIsInviteTeamsModalOpen(true)}
-                disabled={availableTeamsToInvite.length === 0}
-              >
-                <Plus className="h-6 w-6 mb-2" />
-                <span>Invite More Teams</span>
-              </Button>
-              {/* Only show Schedule Matches button when no regular matches have been scheduled */}
-              {matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
-                <Button 
-                  variant="outline" 
-                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-                  onClick={() => setIsScheduleMatchesModalOpen(true)}
-                  disabled={seasonGroups.length === 0}
-                >
-                  <Calendar className="h-6 w-6 mb-2" />
-                  <span>Schedule Matches</span>
-                  {seasonGroups.length === 0 && (
-                    <Badge variant="secondary" className="mt-1 text-xs">
-                      Create groups first
-                    </Badge>
-                  )}
-                </Button>
-              )}
-              
-              {/* Show Schedule Performance Matches button when regular matches have been scheduled */}
-              {matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 && (
-                <Button 
-                  variant="outline" 
-                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-                  onClick={() => setIsScheduleMatchesModalOpen(true)}
-                  disabled={isSchedulingPerformance}
-                >
-                  <Target className="h-6 w-6 mb-2" />
-                  <span>Schedule Performance Matches</span>
-                  {isSchedulingPerformance && (
-                    <Badge variant="secondary" className="mt-1 text-xs">
-                      Scheduling...
-                    </Badge>
-                  )}
-                </Button>
-              )}
-              
-              {seasonGroups.length > 0 ? (
-                <Button 
-                  variant="outline" 
-                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-                  onClick={() => setIsViewGroupsModalOpen(true)}
-                >
-                  <Users className="h-6 w-6 mb-2" />
-                  <span>View Groups</span>
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="h-20 flex-col bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-                  onClick={() => setIsCreateGroupModalOpen(true)}
-                >
-                  <Users className="h-6 w-6 mb-2" />
-                  <span>Create Group</span>
-                </Button>
-              )}
+                      <div className="flex flex-col gap-4 py-4 border-y border-white/5 my-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-white/5 border border-white/10 flex items-center justify-center font-black text-[10px] text-white/30">
+                            {(match.Team1?.name || "T1").substring(0,2).toUpperCase()}
+                          </div>
+                          <span className="font-black italic uppercase text-xs text-white tracking-widest truncate">{match.Team1?.name || `Team ${match.team1}`}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-white/5 border border-white/10 flex items-center justify-center font-black text-[10px] text-white/30">
+                            {(match.Team2?.name || "T2").substring(0,2).toUpperCase()}
+                          </div>
+                          <span className="font-black italic uppercase text-xs text-white/70 tracking-widest truncate">{match.Team2?.name || `Team ${match.team2}`}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center gap-2 text-[10px] font-mono text-cyan-400/60 uppercase tracking-widest">
+                          <MapPin className="h-3 w-3" />
+                          <span className="truncate max-w-[120px]">{match.location || "TBD ARENA"}</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditMatch(match)}
+                          className="h-8 text-white/40 hover:text-cyan-400 hover:bg-cyan-400/10 rounded-none font-black uppercase text-[9px] tracking-widest"
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          OVERRIDE
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
 
-      {/* Team Details Modal */}
+      {/* Team Details Modal (Team Intelligence Profile) */}
       <Dialog open={isTeamModalOpen} onOpenChange={setIsTeamModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Team Details
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none shadow-2xl text-white p-0 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-lime-400/50 to-transparent" />
           
           {selectedTeam && (
-            <div className="space-y-6">
-              {/* Team Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold text-white mb-3">Basic Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Team Name:</span>
-                      <span className="font-medium text-white">{selectedTeam.name || selectedTeam.team_name || 'N/A'}</span>
+            <div className="p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
+              <DialogHeader className="mb-8">
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center relative group">
+                      <div className="absolute inset-0 bg-lime-400/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {selectedTeam.logo ? (
+                        <img 
+                          src={selectedTeam.logo} 
+                          alt={`${selectedTeam.name} Logo`}
+                          className="w-10 h-10 object-contain"
+                        />
+                      ) : (
+                        <Shield className="h-6 w-6 text-lime-400/60" />
+                      )}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Short Name:</span>
-                      <span className="font-medium text-white">{selectedTeam.shortname || selectedTeam.short_name || 'N/A'}</span>
+                    <div>
+                      <h2 className="text-2xl font-black italic uppercase tracking-[0.2em] text-white leading-none">
+                        {selectedTeam.name || selectedTeam.team_name}
+                      </h2>
+                      <p className="text-[10px] font-mono text-lime-400/60 uppercase tracking-widest mt-1">
+                        TEAM_INTELLIGENCE_PROFILE // {selectedTeam.shortname || selectedTeam.short_name || "N/A"}
+                      </p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Team ID:</span>
-                      <span className="font-medium text-white">{selectedTeam.id || selectedTeam.team_id || 'N/A'}</span>
+                  </DialogTitle>
+                </div>
+              </DialogHeader>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                {/* Basic Intelligence */}
+                <div className="glass-dark border border-white/10 p-6 rounded-none relative">
+                   <div className="absolute top-0 left-0 w-full p-2 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-white/40 animate-pulse rounded-full" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">BASIC_IDENTITY_NODE</span>
+                  </div>
+                  <div className="mt-6 space-y-4">
+                    <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                      <span className="text-[10px] font-black uppercase text-white/30 tracking-widest">DESIGNATION</span>
+                      <span className="text-[11px] font-black italic uppercase text-white tracking-widest">{selectedTeam.name || selectedTeam.team_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                      <span className="text-[10px] font-black uppercase text-white/30 tracking-widest">SHORT_NAME</span>
+                      <span className="text-[11px] font-black italic uppercase text-lime-400 tracking-widest">{selectedTeam.shortname || selectedTeam.short_name || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase text-white/30 tracking-widest">CORE_ID</span>
+                      <span className="text-[10px] font-mono text-white/60">{selectedTeam.id || selectedTeam.team_id}</span>
                     </div>
                   </div>
                 </div>
-                
-                <div>
-                  <h3 className="font-semibold text-white mb-3">Manager Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Name:</span>
-                      <span className="font-medium text-white">{selectedTeam.manager?.name || 'N/A'}</span>
+
+                {/* Manager Command Profile */}
+                <div className="glass-dark border border-lime-400/20 bg-lime-400/5 p-6 rounded-none relative">
+                  <div className="absolute top-0 left-0 w-full p-2 bg-lime-400/10 border-b border-lime-400/20 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-lime-400 animate-pulse rounded-full" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-lime-400/60">COMMAND_OVERRIDE_AUTH</span>
+                  </div>
+                  <div className="mt-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-black/40 border border-lime-400/30 flex items-center justify-center">
+                        <User className="h-5 w-5 text-lime-400/40" />
+                      </div>
+                      <div>
+                        <h3 className="font-black italic uppercase text-[12px] text-white tracking-widest leading-none">
+                          {selectedTeam.manager?.name || "UNKNOWN_CMD"}
+                        </h3>
+                        <p className="text-[8px] font-mono text-lime-400 uppercase mt-1">CHIEF_SQUADRON_OFFICER</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Email:</span>
-                      <span className="font-medium text-white">{selectedTeam.manager?.email || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Phone:</span>
-                      <span className="font-medium text-white">{selectedTeam.manager?.phone || 'N/A'}</span>
+                    <div className="space-y-1.5 border-t border-white/5 pt-4">
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-white/60">
+                        <Mail className="h-3 w-3 text-lime-400/40" />
+                        {selectedTeam.manager?.email || "OFFLINE"}
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-white/40">
+                        <Phone className="h-3 w-3 text-lime-400/20" />
+                        {selectedTeam.manager?.phone || "UNCERTAIN"}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Players Section */}
-              <div>
-                <h3 className="font-semibold text-white mb-3">Players ({selectedTeam.players?.length || 0})</h3>
+              {/* Personnel Manifest */}
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">PERSONNEL_MANIFEST</span>
+                  <div className="h-px flex-1 bg-white/5" />
+                  <Badge variant="outline" className="rounded-none border-white/10 font-mono text-[9px] text-white/30 text-[8px] h-5">
+                    {selectedTeam.players?.length || 0} UNITS
+                  </Badge>
+                </div>
+                
                 {selectedTeam.players && selectedTeam.players.length > 0 ? (
-                  <div className="overflow-x-auto">
+                  <div className="glass-dark border border-white/10 overflow-hidden">
                     <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-white">Name</TableHead>
-                          <TableHead className="text-white">Email</TableHead>
-                          <TableHead className="text-white">Phone</TableHead>
-                          <TableHead className="text-white">Gender</TableHead>
-                          <TableHead className="text-white">Date of Birth</TableHead>
+                      <TableHeader className="bg-white/5">
+                        <TableRow className="border-white/10 hover:bg-transparent h-10">
+                          <TableHead className="text-[8px] font-black uppercase tracking-widest text-white/40">OPERATIVE_ID</TableHead>
+                          <TableHead className="text-[8px] font-black uppercase tracking-widest text-white/40">CONTACT_VECTOR</TableHead>
+                          <TableHead className="text-[8px] font-black uppercase tracking-widest text-white/40">GENOTYPE</TableHead>
+                          <TableHead className="text-[8px] font-black uppercase tracking-widest text-white/40">BIRTH_NODE</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {selectedTeam.players.map((player: any) => (
-                          <TableRow key={player.id}>
-                            <TableCell className="font-medium text-white">{player.name}</TableCell>
-                            <TableCell className="text-white/80">{player.email}</TableCell>
-                            <TableCell className="text-white/80">{player.phone}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-white border-white/30">{player.gender}</Badge>
+                          <TableRow key={player.id} className="border-white/5 hover:bg-lime-400/10 transition-colors group h-12">
+                            <TableCell className="py-2">
+                              <span className="font-black italic uppercase text-[11px] text-white tracking-[0.2em]">{player.name}</span>
                             </TableCell>
-                            <TableCell className="text-white/80">{player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}</TableCell>
+                            <TableCell className="py-2">
+                              <div className="text-[10px] font-mono text-white/60">{player.email}</div>
+                              <div className="text-[9px] font-mono text-white/40">{player.phone}</div>
+                            </TableCell>
+                            <TableCell className="py-2">
+                              <Badge variant="outline" className={`rounded-none border-white/20 font-mono text-[9px] uppercase py-0.5 px-2 ${player.gender === 'male' ? 'text-cyan-400 border-cyan-400/30' : 'text-purple-400 border-purple-400/30'}`}>
+                                {player.gender}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="py-2 text-[10px] font-mono text-white/40">
+                              {player.dob ? new Date(player.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase() : "N/A"}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
                   </div>
                 ) : (
-                  <div className="text-center text-white/70 py-4">
-                    <Users className="h-8 w-8 mx-auto mb-2 text-white/50" />
-                    <p>No players found for this team</p>
+                  <div className="p-8 text-center glass-dark border border-dashed border-white/10 bg-white/5">
+                    <Users className="h-8 w-8 text-white/10 mx-auto mb-3" />
+                    <p className="text-[9px] font-black italic uppercase tracking-widest text-white/30">No active personnel detected</p>
                   </div>
                 )}
               </div>
 
-              {/* Season Invitation */}
-              <div>
-                <h3 className="font-semibold text-white mb-3">Season Invitation</h3>
-                <div className="bg-white/5 backdrop-blur-sm border border-white/20 p-3 rounded-md">
-                  <div className="text-sm text-white/80 mb-2">Invitation Token:</div>
-                  <div className="font-mono text-xs bg-white/10 backdrop-blur-sm text-white p-2 rounded border border-white/20">
-                    {season?.teams?.[selectedTeam.id || selectedTeam.team_id] || 'N/A'}
+              {/* Security Protocol (Token) */}
+              <div className="glass-dark border border-cyan-400/20 bg-cyan-400/5 p-6 rounded-none relative">
+                 <div className="absolute top-0 left-0 w-full p-2 bg-cyan-400/10 border-b border-cyan-400/20 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-cyan-400 animate-pulse rounded-full" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-cyan-400/60">SECURITY_TOKEN_V3</span>
                   </div>
-                </div>
+                   <div className="mt-6">
+                    <p className="text-[10px] font-black italic uppercase text-white/80 tracking-[0.2em] mb-4 flex items-center gap-2">
+                      <div className="w-1 h-1 bg-cyan-400 rounded-full" />
+                      ACTIVE SEASON INVITATION HASH
+                    </p>
+                    <div className="bg-black/90 border border-cyan-400/30 p-6 rounded-none relative group overflow-hidden shadow-[inset_0_0_30px_rgba(34,211,238,0.05)]">
+                       <div className="absolute inset-0 bg-cyan-400/5 opacity-100" />
+                       <code className="text-sm font-mono font-bold text-cyan-400 break-all relative z-10 block text-center tracking-wider drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]">
+                         {season?.teams?.[selectedTeam.id || selectedTeam.team_id] || 'NODE_NULL_AUTH_REQUIRED'}
+                       </code>
+                    </div>
+                  </div>
               </div>
             </div>
           )}
           
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setIsTeamModalOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
-              Close
+          <div className="flex justify-end p-8 mt-auto bg-black/40 border-t border-white/10">
+            <Button 
+              onClick={() => setIsTeamModalOpen(false)} 
+              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-12 transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+            >
+              DISCONNECT_PROFILE
             </Button>
           </div>
         </DialogContent>
@@ -2930,1165 +2923,1046 @@ export default function SeasonDetailsPage() {
 
       {/* Invite Teams Modal */}
       <Dialog open={isInviteTeamsModalOpen} onOpenChange={setIsInviteTeamsModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              Invite Teams to Season
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-2xl bg-black/80 backdrop-blur-2xl border border-white/10 rounded-none shadow-2xl text-white p-0 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-lime-400/50 to-transparent" />
           
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-white/80 mb-3">
-                Select teams to invite to "{season?.name}". Teams that are already in this season are not shown.
-              </p>
-              
-              {availableTeamsToInvite.length === 0 ? (
-                <div className="text-center text-white/70 py-8">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-white/50" />
-                  <p>No teams available to invite</p>
-                  <p className="text-sm">All teams are already part of this season</p>
+          <div className="p-8">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-lime-400/10 border border-lime-400/30 flex items-center justify-center">
+                  <Plus className="h-4 w-4 text-lime-400" />
                 </div>
-              ) : (
-                <div className="space-y-3 max-h-60 overflow-y-auto border border-white/20 rounded-md p-3 bg-white/5">
-                  {availableTeamsToInvite.map((team: any) => {
-                    // Only use the actual id field from GraphQL response
+                <span className="text-xl font-black italic uppercase tracking-widest">SQUADRON <span className="text-lime-400">ENLISTMENT</span></span>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              <div className="p-4 bg-lime-400/5 border border-lime-400/10 flex items-start gap-4">
+                <AlertCircle className="h-5 w-5 text-lime-400 mt-0.5" />
+                <p className="text-[11px] font-bold text-lime-400/70 leading-relaxed uppercase tracking-wider">
+                  Select available squadrons to enlist in this campaign. Teams must be approved by high command before appearing in this ledger.
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {availableTeamsToInvite.length === 0 ? (
+                  <div className="py-12 text-center border border-white/5 bg-white/5">
+                    <p className="text-white/30 font-black italic uppercase tracking-widest text-xs">No eligible squadrons available</p>
+                  </div>
+                ) : (
+                  availableTeamsToInvite.map((team: any) => {
                     const teamId = team.id
-                    
                     if (!teamId) return null
-                    
                     return (
-                      <div key={teamId} className="flex items-center space-x-3">
-                        <Checkbox
-                          id={`invite-team-${teamId}`}
-                          checked={selectedTeamsToInvite.includes(teamId)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedTeamsToInvite([...selectedTeamsToInvite, teamId])
-                            } else {
-                              setSelectedTeamsToInvite(selectedTeamsToInvite.filter(id => id !== teamId))
-                            }
-                          }}
-                        />
-                        <div className="flex-1">
-                          <Label htmlFor={`invite-team-${teamId}`} className="text-sm font-medium">
-                            {team.name || team.team_name || `Team ${teamId}`}
-                          </Label>
-                          <div className="text-xs text-white/60">
-                            {team.shortname || team.short_name || 'N/A'} • Manager: {team.manager?.name || 'N/A'}
+                      <div 
+                        key={teamId} 
+                        className="flex items-center justify-between p-4 bg-white/5 border border-white/10 hover:border-lime-400/30 transition-all group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <Checkbox
+                            id={`invite-team-${teamId}`}
+                            checked={selectedTeamsToInvite.includes(teamId)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedTeamsToInvite([...selectedTeamsToInvite, teamId])
+                              } else {
+                                setSelectedTeamsToInvite(selectedTeamsToInvite.filter(id => id !== teamId))
+                              }
+                            }}
+                            className="border-white/20 data-[state=checked]:bg-lime-400 data-[state=checked]:border-lime-400 rounded-none w-5 h-5"
+                          />
+                          <div className="flex flex-col">
+                            <label 
+                              htmlFor={`invite-team-${teamId}`} 
+                              className="font-black italic uppercase text-sm tracking-widest text-white group-hover:text-lime-400 transition-colors cursor-pointer"
+                            >
+                              {team.name || team.team_name || `Team ${teamId}`}
+                            </label>
+                            <span className="text-[10px] font-mono text-white/30 uppercase">SIG: {team.shortname || 'N/A'}</span>
                           </div>
                         </div>
+                        <Badge variant="outline" className="font-mono text-[9px] border-white/10 text-white/40 rounded-none bg-white/5 px-2">
+                          MANAGER: {team.manager?.name || 'N/A'}
+                        </Badge>
                       </div>
                     )
-                  })}
-                </div>
-              )}
-              
-              {selectedTeamsToInvite.length > 0 && (
-                <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 p-3 rounded-md">
-                  <p className="text-sm text-blue-200">
-                    <strong>{selectedTeamsToInvite.length}</strong> team(s) selected for invitation
-                  </p>
-                </div>
-              )}
+                  })
+                )}
+              </div>
             </div>
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => {
-              setIsInviteTeamsModalOpen(false)
-              setSelectedTeamsToInvite([])
-            }}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleInviteTeams}
-              disabled={selectedTeamsToInvite.length === 0 || updateLoading}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {updateLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              ) : (
-                <Plus className="h-4 w-4 mr-2" />
-              )}
-              Invite {selectedTeamsToInvite.length > 0 ? `(${selectedTeamsToInvite.length})` : ''} Teams
-            </Button>
+
+            <div className="flex justify-end gap-3 mt-10">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsInviteTeamsModalOpen(false)
+                  setSelectedTeamsToInvite([])
+                }}
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-8 transition-all"
+              >
+                ABORT
+              </Button>
+              <Button 
+                onClick={handleInviteTeams}
+                disabled={selectedTeamsToInvite.length === 0 || updateLoading}
+                className="bg-lime-400 text-black hover:bg-lime-500 rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-8 shadow-[0_0_20px_rgba(163,230,53,0.3)]"
+              >
+                {updateLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    ENLIST {selectedTeamsToInvite.length > 0 ? `(${selectedTeamsToInvite.length})` : ''} SQUADRONS
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Create Group Modal */}
       <Dialog open={isCreateGroupModalOpen} onOpenChange={setIsCreateGroupModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Create & Manage Groups
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none shadow-2xl text-white p-0 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400/50 to-transparent" />
           
-          <div className="space-y-6">
-            {/* Create New Group */}
-            <div className="flex gap-3 items-end">
-              <div className="flex-1">
-                <Label htmlFor="groupName">New Group Name</Label>
-                <Input
-                  id="groupName"
-                  placeholder="e.g., Group A, Pool 1, Division 1"
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleCreateGroup} disabled={!newGroupName.trim() || createGroupLoading}>
-                {createGroupLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Plus className="h-4 w-4 mr-2" />
-                )}
-                Create Group
-              </Button>
-            </div>
-
-            {/* Randomization Section */}
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-white mb-4">Quick Randomization</h3>
-              <div className="flex gap-4 items-end">
-                <div>
-                  <Label htmlFor="numberOfGroups">Number of Groups</Label>
-                  <Select value={numberOfGroups.toString()} onValueChange={(value) => setNumberOfGroups(parseInt(value))}>
-                    <SelectTrigger className="w-32 bg-white/10 backdrop-blur-sm text-white border-white/20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[2, 3, 4, 5, 6].map(num => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} Groups
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button 
-                  onClick={randomizeTeamsIntoGroups}
-                  disabled={seasonTeams.length === 0}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  🎲 Randomize Teams
-                </Button>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                This will randomly distribute {seasonTeams.length} teams into {numberOfGroups} equal groups
-              </p>
-            </div>
-
-            {/* Randomized Groups Preview */}
-            {isRandomized && randomizedGroups.length > 0 && (
-              <div className="border-t pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-white">Randomized Groups Preview</h3>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={resetRandomization}
-                      className="bg-orange-500/20 backdrop-blur-sm text-orange-200 border-orange-400/30 hover:bg-orange-500/30 hover:text-orange-100"
-                    >
-                      🔄 Reset
-                    </Button>
-                    <Button 
-                      onClick={confirmRandomization}
-                      className="bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white border-blue-400/30"
-                    >
-                      ✅ Confirm & Save
-                    </Button>
+          <div className="p-8 flex flex-col h-full">
+            <DialogHeader className="mb-8">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-purple-400/10 border border-purple-400/30 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-purple-400" />
+                  </div>
+                  <span className="text-xl font-black italic uppercase tracking-widest text-white">GROUP <span className="text-purple-400">INITIATION</span></span>
+                </DialogTitle>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2">
+                    <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">SQUADRON STATUS</span>
+                    <Badge variant="outline" className="font-mono text-[10px] border-lime-400/30 text-lime-400 rounded-none bg-lime-400/5">
+                      {getUnassignedTeams().length} UNASSIGNED
+                    </Badge>
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {randomizedGroups.map((group, index) => (
-                    <div key={group.id} className="border border-white/20 rounded-lg p-4 bg-white/5 backdrop-blur-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-white">{group.name}</h4>
-                        <Badge variant="secondary" className="bg-white/10 backdrop-blur-sm text-white border-white/20">{group.teams.length} teams</Badge>
+              </div>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-12">
+                {/* Protocol Creation Area */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="glass-dark border border-white/10 p-8 rounded-none relative">
+                    <div className="absolute top-0 left-0 w-full p-2 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-purple-400 animate-pulse rounded-full" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">PROTOCOL_CREATE_NEW</span>
+                    </div>
+                    <div className="flex gap-4 items-end mt-4">
+                      <div className="flex-1 space-y-2">
+                        <Label htmlFor="groupName" className="text-[10px] font-black uppercase tracking-widest text-white/40">NEW GROUP DESIGNATION</Label>
+                        <Input
+                          id="groupName"
+                          placeholder="e.g. ALPHA_CLUSTER, BRAVO_SECTOR"
+                          value={newGroupName}
+                          onChange={(e) => setNewGroupName(e.target.value)}
+                          className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest placeholder:text-white/10 focus:border-purple-400/50 transition-all"
+                        />
                       </div>
-                      
-                      <div className="space-y-2">
-                        {group.teams.map(teamId => {
-                          const team = getTeamById(teamId)
-                          return (
-                            <div key={teamId} className="bg-white/10 backdrop-blur-sm p-2 rounded border border-white/20 text-sm text-white">
-                              {team?.name || team?.team_name || `Team ${teamId}`}
-                            </div>
-                          )
-                        })}
+                      <Button 
+                        onClick={handleCreateGroup} 
+                        disabled={!newGroupName.trim() || createGroupLoading}
+                        className="bg-white/5 border border-white/20 hover:border-purple-400/50 hover:bg-purple-400/10 text-white rounded-none h-12 font-black italic uppercase tracking-widest text-[11px] transition-all"
+                      >
+                        {createGroupLoading ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                          <Plus className="h-4 w-4 mr-2" />
+                        )}
+                        CREATE
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="glass-dark border border-white/10 p-8 rounded-none relative">
+                    <div className="absolute top-0 left-0 w-full p-2 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-lime-400 animate-pulse rounded-full" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">TACTICAL_RANDOMIZATION</span>
+                    </div>
+                    <div className="flex gap-4 items-end mt-4">
+                      <div className="flex-1 space-y-2">
+                        <Label htmlFor="numberOfGroups" className="text-[10px] font-black uppercase tracking-widest text-white/40">SECTOR COUNT</Label>
+                        <Select value={numberOfGroups.toString()} onValueChange={(value) => setNumberOfGroups(parseInt(value))}>
+                          <SelectTrigger className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-lime-400/50 transition-all">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/90 border border-white/10 rounded-none">
+                            {[2, 3, 4, 5, 6].map(num => (
+                              <SelectItem key={num} value={num.toString()} className="font-black uppercase text-[10px] text-white focus:bg-white/10">
+                                {num} SECTORS
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button 
+                        onClick={randomizeTeamsIntoGroups}
+                        disabled={seasonTeams.length === 0}
+                        className="bg-lime-400 text-black hover:bg-lime-500 rounded-none h-12 font-black italic uppercase tracking-widest text-[11px] px-6 shadow-[0_0_20px_rgba(163,230,53,0.3)]"
+                      >
+                        🎲 RANDOMIZE
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Randomized Preview */}
+                {isRandomized && randomizedGroups.length > 0 && (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-400 border-l-2 border-lime-400 pl-4 h-4 flex items-center">THEORETICAL SECTOR PREVIEW</h3>
+                      <div className="flex gap-4">
+                        <Button 
+                          variant="outline" 
+                          onClick={resetRandomization}
+                          className="bg-white/5 border border-white/10 hover:border-orange-500/50 hover:bg-orange-500/10 text-white rounded-none font-black italic uppercase tracking-widest text-[10px] h-10 px-6 transition-all"
+                        >
+                          🔄 RE-CALCULATE
+                        </Button>
+                        <Button 
+                          onClick={confirmRandomization}
+                          className="bg-blue-600 text-white hover:bg-blue-700 rounded-none font-black italic uppercase tracking-widest text-[10px] h-10 px-6 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+                        >
+                          ✅ CONFIRM DEPLOYMENT
+                        </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-                
-                <div className="mt-4 p-3 bg-green-500/20 backdrop-blur-sm border border-green-400/30 rounded-lg">
-                  <p className="text-sm text-green-200">
-                    <strong>Ready to save!</strong> Review the groups above. Click "Confirm & Save" to save to database, 
-                    or "Reset" to randomize again.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Groups and Teams */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Existing Groups */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-white">Groups ({groups.length})</h3>
-                {groups.length === 0 ? (
-                  <div className="text-center text-white/70 py-8 border-2 border-dashed border-white/30 rounded-lg">
-                    <Users className="h-8 w-8 mx-auto mb-2 text-white/50" />
-                    <p>No groups created yet</p>
-                    <p className="text-sm">Create a group to start organizing teams</p>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {randomizedGroups.map((group, index) => (
+                        <div key={group.id} className="glass-dark border border-white/10 p-6 rounded-none relative">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-black italic uppercase text-lg text-white tracking-widest">{group.name}</h4>
+                            <Badge variant="outline" className="font-mono text-[10px] border-white/10 text-white/40 rounded-none bg-white/5">
+                              {group.teams.length} SQUADS
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {group.teams.map(teamId => {
+                              const team = getTeamById(teamId)
+                              return (
+                                <div key={teamId} className="bg-white/5 p-3 border border-white/5 text-[10px] font-black italic uppercase tracking-widest text-white/60">
+                                  {team?.name || team?.team_name || `Team ${teamId}`}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ) : (
-                  groups.map(group => (
-                    <div key={group.id} className="border border-white/20 rounded-lg p-4 bg-white/5 backdrop-blur-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-white">{group.name}</h4>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteGroup(group.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                )}
+
+                {/* Groups Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Existing Groups Ledger */}
+                  <div className="space-y-6">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 border-l-2 border-purple-400 pl-4 h-4 flex items-center">ACTIVE SECTORS ({groups.length})</h3>
+                    {groups.length === 0 ? (
+                      <div className="p-20 text-center border border-dashed border-white/10 bg-white/5">
+                        <Users className="h-8 w-8 mx-auto mb-4 text-white/10" />
+                        <p className="text-[10px] font-black italic uppercase tracking-widest text-white/30">No active sectors detected</p>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <div className="text-sm text-gray-600">
-                          {group.teams.length} team(s)
-                        </div>
-                        {group.teams.map(teamId => {
-                          const team = getTeamById(teamId)
-                          return (
-                            <div key={teamId} className="flex items-center justify-between bg-white p-2 rounded border">
-                              <span className="text-sm">
-                                {team?.name || team?.team_name || `Team ${teamId}`}
-                              </span>
+                    ) : (
+                      <div className="space-y-4">
+                        {groups.map(group => (
+                          <div 
+                            key={group.id} 
+                            className="glass-dark border border-white/10 p-6 rounded-none relative group"
+                            onDragOver={(e) => {
+                              e.preventDefault()
+                              const target = e.currentTarget
+                              target.style.borderColor = 'rgba(168, 85, 247, 0.5)'
+                              target.style.background = 'rgba(168, 85, 247, 0.05)'
+                            }}
+                            onDragLeave={(e) => {
+                              const target = e.currentTarget
+                              target.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                              target.style.background = 'transparent'
+                            }}
+                            onDrop={() => {
+                              if (draggedTeam) {
+                                handleAddTeamToGroup(draggedTeam, group.id)
+                              }
+                            }}
+                          >
+                            <div className="flex items-center justify-between mb-6">
+                              <h4 className="font-black italic uppercase text-lg text-white tracking-widest group-hover:text-purple-400 transition-colors">{group.name}</h4>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleRemoveTeamFromGroup(teamId, group.id)}
-                                className="text-red-500 hover:text-red-600"
+                                onClick={() => handleDeleteGroup(group.id)}
+                                className="text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-none h-8 w-8 p-0"
                               >
-                                <X className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
-                          )
-                        })}
+                            
+                            <div className="space-y-2">
+                              {group.teams.length === 0 && (
+                                <div className="py-8 text-center border border-dashed border-white/5 rounded-none">
+                                  <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Drop squadron data here</p>
+                                </div>
+                              )}
+                              {group.teams.map(teamId => {
+                                const team = getTeamById(teamId)
+                                return (
+                                  <div key={teamId} className="flex items-center justify-between bg-white/5 p-3 border border-white/5 group/team">
+                                    <span className="text-[10px] font-black italic uppercase tracking-widest text-white/80 group-hover/team:text-white transition-colors">
+                                      {team?.name || team?.team_name || `Team ${teamId}`}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleRemoveTeamFromGroup(teamId, group.id)}
+                                      className="text-white/20 hover:text-red-500 rounded-none h-6 w-6 p-0"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))
-                )}
-              </div>
+                    )}
+                  </div>
 
-              {/* Available Teams */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-white">Available Teams ({getUnassignedTeams().length})</h3>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {getUnassignedTeams().map((team: any) => {
-                    // Only use the actual id field from GraphQL response
-                    const teamId = team.id
-                    
-                    if (!teamId) return null
-                    
-                    return (
-                      <div
-                        key={teamId}
-                        className="flex items-center justify-between bg-white/10 backdrop-blur-sm p-3 rounded border border-white/20 cursor-move hover:bg-white/20"
-                        draggable
-                        onDragStart={() => setDraggedTeam(teamId)}
-                        onDragEnd={() => setDraggedTeam(null)}
-                      >
-                        <div>
-                          <div className="font-medium text-white">
-                            {team.name || team.team_name || `Team ${teamId}`}
-                          </div>
-                          <div className="text-sm text-white/70">
-                            {team.shortname || team.short_name || 'N/A'}
-                          </div>
-                        </div>
+                  {/* Available Manifest */}
+                  <div className="space-y-6">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 border-l-2 border-lime-400 pl-4 h-4 flex items-center">UNASSIGNED SQUADRONS ({getUnassignedTeams().length})</h3>
+                    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                      {getUnassignedTeams().map((team: any) => {
+                        const teamId = team.id
+                        if (!teamId) return null
                         
-                        {/* Quick Add to Group */}
-                        {groups.length > 0 && (
-                          <Select onValueChange={(groupId) => handleAddTeamToGroup(teamId, groupId)}>
-                            <SelectTrigger className="w-32 bg-white/10 backdrop-blur-sm text-white border-white/20">
-                              <SelectValue placeholder="Add to..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {groups.map(group => (
-                                <SelectItem key={group.id} value={group.id}>
-                                  {group.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                    )
-                  })}
+                        return (
+                          <div
+                            key={teamId}
+                            className="flex items-center justify-between bg-white/5 p-4 border border-white/10 hover:border-white/30 cursor-move transition-all group"
+                            draggable
+                            onDragStart={() => setDraggedTeam(teamId)}
+                            onDragEnd={() => setDraggedTeam(null)}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-8 h-8 bg-white/5 border border-white/10 flex items-center justify-center font-black text-[9px] text-white/20">
+                                {(team.name || "UN").substring(0,2).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-black italic uppercase text-xs text-white tracking-widest group-hover:text-lime-400 transition-colors">
+                                  {team.name || team.team_name || `Team ${teamId}`}
+                                </div>
+                                <div className="text-[8px] font-mono text-white/20 uppercase tracking-widest">
+                                  TAG: {team.shortname || 'N/A'}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {groups.length > 0 && (
+                              <Select onValueChange={(groupId) => handleAddTeamToGroup(teamId, groupId)}>
+                                <SelectTrigger className="w-28 h-8 bg-white/5 text-[9px] font-black uppercase tracking-widest border-white/10 rounded-none text-white/40">
+                                  <SelectValue placeholder="DEPLOY TO..." />
+                                </SelectTrigger>
+                                <SelectContent className="bg-black/90 border border-white/10 rounded-none">
+                                  {groups.map(group => (
+                                    <SelectItem key={group.id} value={group.id} className="font-black uppercase text-[10px] text-white focus:bg-white/10">
+                                      {group.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Drag and Drop Instructions */}
-            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
-              <h4 className="font-medium text-white mb-2">💡 How to Use Groups</h4>
-              <ul className="text-sm text-white/80 space-y-1">
-                <li>• <strong>Create groups</strong> to organize teams for match scheduling</li>
-                <li>• <strong>Drag and drop</strong> teams between groups or use the quick add dropdown</li>
-                <li>• <strong>Groups will be used</strong> when scheduling matches to ensure fair competition</li>
-                <li>• <strong>Teams can only be in one group</strong> at a time</li>
-              </ul>
+            
+            <div className="flex justify-end pt-8 mt-auto px-8 pb-8">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsCreateGroupModalOpen(false)} 
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-12 transition-all"
+              >
+                DISCONNECT
+              </Button>
             </div>
-          </div>
-          
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setIsCreateGroupModalOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
-              Close
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* View Groups Modal */}
       <Dialog open={isViewGroupsModalOpen} onOpenChange={setIsViewGroupsModalOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              View Season Groups & Statistics
-              </div>
-              {/* Show Edit Groups button only if season hasn't started */}
-              {status.status === 'upcoming' && (
-                <Button
-                  onClick={() => {
-                    setIsViewGroupsModalOpen(false)
-                    setIsCreateGroupModalOpen(true)
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Groups
-                </Button>
-              )}
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none shadow-2xl text-white p-0 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
           
-          <div className="space-y-6">
-            {groupsLoading ? (
-              <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="p-8 flex flex-col h-full">
+            <DialogHeader className="mb-8">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center">
+                    <LayoutGrid className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <span className="text-xl font-black italic uppercase tracking-widest text-white">SECTOR <span className="text-cyan-400">INTELLIGENCE</span></span>
+                </DialogTitle>
+                
+                {status.status === 'upcoming' && (
+                  <Button
+                    onClick={() => {
+                      setIsViewGroupsModalOpen(false)
+                      setIsCreateGroupModalOpen(true)
+                    }}
+                    className="bg-white/5 border border-white/20 hover:border-cyan-400/50 hover:bg-cyan-400/10 text-white rounded-none font-black italic uppercase tracking-widest text-[10px] h-10 px-6 transition-all"
+                  >
+                    <Edit className="h-3 w-3 mr-2" />
+                    MODIFY PROTOCOLS
+                  </Button>
+                )}
               </div>
-            ) : seasonGroups.length === 0 ? (
-              <div className="text-center text-white/70 py-8">
-                <Users className="h-12 w-12 mx-auto mb-4 text-white/50" />
-                <p>No groups found for this season</p>
-              </div>
-            ) : (
-              <>
-                {/* Groups Overview */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {seasonGroups.map((group) => {
-                    const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
-                    const teamsInGroup = groupTeamStats.map((stat: any) => {
-                      const team = getTeamById(stat.team_id)
-                      return {
-                        ...stat,
-                        teamName: team?.name || team?.team_name || `Team ${stat.team_id}`,
-                        teamShortName: team?.shortname || team?.short_name || 'N/A'
-                      }
-                    })
-                    
-                    return (
-                      <Card key={group.id} className="bg-white/5 backdrop-blur-sm border border-white/20">
-                        <CardHeader>
-                          <CardTitle className="flex items-center justify-between text-white">
-                            <span>{group.name}</span>
-                            <Badge variant="secondary">{teamsInGroup.length} teams</Badge>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          {teamsInGroup.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4">No teams assigned to this group</p>
-                          ) : (
-                            <div className="space-y-3">
-                              {teamsInGroup.map((teamStat) => (
-                                <div key={teamStat.id} className="border rounded-lg p-3 bg-gray-50">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                      <h4 className="font-medium text-gray-900">{teamStat.teamName}</h4>
-                                      <p className="text-sm text-gray-500">{teamStat.teamShortName}</p>
-                                    </div>
-                                    <Badge variant="outline">{teamStat.points} pts</Badge>
-                                  </div>
-                                  
-                                  {/* Team Statistics */}
-                                  <div className="grid grid-cols-4 gap-2 text-xs">
-                                    <div className="text-center">
-                                      <div className="font-medium text-gray-900">{teamStat.played}</div>
-                                      <div className="text-gray-500">Played</div>
-                                    </div>
-                                    <div className="text-center">
-                                      <div className="font-medium text-green-600">{teamStat.wins}</div>
-                                      <div className="text-gray-500">Wins</div>
-                                    </div>
-                                    <div className="text-center">
-                                      <div className="font-medium text-yellow-600">{teamStat.draws}</div>
-                                      <div className="text-gray-500">Draws</div>
-                                    </div>
-                                    <div className="text-center">
-                                      <div className="font-medium text-red-600">{teamStat.losses}</div>
-                                      <div className="text-gray-500">Losses</div>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Goals */}
-                                  <div className="mt-2 pt-2 border-t grid grid-cols-3 gap-2 text-xs">
-                                    <div className="text-center">
-                                      <div className="font-medium text-green-600">{teamStat.goals_for}</div>
-                                      <div className="text-gray-500">GF</div>
-                                    </div>
-                                    <div className="text-center">
-                                      <div className="font-medium text-red-600">{teamStat.goals_against}</div>
-                                      <div className="text-gray-500">GA</div>
-                                    </div>
-                                    <div className="text-center">
-                                      <div className="font-medium text-blue-600">{teamStat.goal_diff}</div>
-                                      <div className="text-gray-500">GD</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
-                </div>
+            </DialogHeader>
 
-                {/* Season Summary */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Season Summary</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{seasonGroups.length}</div>
-                        <div className="text-sm text-gray-500">Total Groups</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{seasonTeamStatistics.length}</div>
-                        <div className="text-sm text-gray-500">Teams with Stats</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {seasonTeamStatistics.reduce((total, stat) => total + parseInt(stat.points || '0'), 0)}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              {groupsLoading ? (
+                <div className="flex flex-col items-center justify-center h-64 border border-dashed border-white/10 bg-white/5">
+                  <RefreshCw className="h-8 w-8 text-cyan-400 animate-spin mb-4" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">DECRYPTING SECTOR DATA...</p>
+                </div>
+              ) : seasonGroups.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 border border-dashed border-white/10 bg-white/5">
+                  <Users className="h-12 w-12 text-white/10 mb-6" />
+                  <p className="text-[10px] font-black italic uppercase tracking-widest text-white/30">No active sectors detected in this campaign</p>
+                </div>
+              ) : (
+                <div className="space-y-12">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {seasonGroups.map((group: any) => {
+                      const groupTeamStats = seasonTeamStatistics.filter((stat: any) => stat.group_id === group.id)
+                      const teamsInGroup = groupTeamStats.map((stat: any) => {
+                        const team = getTeamById(stat.team_id)
+                        return {
+                          ...stat,
+                          teamName: team?.name || team?.team_name || `Team ${stat.team_id}`,
+                          teamShortName: team?.shortname || team?.short_name || 'N/A'
+                        }
+                      })
+                      
+                      return (
+                        <div key={group.id} className="glass-dark border border-white/10 p-0 rounded-none overflow-hidden group">
+                          <div className="bg-white/5 border-b border-white/10 p-4 flex items-center justify-between">
+                            <h4 className="font-black italic uppercase text-lg text-white tracking-widest group-hover:text-cyan-400 transition-colors">
+                              {group.name}
+                            </h4>
+                            <Badge variant="outline" className="font-mono text-[10px] border-cyan-400/30 text-cyan-400 rounded-none bg-cyan-400/5">
+                              {teamsInGroup.length} SQUADS ACTIVE
+                            </Badge>
+                          </div>
+                          
+                          <div className="p-6">
+                            {teamsInGroup.length === 0 ? (
+                              <div className="py-12 text-center border border-dashed border-white/5 rounded-none">
+                                <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Zero squadrons assigned to sector</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {teamsInGroup.map((teamStat: any) => (
+                                  <div key={teamStat.id} className="bg-black/40 border border-white/5 p-4 hover:border-white/20 transition-all flex items-center justify-between group/team">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 bg-white/5 border border-white/10 flex items-center justify-center font-black text-[12px] text-white/40">
+                                        {(teamStat.teamName || "UN").substring(0,2).toUpperCase()}
+                                      </div>
+                                      <div>
+                                        <h5 className="font-black italic uppercase text-xs text-white tracking-widest group-hover/team:text-cyan-400 transition-colors">{teamStat.teamName}</h5>
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest">SIG: {teamStat.teamShortName}</span>
+                                          <span className="text-[8px] font-bold text-cyan-400/50 uppercase tracking-widest bg-cyan-400/5 px-1.5 py-0.5 border border-cyan-400/10">LVL: {teamStat.played}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-xl font-black italic text-cyan-400 tracking-tighter tabular-nums drop-shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+                                        {teamStat.points}
+                                      </div>
+                                      <div className="text-[8px] font-black uppercase text-white/20 tracking-widest">PTS</div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">Total Points</div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Operational Summary Ledger */}
+                  <div className="glass-dark border border-white/10 p-8 rounded-none relative">
+                    <div className="absolute top-0 left-0 w-full p-2 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-cyan-400 animate-pulse rounded-full" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">ANALYTICS_AGGREGATION_MAIN</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-4 pt-4">
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-white/30 tracking-[0.2em] block">SECTORS</span>
+                        <div className="text-3xl font-black italic uppercase text-white tracking-tighter">{seasonGroups.length}</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {seasonTeamStatistics.reduce((total, stat) => total + parseInt(stat.goals_for || '0'), 0)}
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-white/30 tracking-[0.2em] block">SQUADRONS</span>
+                        <div className="text-3xl font-black italic uppercase text-cyan-400 tracking-tighter">{seasonTeamStatistics.length}</div>
+                      </div>
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-white/30 tracking-[0.2em] block">TOTAL_PTS</span>
+                        <div className="text-3xl font-black italic uppercase text-white tracking-tighter">
+                          {seasonTeamStatistics.reduce((total: number, stat: any) => total + (parseInt(stat.points) || 0), 0)}
                         </div>
-                        <div className="text-sm text-gray-500">Total Goals</div>
+                      </div>
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-white/30 tracking-[0.2em] block">MUNITIONS_EXPENDED (GOALS)</span>
+                        <div className="text-3xl font-black italic uppercase text-lime-400 tracking-tighter">
+                          {seasonTeamStatistics.reduce((total: number, stat: any) => total + (parseInt(stat.goals_for) || 0), 0)}
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
-          </div>
-          
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setIsViewGroupsModalOpen(false)}>
-              Close
-            </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end pt-8 mt-auto px-8 pb-8">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsViewGroupsModalOpen(false)}
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-12 transition-all"
+              >
+                DISCONNECT
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Schedule Matches Modal */}
       <Dialog open={isScheduleMatchesModalOpen} onOpenChange={setIsScheduleMatchesModalOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 ? (
-                <Target className="h-5 w-5" />
-              ) : (
-                <Calendar className="h-5 w-5" />
-              )}
-              {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 
-                ? 'Schedule Performance Matches' 
-                : 'Schedule Season Matches'
-              }
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none shadow-2xl text-white p-0 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-lime-400/50 to-transparent" />
           
-          <div className="space-y-6">
-            {/* Show regular scheduling interface only when no matches are scheduled */}
-            {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
-              <>
-                {/* Location Setting */}
-                <div className="p-4 bg-blue-500/20 backdrop-blur-sm rounded-lg border border-blue-400/30">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <Label htmlFor="default-venue" className="text-sm font-medium text-blue-200">
-                        Default Venue for All Games
-                      </Label>
-                      <Input
-                        id="default-venue"
-                        value={defaultVenue}
-                        onChange={(e) => setDefaultVenue(e.target.value)}
-                        placeholder="Enter venue name (e.g., Prime Arena, Stadium A)"
-                        className="mt-1 bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
-                      />
-                      <p className="text-xs text-blue-200/80 mt-1">
-                        This venue will be applied to all scheduled matches. You can change individual match venues later.
-                      </p>
-                    </div>
+          <div className="p-8 flex flex-col h-full">
+            <DialogHeader className="mb-8">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-lime-400/10 border border-lime-400/30 flex items-center justify-center">
+                    <Calendar className="h-4 w-4 text-lime-400" />
                   </div>
-                </div>
-
-                {/* Scheduling Controls */}
-                <div className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20">
-                  <div>
-                    <h3 className="font-semibold text-white">Randomized Group Weekend Scheduling</h3>
-                    <p className="text-sm text-white/80">
-                      Weekend 1-3: Group stage matches. Weekend 4 Saturday: Quarterfinals (all 8 teams play). Weekend 4 Sunday: Semi-finals and finals.
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={scheduleMatches}
-                    disabled={isScheduling || seasonGroups.length === 0}
-                    className="bg-green-600/80 backdrop-blur-sm hover:bg-green-700/80 text-white border-green-400/30"
-                  >
-                    {isScheduling ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    ) : (
-                      <Calendar className="h-4 w-4 mr-2" />
-                    )}
-                    {isScheduling ? 'Scheduling...' : 'Generate Matches'}
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {/* Show performance matches interface when regular matches are already scheduled */}
-            {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length > 0 && (
-              <div className="p-6 bg-purple-500/20 backdrop-blur-sm rounded-lg border border-purple-400/30">
-                <div className="text-center space-y-4">
-                  <Target className="h-16 w-16 mx-auto text-purple-300" />
-                  <h3 className="text-xl font-semibold text-purple-200">Performance Matches Ready to Schedule</h3>
-                  <p className="text-purple-200/80 max-w-2xl mx-auto">
-                    Regular season matches have already been scheduled. You can now schedule performance matches 
-                    based on team statistics for weekends 3-4 to determine final standings.
-                  </p>
-                  <div className="flex justify-center">
-                    <Button 
-                      onClick={schedulePerformanceMatches}
-                      disabled={isSchedulingPerformance}
-                      size="lg"
-                      className="bg-purple-600/80 backdrop-blur-sm hover:bg-purple-700/80 text-white border-purple-400/30"
-                    >
-                      {isSchedulingPerformance ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      ) : (
-                        <Target className="h-5 w-5 mr-2" />
-                      )}
-                      {isSchedulingPerformance ? 'Scheduling...' : 'Schedule Performance Matches'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Scheduled Matches Display */}
-            {scheduledMatches.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-white">
-                    Scheduled Matches ({scheduledMatches.length})
-                  </h3>
-                  <Badge variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white/20">
-                    Weekend 1: {scheduledMatches.filter(m => m.weekend === 1).length} matches | 
-                    Weekend 2: {scheduledMatches.filter(m => m.weekend === 2).length} matches
-                  </Badge>
-                </div>
-
-                {/* Swap Instructions */}
-                {selectedMatchForSwap && (
-                  <div className="p-4 bg-blue-500/20 backdrop-blur-sm rounded-lg border border-blue-400/30 flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 text-blue-300 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-blue-200">
-                        Match selected for swap
-                      </p>
-                      <p className="text-xs text-blue-200/80 mt-0.5">
-                        Click another match (any day) to swap teams. Click the selected match again to cancel.
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  <span className="text-xl font-black italic uppercase tracking-widest text-white">SCHEDULING <span className="text-lime-400">HUB</span></span>
+                </DialogTitle>
                 
-                {!selectedMatchForSwap && scheduledMatches.some(m => m.team2_id) && (
-                  <div className="p-3 bg-gray-500/10 backdrop-blur-sm rounded-lg border border-gray-400/20 flex items-center gap-2">
-                    <Swap className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <p className="text-xs text-gray-300">
-                      💡 <strong>Tip:</strong> Click any match to swap teams with another match from any day
-                    </p>
+                {scheduledMatches.length > 0 && (
+                  <Button 
+                    onClick={saveMatchesToDatabase}
+                    disabled={addMatchLoading}
+                    className="bg-lime-400 text-black hover:bg-lime-500 rounded-none h-10 px-6 font-black italic uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(163,230,53,0.3)] transition-all"
+                  >
+                    {addMatchLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    EXECUTE BATCH UPLOAD
+                  </Button>
+                )}
+              </div>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-8">
+                {/* Initial Configuration */}
+                {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="md:col-span-2 glass-dark border border-white/10 p-8 rounded-none relative">
+                      <div className="absolute top-0 left-0 w-full p-2 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-lime-400 animate-pulse rounded-full" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">OPERATIONAL_VENUE_CONFIG</span>
+                      </div>
+                      <div className="mt-4 space-y-4">
+                        <Label htmlFor="default-venue" className="text-[10px] font-black uppercase tracking-widest text-white/40">DEFAULT SECTOR VENUE</Label>
+                        <Input
+                          id="default-venue"
+                          value={defaultVenue}
+                          onChange={(e) => setDefaultVenue(e.target.value)}
+                          placeholder="ENTER VENUE DESIGNATION"
+                          className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-lime-400/50 transition-all"
+                        />
+                        <p className="text-[9px] font-mono text-white/20 uppercase tracking-widest">Global override for all generated engagement coordinates</p>
+                      </div>
+                    </div>
+
+                    <div className="glass-dark border border-lime-400/20 bg-lime-400/5 p-8 rounded-none relative flex flex-col justify-between">
+                      <div className="absolute top-0 left-0 w-full p-2 bg-lime-400/10 border-b border-lime-400/20 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-lime-400 animate-pulse rounded-full" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-lime-400/60">INITIATE_PROTOCOL</span>
+                      </div>
+                      <div className="mt-4">
+                        <h3 className="font-black italic uppercase text-sm text-white mb-2 tracking-widest">GENERATE MATRIX</h3>
+                        <p className="text-[9px] text-white/40 leading-relaxed uppercase font-bold">Calculate weekend engagement nodes for all defined sectors (Group stage + Finals).</p>
+                      </div>
+                      <Button 
+                        onClick={scheduleMatches}
+                        disabled={isScheduling || seasonGroups.length === 0}
+                        className="bg-lime-400 text-black hover:bg-lime-500 rounded-none h-12 font-black italic uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(163,230,53,0.3)] mt-6"
+                      >
+                        {isScheduling ? <RefreshCw className="h-4 w-4 animate-spin" /> : "START GENERATION"}
+                      </Button>
+                    </div>
                   </div>
                 )}
+                {scheduledMatches.length > 0 && (
+                  <div className="space-y-8">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                      <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">GENERATED_MATRIX_NODES</span>
+                        <Badge variant="outline" className="font-mono text-[11px] border-lime-400/30 text-lime-400 rounded-none bg-lime-400/5">
+                          {scheduledMatches.length} NODES CREATED
+                        </Badge>
+                      </div>
+                      <div className="flex gap-4">
+                         <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5">
+                           <span className="text-[8px] font-black uppercase text-white/20 tracking-widest">WK1</span>
+                           <span className="text-[10px] font-mono font-bold text-white/60">{scheduledMatches.filter(m => m.weekend === 1).length}</span>
+                         </div>
+                         <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5">
+                           <span className="text-[8px] font-black uppercase text-white/20 tracking-widest">WK2</span>
+                           <span className="text-[10px] font-mono font-bold text-white/60">{scheduledMatches.filter(m => m.weekend === 2).length}</span>
+                         </div>
+                      </div>
+                    </div>
 
-                {/* Group matches by date */}
-                {(() => {
-                  const matchesByDate = scheduledMatches.reduce((acc: any, match) => {
-                    const date = match.date
-                    if (!acc[date]) acc[date] = []
-                    acc[date].push(match)
-                    return acc
-                  }, {})
+                    {selectedMatchForSwap && (
+                      <div className="bg-cyan-400/10 border border-cyan-400/30 p-4 rounded-none flex items-center gap-4 animate-in fade-in slide-in-from-left-4">
+                        <div className="w-10 h-10 bg-cyan-400/20 border border-cyan-400 flex items-center justify-center">
+                          <Swap className="h-5 w-5 text-cyan-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black italic uppercase text-cyan-400 tracking-widest">NODE SWAP PROTOCOL ACTIVE</p>
+                          <p className="text-[9px] text-white/60 uppercase font-bold tracking-widest">Select secondary engagement node to initiate squadron coordinates exchange</p>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          onClick={() => setSelectedMatchForSwap(null)}
+                          className="ml-auto text-white/40 hover:text-white rounded-none text-[10px] font-black uppercase"
+                        >
+                          ABORT SWAP
+                        </Button>
+                      </div>
+                    )}
 
-                  return Object.entries(matchesByDate).map(([date, dayMatches]: [string, any]) => (
-                    <Card key={date} className="bg-white/5 backdrop-blur-sm border border-white/20">
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between text-white">
-                          <span>{new Date(date).toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}</span>
-                          <Badge variant="secondary" className="bg-white/10 backdrop-blur-sm text-white border-white/20">{dayMatches.length} matches</Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {dayMatches.map((match: any) => {
-                            const team1 = getTeamById(match.team1_id)
-                            const team2 = match.team2_id ? getTeamById(match.team2_id) : null
-                            const isPlaceholder = match.type === 'placeholder' || !match.team2_id
-                            const isSelected = selectedMatchForSwap === match.id
-                            const isSwapable = !isPlaceholder // Only non-placeholder matches can be swapped
-                            
-                            return (
-                              <div 
-                                key={match.id} 
-                                onClick={() => isSwapable && handleMatchClick(match.id, match)}
-                                className={`flex items-center justify-between p-3 border rounded-lg backdrop-blur-sm transition-all cursor-pointer ${
-                                  isSelected 
-                                    ? 'border-blue-400 bg-blue-500/20 shadow-lg' 
-                                    : isSwapable 
-                                      ? 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10' 
-                                      : 'border-white/20 bg-white/5 cursor-not-allowed'
-                                }`}
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-3">
-                                    {isSwapable && (
-                                      <Badge variant="outline" className={`text-xs ${isSelected ? 'bg-blue-600 text-white' : 'bg-white/10 text-white/70'}`}>
-                                        {isSelected ? 'Selected' : 'Click to swap'}
-                                      </Badge>
-                                    )}
-                                    <span className="font-medium text-white">
-                                      {team1?.name || team1?.team_name || `Team ${match.team1_id}`}
-                                    </span>
-                                    <span className="text-white/60">vs</span>
-                                    {isPlaceholder ? (
-                                      <span className="font-medium text-yellow-300 text-lg">?</span>
-                                    ) : (
-                                    <span className="font-medium text-white">
-                                      {team2?.name || team2?.team_name || `Team ${match.team2_id}`}
-                                    </span>
-                                    )}
-                                  </div>
-                                  <div className="text-sm text-white/70 mt-1">
-                                    {isPlaceholder ? (
-                                      <Badge variant="secondary" className="bg-yellow-500/20 backdrop-blur-sm text-yellow-300 border-yellow-400/30">Pending Opponent</Badge>
-                                    ) : (
-                                      <>
-                                                                         Group: {seasonGroups.find((g: any) => g.id === match.group_id)?.name || 'N/A'} | 
-                                    Weekend {match.weekend} - {match.day}
-                                    {match.type === 'performance' && (
-                                      <Badge variant="secondary" className="ml-2 bg-white/10 backdrop-blur-sm text-white border-white/20">Performance</Badge>
-                                        )}
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
+                    <div className="grid grid-cols-1 gap-12">
+                      {(() => {
+                        const matchesByDate = scheduledMatches.reduce((acc: any, match) => {
+                          const date = match.date
+                          if (!acc[date]) acc[date] = []
+                          acc[date].push(match)
+                          return acc
+                        }, {})
+
+                        return Object.entries(matchesByDate).map(([date, dayMatches]: [string, any]) => (
+                          <div key={date} className="space-y-6">
+                            <div className="flex items-center gap-4">
+                              <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-white border-l-2 border-lime-400 pl-4 py-1">
+                                {new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}
+                              </h4>
+                              <div className="h-px flex-1 bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                              {dayMatches.map((match: any) => {
+                                const team1 = getTeamById(match.team1_id)
+                                const team2 = match.team2_id ? getTeamById(match.team2_id) : null
+                                const isPlaceholder = match.type === 'placeholder' || !match.team2_id
+                                const isSelected = selectedMatchForSwap === match.id
+                                const isSwapable = !isPlaceholder
                                 
-                                {matchBeingEdited === match.id ? (
-                                  // Edit mode: show dropdown and buttons
-                                  <div className="flex items-center space-x-2 mt-2" onClick={(e) => e.stopPropagation()}>
-                                    <Select value={newOpponentId} onValueChange={setNewOpponentId}>
-                                      <SelectTrigger className="text-xs h-8 bg-white/10 backdrop-blur-sm text-white border-white/20">
-                                        <SelectValue placeholder="Select opponent" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {seasonTeams.filter((t: any) => {
-                                          const teamId = t.id || t.team_id
-                                          return teamId && teamId.toString() !== match.team1_id?.toString() && teamId.toString() !== match.team2_id?.toString()
-                                        }).map((team: any) => {
-                                          const teamId = team.id || team.team_id
-                                          return (
-                                            <SelectItem key={teamId} value={teamId?.toString()}>
-                                              {team.name || team.team_name}
-                                            </SelectItem>
-                                          )
-                                        })}
-                                      </SelectContent>
-                                    </Select>
-                                    <Button
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        if (newOpponentId) {
-                                          changeOpponent(match.id, newOpponentId)
-                                        } else {
-                                          toast({
-                                            title: "Please select an opponent",
-                                            variant: "destructive"
-                                          })
-                                        }
-                                      }}
-                                      className="bg-green-600 hover:bg-green-700 text-white"
-                                    >
-                                      Save
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setMatchBeingEdited(null)
-                                        setNewOpponentId("")
-                                      }}
-                                      className="bg-white/10 text-white border-white/20 hover:bg-white/20"
-                                    >
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  // Normal mode: show venue/time and edit button
-                                  <div className="flex items-center space-x-2 mt-2" onClick={(e) => e.stopPropagation()}>
-                                    <Input
-                                      value={match.venue}
-                                      onChange={(e) => {
-                                        const updatedMatches = scheduledMatches.map(m => 
-                                          m.id === match.id ? { ...m, venue: e.target.value } : m
-                                        )
-                                        setScheduledMatches(updatedMatches)
-                                      }}
-                                      placeholder="Venue"
-                                      className="text-xs h-8 bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
-                                    />
-                                    <span className="text-xs text-white/60">|</span>
-                                    <Input
-                                      type="time"
-                                      value={match.time}
-                                      onChange={(e) => {
-                                        const updatedMatches = scheduledMatches.map(m => 
-                                          m.id === match.id ? { ...m, time: e.target.value } : m
-                                        )
-                                        setScheduledMatches(updatedMatches)
-                                      }}
-                                      className="text-xs h-8 w-32 bg-white/10 backdrop-blur-sm text-white border-white/20"
-                                    />
+                                return (
+                                  <div 
+                                    key={match.id} 
+                                    onClick={() => isSwapable && handleMatchClick(match.id, match)}
+                                    className={`glass-dark border p-4 rounded-none transition-all cursor-pointer group relative overflow-hidden ${
+                                      isSelected 
+                                        ? 'border-cyan-400 bg-cyan-400/5 shadow-[0_0_20px_rgba(34,211,238,0.2)]' 
+                                        : isSwapable 
+                                          ? 'border-white/10 hover:border-white/30 hover:bg-white/5' 
+                                          : 'border-white/5 opacity-60 cursor-not-allowed'
+                                    }`}
+                                  >
+                                    <div className="absolute top-0 right-0 p-1.5 bg-white/5 border-b border-l border-white/10">
+                                      <span className="text-[7px] font-mono text-white/40 uppercase tracking-widest">{match.day} | WK{match.weekend}</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between mb-4 mt-2">
+                                      <div className="text-center flex-1">
+                                        <div className="text-[10px] font-black italic uppercase text-white/70 truncate mb-1">
+                                          {team1?.name || team1?.team_name || "???"}
+                                        </div>
+                                        <div className="text-[8px] font-mono text-white/20 uppercase tracking-[0.2em]">{team1?.shortname || "UNK"}</div>
+                                      </div>
+                                      
+                                      <div className="px-3 flex flex-col items-center">
+                                        <span className="text-[9px] font-black text-lime-400/40 italic">VS</span>
+                                      </div>
+
+                                      <div className="text-center flex-1">
+                                        <div className={`text-[10px] font-black italic uppercase truncate mb-1 ${isPlaceholder ? 'text-orange-400' : 'text-white/70'}`}>
+                                          {isPlaceholder ? "TBD_NODE" : (team2?.name || team2?.team_name || "???")}
+                                        </div>
+                                        <div className="text-[8px] font-mono text-white/20 uppercase tracking-[0.2em]">{isPlaceholder ? "???" : (team2?.shortname || "UNK")}</div>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-white/5">
+                                      <div className="space-y-1">
+                                        <span className="text-[7px] font-black text-white/20 uppercase tracking-widest">OPERATIONAL_VENUE</span>
+                                        <div className="text-[9px] font-black text-white/60 truncate italic uppercase">
+                                           <Input
+                                              value={match.venue}
+                                              onChange={(e) => {
+                                                const updatedMatches = scheduledMatches.map(m => 
+                                                  m.id === match.id ? { ...m, venue: e.target.value } : m
+                                                )
+                                                setScheduledMatches(updatedMatches)
+                                              }}
+                                              onClick={e => e.stopPropagation()}
+                                              className="h-6 bg-transparent border-none p-0 text-[10px] font-black text-white/60 uppercase focus-visible:ring-0 focus-visible:ring-offset-0"
+                                            />
+                                        </div>
+                                      </div>
+                                      <div className="space-y-1 text-right">
+                                        <span className="text-[7px] font-black text-white/20 uppercase tracking-widest">DEPLOYMENT_TIME</span>
+                                        <div className="text-[10px] font-black text-cyan-400 italic tabular-nums">
+                                           <Input
+                                              type="time"
+                                              value={match.time}
+                                              onChange={(e) => {
+                                                const updatedMatches = scheduledMatches.map(m => 
+                                                  m.id === match.id ? { ...m, time: e.target.value } : m
+                                                )
+                                                setScheduledMatches(updatedMatches)
+                                              }}
+                                              onClick={e => e.stopPropagation()}
+                                              className="h-6 bg-transparent border-none p-0 text-[10px] font-black text-cyan-400 text-right focus-visible:ring-0 focus-visible:ring-offset-0"
+                                            />
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {matchBeingEdited === match.id && (
+                                      <div className="absolute inset-0 bg-black/95 backdrop-blur-md p-4 flex flex-col justify-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                                        <Label className="text-[8px] font-black uppercase text-white/40 mb-2 tracking-[0.2em]">RE-ASSIGN OPPONENT</Label>
+                                        <Select value={newOpponentId} onValueChange={setNewOpponentId}>
+                                          <SelectTrigger className="h-8 bg-white/5 border-white/10 text-[9px] font-black italic uppercase tracking-widest text-white rounded-none">
+                                            <SelectValue placeholder="SELECT SQUADRON" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-black/90 border border-white/10 rounded-none">
+                                            {seasonTeams.filter((t: any) => (t.id || t.team_id).toString() !== match.team1_id?.toString()).map((team: any) => (
+                                              <SelectItem key={team.id || team.team_id} value={(team.id || team.team_id).toString()} className="font-black uppercase text-[10px] text-white focus:bg-white/10">
+                                                {team.name || team.team_name}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                        <div className="flex gap-2 mt-4">
+                                          <Button size="sm" onClick={() => changeOpponent(match.id, newOpponentId)} className="flex-1 bg-lime-400 text-black rounded-none h-8 font-black text-[9px] uppercase tracking-widest">CONFIRM</Button>
+                                          <Button size="sm" variant="outline" onClick={() => setMatchBeingEdited(null)} className="flex-1 border-white/10 text-white rounded-none h-8 font-black text-[9px] uppercase tracking-widest">ABORT</Button>
+                                        </div>
+                                      </div>
+                                    )}
+
                                     {isSwapable && (
-                                      <>
-                                        <span className="text-xs text-white/60">|</span>
-                                        <Button
+                                       <Button
                                           size="sm"
-                                          variant="outline"
+                                          variant="ghost"
                                           onClick={(e) => {
                                             e.stopPropagation()
                                             setMatchBeingEdited(match.id)
-                                            setNewOpponentId("") // Reset when entering edit mode
                                           }}
-                                          className="bg-orange-600/80 hover:bg-orange-700/80 text-white border-orange-400/30"
+                                          className="absolute top-1 left-1 h-5 w-5 p-0 text-white/10 hover:text-white/60"
                                         >
-                                          <Edit className="h-3 w-3 mr-1" />
-                                          Edit Opponent
+                                          <Edit className="h-3 w-3" />
                                         </Button>
-                                      </>
                                     )}
                                   </div>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                })()}
-
-                {/* Summary */}
-                <Card className="bg-white/5 backdrop-blur-sm border border-white/20">
-                  <CardHeader>
-                    <CardTitle className="text-white">Match Summary</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-300">{scheduledMatches.length}</div>
-                        <div className="text-sm text-white/70">Total Matches</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-300">
-                          {scheduledMatches.filter(m => m.weekend === 1).length}
-                        </div>
-                        <div className="text-sm text-white/70">Weekend 1</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-300">
-                          {scheduledMatches.filter(m => m.weekend === 2).length}
-                        </div>
-                        <div className="text-sm text-white/70">Weekend 2</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-300">
-                          {scheduledMatches.filter(m => m.type === 'performance').length}
-                        </div>
-                        <div className="text-sm text-white/70">Performance</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-indigo-300">
-                          {new Set(scheduledMatches.map(m => m.date)).size}
-                        </div>
-                        <div className="text-sm text-white/70">Weekend Days</div>
-                      </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))
+                      })()}
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                  </div>
+                )}
 
-            {/* No matches scheduled - only show when no regular matches exist */}
-            {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && !isScheduling && (
-              <div className="text-center text-white/70 py-8">
-                <Calendar className="h-12 w-12 mx-auto mb-4 text-white/50" />
-                <p>No matches scheduled yet</p>
-                <p className="text-sm">Click "Generate Matches" to create the season schedule</p>
+                {scheduledMatches.length === 0 && matchSchedules.filter((match: any) => match.season_id === seasonId).length === 0 && !isScheduling && (
+                  <div className="flex flex-col items-center justify-center h-64 border border-dashed border-white/10 bg-white/5 mt-8">
+                    <Calendar className="h-12 w-12 text-white/10 mb-6" />
+                    <p className="text-[10px] font-black italic uppercase tracking-widest text-white/30">No active matrix detected</p>
+                    <p className="text-[8px] font-mono text-white/20 mt-2 uppercase">Initiate protocol to generate engagement nodes</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setIsScheduleMatchesModalOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
-              Close
-            </Button>
-            {scheduledMatches.length > 0 && (
+            </div>
+            
+            <div className="flex justify-end pt-8 mt-auto px-8 pb-8 gap-4">
               <Button 
-                onClick={reshuffleMatches}
-                disabled={isScheduling}
-                className="bg-purple-600/80 backdrop-blur-sm hover:bg-purple-700/80 text-white border-purple-400/30"
+                variant="outline" 
+                onClick={() => setIsScheduleMatchesModalOpen(false)}
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-8 transition-all"
               >
-                {isScheduling ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Reshuffle Matches
+                DISCONNECT
               </Button>
-            )}
-            {scheduledMatches.length > 0 && (
-              <Button 
-                onClick={updateAllVenues}
-                className="bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white border-blue-400/30"
-              >
-                🏟️ Update All Venues
-              </Button>
-            )}
-            {scheduledMatches.length > 0 && (
-              <Button 
-                onClick={saveMatchesToDatabase}
-                disabled={addMatchLoading}
-                className="bg-green-600/80 backdrop-blur-sm hover:bg-green-700/80 text-white border-green-400/30"
-              >
-                {addMatchLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Calendar className="h-4 w-4 mr-2" />
-                )}
-                {addMatchLoading ? 'Saving...' : 'Schedule Match'}
-              </Button>
-            )}
+              
+              {scheduledMatches.length > 0 && (
+                <>
+                  <Button 
+                    onClick={reshuffleMatches}
+                    disabled={isScheduling}
+                    className="bg-white/5 border border-white/10 hover:bg-purple-600/20 hover:border-purple-400 hover:text-white text-white/60 rounded-none h-12 px-8 font-black italic uppercase tracking-widest text-[11px] transition-all"
+                  >
+                    {isScheduling ? <RefreshCw className="h-4 w-4 animate-spin" /> : "RE-CALC"}
+                  </Button>
+                  <Button 
+                    onClick={saveMatchesToDatabase}
+                    disabled={addMatchLoading}
+                    className="bg-lime-400 text-black hover:bg-lime-500 rounded-none h-12 px-12 font-black italic uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(163,230,53,0.3)] transition-all"
+                  >
+                    {addMatchLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "FINALIZE NODES"}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Edit Match Modal */}
       <Dialog open={isEditMatchModalOpen} onOpenChange={setIsEditMatchModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Match
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-2xl overflow-hidden bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none shadow-2xl text-white p-0 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-400/50 to-transparent" />
           
-          <div className="space-y-4">
-            {/* Team 1 Selection */}
-            <div>
-              <Label htmlFor="editTeam1" className="text-white">Team 1 *</Label>
-              <Select 
-                value={editMatchForm.team1_id} 
-                onValueChange={(value) => setEditMatchForm({ ...editMatchForm, team1_id: value })}
-              >
-                <SelectTrigger className="bg-white/10 backdrop-blur-sm text-white border-white/20">
-                  <SelectValue placeholder="Select Team 1" />
-                </SelectTrigger>
-                <SelectContent>
-                  {seasonTeams.map((team: any) => {
-                    const teamId = team.id || team.team_id
-                    return (
-                      <SelectItem key={teamId} value={teamId?.toString()}>
-                        {team.name || team.team_name}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="p-8 flex flex-col h-full">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-orange-400/10 border border-orange-400/30 flex items-center justify-center">
+                  <Edit className="h-4 w-4 text-orange-400" />
+                </div>
+                <span className="text-xl font-black italic uppercase tracking-widest text-white">MANUAL <span className="text-orange-400">OVERRIDE</span></span>
+              </DialogTitle>
+            </DialogHeader>
 
-            {/* Team 2 Selection */}
-            <div>
-              <Label htmlFor="editTeam2" className="text-white">Team 2 *</Label>
-              <Select 
-                value={editMatchForm.team2_id} 
-                onValueChange={(value) => setEditMatchForm({ ...editMatchForm, team2_id: value })}
-              >
-                <SelectTrigger className="bg-white/10 backdrop-blur-sm text-white border-white/20">
-                  <SelectValue placeholder="Select Team 2" />
-                </SelectTrigger>
-                <SelectContent>
-                  {seasonTeams.filter((team: any) => {
-                    const teamId = team.id || team.team_id
-                    return teamId?.toString() !== editMatchForm.team1_id
-                  }).map((team: any) => {
-                    const teamId = team.id || team.team_id
-                    return (
-                      <SelectItem key={teamId} value={teamId?.toString()}>
-                        {team.name || team.team_name}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">SQUADRON ALPHA</Label>
+                  <Select 
+                    value={editMatchForm.team1_id} 
+                    onValueChange={(value) => setEditMatchForm({ ...editMatchForm, team1_id: value })}
+                  >
+                    <SelectTrigger className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-orange-400/50 transition-all">
+                      <SelectValue placeholder="SELECT TEAM" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black/90 border border-white/10 rounded-none">
+                      {seasonTeams.map((team: any) => (
+                        <SelectItem key={team.id || team.team_id} value={(team.id || team.team_id).toString()} className="font-black uppercase text-[10px] text-white focus:bg-white/10">
+                          {team.name || team.team_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            {/* Location/Arena */}
-            <div>
-              <Label htmlFor="editLocation" className="text-white">Arena/Venue *</Label>
-              <Input
-                id="editLocation"
-                placeholder="e.g., Prime Arena"
-                value={editMatchForm.location}
-                onChange={(e) => setEditMatchForm({ ...editMatchForm, location: e.target.value })}
-                className="bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">SQUADRON BRAVO</Label>
+                  <Select 
+                    value={editMatchForm.team2_id} 
+                    onValueChange={(value) => setEditMatchForm({ ...editMatchForm, team2_id: value })}
+                  >
+                    <SelectTrigger className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-orange-400/50 transition-all">
+                      <SelectValue placeholder="SELECT TEAM" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black/90 border border-white/10 rounded-none">
+                      {seasonTeams.filter((team: any) => (team.id || team.team_id).toString() !== editMatchForm.team1_id).map((team: any) => (
+                        <SelectItem key={team.id || team.team_id} value={(team.id || team.team_id).toString()} className="font-black uppercase text-[10px] text-white focus:bg-white/10">
+                          {team.name || team.team_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="editDate" className="text-white">Date *</Label>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">COORDINATE VECTOR (LOCATION)</Label>
                 <Input
-                  id="editDate"
-                  type="date"
-                  value={editMatchForm.dateAndtime.split('T')[0]}
-                  onChange={(e) => {
-                    const currentTime = editMatchForm.dateAndtime.split('T')[1] || '12:00'
-                    setEditMatchForm({ ...editMatchForm, dateAndtime: `${e.target.value}T${currentTime}` })
-                  }}
-                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
+                  placeholder="e.g. ALPHA_SECTION_7"
+                  value={editMatchForm.location}
+                  onChange={(e) => setEditMatchForm({ ...editMatchForm, location: e.target.value })}
+                  className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-orange-400/50 transition-all"
                 />
               </div>
-              <div>
-                <Label htmlFor="editTime" className="text-white">Time *</Label>
-                <Input
-                  id="editTime"
-                  type="time"
-                  value={editMatchForm.dateAndtime.split('T')[1] || '12:00'}
-                  onChange={(e) => {
-                    const currentDate = editMatchForm.dateAndtime.split('T')[0]
-                    setEditMatchForm({ ...editMatchForm, dateAndtime: `${currentDate}T${e.target.value}` })
-                  }}
-                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
-                />
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">CALENDAR_NODE</Label>
+                  <Input
+                    type="date"
+                    value={editMatchForm.dateAndtime.split('T')[0]}
+                    onChange={(e) => {
+                      const currentTime = editMatchForm.dateAndtime.split('T')[1] || '12:00'
+                      setEditMatchForm({ ...editMatchForm, dateAndtime: `${e.target.value}T${currentTime}` })
+                    }}
+                    className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-orange-400/50 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">TIME_STAMP</Label>
+                  <Input
+                    type="time"
+                    value={editMatchForm.dateAndtime.split('T')[1] || '12:00'}
+                    onChange={(e) => {
+                      const currentDate = editMatchForm.dateAndtime.split('T')[0]
+                      setEditMatchForm({ ...editMatchForm, dateAndtime: `${currentDate}T${e.target.value}` })
+                    }}
+                    className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-orange-400/50 transition-all"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-3 pt-4 mt-6">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsEditMatchModalOpen(false)
-                setEditingMatch(null)
-                setEditMatchForm({
-                  team1_id: "",
-                  team2_id: "",
-                  location: "",
-                  dateAndtime: ""
-                })
-              }}
-              className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSaveMatchEdit}
-              disabled={updateMatchLoading || !editMatchForm.team1_id || !editMatchForm.team2_id || !editMatchForm.location || !editMatchForm.dateAndtime}
-              className="bg-green-600/80 backdrop-blur-sm hover:bg-green-700/80 text-white border-green-400/30"
-            >
-              {updateMatchLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
+            <div className="flex justify-end gap-4 mt-12 pb-8">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsEditMatchModalOpen(false)
+                  setEditingMatch(null)
+                  setEditMatchForm({ team1_id: "", team2_id: "", location: "", dateAndtime: "" })
+                }}
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-8 transition-all"
+              >
+                ABORT_MISSION
+              </Button>
+              <Button 
+                onClick={handleSaveMatchEdit}
+                disabled={updateMatchLoading || !editMatchForm.team1_id || !editMatchForm.team2_id || !editMatchForm.location || !editMatchForm.dateAndtime}
+                className="bg-orange-500 text-black hover:bg-orange-600 rounded-none h-12 px-8 font-black italic uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+              >
+                {updateMatchLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "OVERWRITE_NODE"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Edit Season Modal */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Season
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl overflow-hidden bg-black/90 backdrop-blur-3xl border border-white/10 rounded-none shadow-2xl text-white p-0 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400/50 to-transparent" />
           
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="editSeasonName" className="text-white">Season Name *</Label>
-              <Input
-                id="editSeasonName"
-                placeholder="e.g., Prime5 League 2024"
-                value={season?.name || ''}
-                onChange={(e) => {
-                  // Update season name in local state if needed
-                }}
-                className="bg-white/10 backdrop-blur-sm text-white border-white/20 placeholder:text-white/60"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="editStartDate" className="text-white">Start Date *</Label>
-                <Input
-                  id="editStartDate"
-                  type="date"
-                  value={season?.startDate || ''}
-                  onChange={(e) => {
-                    // Update start date in local state if needed
-                  }}
-                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
-                />
-              </div>
-              <div>
-                <Label htmlFor="editEndDate" className="text-white">End Date *</Label>
-                <Input
-                  id="editEndDate"
-                  type="date"
-                  value={season?.EndDate || ''}
-                  onChange={(e) => {
-                    // Update end date in local state if needed
-                  }}
-                  className="bg-white/10 backdrop-blur-sm text-white border-white/20"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label className="text-white">Add Teams</Label>
-              <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border border-white/20 rounded-md p-3 bg-white/5">
-                {allTeams?.filter((team: any) => team.approved === true).map((team: any) => {
-                  const teamId = team.id
-                  if (!teamId) return null
+          <div className="p-8 flex flex-col h-full">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-400/10 border border-blue-400/30 flex items-center justify-center">
+                  <Edit className="h-4 w-4 text-blue-400" />
+                </div>
+                <span className="text-xl font-black italic uppercase tracking-widest text-white">SYSTEM <span className="text-blue-400">RECONFIG</span></span>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">CAMPAIGN DESIGNATION</Label>
+                    <Input
+                      value={season?.name || ''}
+                      className="bg-black/40 border border-white/10 rounded-none h-12 text-white font-black italic uppercase tracking-widest focus:border-blue-400/50 transition-all"
+                    />
+                  </div>
                   
-                  const isAlreadyInSeason = season?.teams?.[teamId]
-                  
-                  return (
-                    <div key={teamId} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`edit-season-team-${teamId}`}
-                        checked={!!isAlreadyInSeason}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            // Add team to season
-                            const token = `e${Date.now()}${Math.random().toString(36).substr(2, 9)}`
-                            const newTeamsObject = { ...season?.teams, [teamId]: token }
-                            
-                            updateSeason({
-                              variables: {
-                                id: seasonId,
-                                name: season?.name,
-                                startDate: season?.startDate,
-                                EndDate: season?.EndDate,
-                                teams: newTeamsObject
-                              }
-                            }).then(() => {
-                              refetch()
-                            })
-                          } else {
-                            // Remove team from season
-                            const newTeamsObject = { ...season?.teams }
-                            delete newTeamsObject[teamId]
-                            
-                            updateSeason({
-                              variables: {
-                                id: seasonId,
-                                name: season?.name,
-                                startDate: season?.startDate,
-                                EndDate: season?.EndDate,
-                                teams: newTeamsObject
-                              }
-                            }).then(() => {
-                              refetch()
-                            })
-                          }
-                        }}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">START_WINDOW</Label>
+                      <Input
+                        type="date"
+                        value={season?.startDate || ''}
+                        className="bg-black/40 border border-white/10 rounded-none h-10 text-[10px] text-white font-black italic uppercase tracking-widest focus:border-blue-400/50 transition-all"
                       />
-                      <Label htmlFor={`edit-season-team-${teamId}`} className="text-sm text-white">
-                        {team.name} ({team.shortname})
-                      </Label>
                     </div>
-                  )
-                })}
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">END_WINDOW</Label>
+                      <Input
+                        type="date"
+                        value={season?.EndDate || ''}
+                        className="bg-black/40 border border-white/10 rounded-none h-10 text-[10px] text-white font-black italic uppercase tracking-widest focus:border-blue-400/50 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">SQUADRON MANIFEST ({Object.keys(season?.teams || {}).length} TOTAL)</Label>
+                  <div className="bg-black/40 border border-white/10 rounded-none p-4 h-[240px] overflow-y-auto custom-scrollbar space-y-2">
+                    {allTeams?.filter((team: any) => team.approved === true).map((team: any) => {
+                      const teamId = team.id
+                      if (!teamId) return null
+                      const isAlreadyInSeason = season?.teams?.[teamId]
+                      
+                      return (
+                        <div key={teamId} className="flex items-center justify-between p-2 bg-white/5 border border-white/5 hover:border-white/10 transition-all">
+                          <div className="flex items-center gap-3">
+                            <Checkbox
+                              id={`edit-season-team-${teamId}`}
+                              checked={!!isAlreadyInSeason}
+                              onCheckedChange={(checked) => {
+                                 // Logic preserved from original
+                                 if (checked) {
+                                   const token = `e${Date.now()}${Math.random().toString(36).substr(2, 9)}`
+                                   const newTeamsObject = { ...season?.teams, [teamId]: token }
+                                   updateSeason({ variables: { id: seasonId, name: season?.name, startDate: season?.startDate, EndDate: season?.EndDate, teams: newTeamsObject } }).then(() => refetch())
+                                 } else {
+                                   const newTeamsObject = { ...season?.teams }
+                                   delete newTeamsObject[teamId]
+                                   updateSeason({ variables: { id: seasonId, name: season?.name, startDate: season?.startDate, EndDate: season?.EndDate, teams: newTeamsObject } }).then(() => refetch())
+                                 }
+                              }}
+                              className="border-white/20 data-[state=checked]:bg-blue-400 data-[state=checked]:border-blue-400 rounded-none"
+                            />
+                            <Label htmlFor={`edit-season-team-${teamId}`} className="text-[10px] font-black italic uppercase tracking-widest text-white/70 cursor-pointer">
+                              {team.name}
+                            </Label>
+                          </div>
+                          <span className="text-[8px] font-mono text-white/20">{team.shortname}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-white/70 mt-1">
-                {Object.keys(season?.teams || {}).length} team(s) in season
-              </p>
             </div>
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:text-white">
-              Close
-            </Button>
+
+            <div className="flex justify-end pt-8 pb-8">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditDialogOpen(false)} 
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-none font-black italic uppercase tracking-widest text-[11px] h-12 px-12 transition-all"
+              >
+                CLOSE_PROTOCOL
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
