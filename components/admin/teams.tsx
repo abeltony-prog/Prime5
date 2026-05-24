@@ -86,6 +86,7 @@ interface Team {
   matche2: Match[]
   players: Player[]
   approved: boolean
+  logo?: string
 }
 
 interface TeamsProps {

@@ -369,7 +369,7 @@ export function AnalyticsTab({ teamId }: AnalyticsTabProps) {
             <h3 className="text-lg font-black italic uppercase tracking-widest text-white">UNIT <span className="text-purple-400">PERFORMANCE_READOUT</span></h3>
           </div>
           <div className="space-y-4">
-            {analyticsData.playerStats.map((p, idx) => (
+            {analyticsData.playerStats.map((p: any, idx: number) => (
               <div key={idx} className="p-4 glass-dark border border-white/5 hover:border-purple-400/40 group transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-4">

@@ -33,7 +33,7 @@ export default function QRScannerPage() {
   const [scannedData, setScannedData] = useState<ScannedTicketData | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [isValid, setIsValid] = useState<boolean | false>(null)
+  const [isValid, setIsValid] = useState<boolean | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
